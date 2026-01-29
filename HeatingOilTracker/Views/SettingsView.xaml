@@ -1,0 +1,35 @@
+<UserControl x:Class="HeatingOilTracker.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:prism="http://prismlibrary.com/"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             Background="White">
+    <StackPanel Margin="30" MaxWidth="500" HorizontalAlignment="Left">
+        <TextBlock Text="Settings"
+                   FontSize="24" FontWeight="Bold"
+                   Foreground="#1e293b"
+                   Margin="0,0,0,25"/>
+
+        <!-- Tank Capacity -->
+        <StackPanel Margin="0,0,0,20">
+            <TextBlock Text="Tank Capacity (Gallons)" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding TankCapacity, UpdateSourceTrigger=PropertyChanged}"
+                     Width="200" HorizontalAlignment="Left"/>
+        </StackPanel>
+
+        <!-- Data File Location -->
+        <StackPanel Margin="0,0,0,25">
+            <TextBlock Text="Data File Location" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding DataFilePath, Mode=OneWay}"
+                     IsReadOnly="True"
+                     Background="#f8fafc"
+                     Foreground="#64748b"/>
+        </StackPanel>
+
+        <!-- Save Button -->
+        <Button Content="Save Settings"
+                Style="{StaticResource PrimaryButtonStyle}"
+                Command="{Binding SaveCommand}"
+                HorizontalAlignment="Left"/>
+    </StackPanel>
+</UserControl>

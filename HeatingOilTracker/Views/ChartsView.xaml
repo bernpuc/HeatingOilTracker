@@ -1,0 +1,112 @@
+<UserControl x:Class="HeatingOilTracker.Views.ChartsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             Background="White">
+    <DockPanel Margin="20">
+        <!-- Header -->
+        <TextBlock DockPanel.Dock="Top"
+                   Text="Charts"
+                   FontSize="24" FontWeight="Bold"
+                   Foreground="#1e293b"
+                   Margin="0,0,0,15"/>
+
+        <!-- Empty State -->
+        <TextBlock Text="No delivery data available. Add deliveries to see charts."
+                   FontSize="16" Foreground="#94a3b8"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Visibility="{Binding HasData, Converter={StaticResource InverseBoolToVisibility}}"/>
+
+        <!-- Charts Container -->
+        <Grid Visibility="{Binding HasData, Converter={StaticResource BoolToVisibility}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Burn Rate Chart -->
+            <Border Grid.Row="0"
+                    BorderBrush="{StaticResource BorderColor}"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="10">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top"
+                               Text="Burn Rate (Gallons/Day)"
+                               FontSize="16" FontWeight="SemiBold"
+                               Foreground="#334155"
+                               Margin="0,0,0,10"/>
+                    <Grid>
+                        <lvc:CartesianChart x:Name="BurnRateChart"
+                                            Series="{Binding BurnRateSeries}"
+                                            XAxes="{Binding BurnRateXAxes}"
+                                            YAxes="{Binding BurnRateYAxes}"
+                                            TooltipPosition="Hidden"
+                                            TooltipFindingStrategy="{Binding TooltipFindingStrategy}"
+                                            ZoomMode="X"/>
+                        <Border x:Name="BurnRateTooltip"
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Left"
+                                IsHitTestVisible="False"
+                                Visibility="Collapsed"
+                                Background="#E51e293b"
+                                CornerRadius="4"
+                                Padding="10,6"
+                                Margin="0,8,0,0">
+                            <Border.RenderTransform>
+                                <TranslateTransform x:Name="BurnRateTooltipTransform"/>
+                            </Border.RenderTransform>
+                            <TextBlock x:Name="BurnRateTooltipText"
+                                       Foreground="White"
+                                       FontSize="12"/>
+                        </Border>
+                    </Grid>
+                </DockPanel>
+            </Border>
+
+            <!-- Price Chart -->
+            <Border Grid.Row="2"
+                    BorderBrush="{StaticResource BorderColor}"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="10">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top"
+                               Text="Price per Gallon"
+                               FontSize="16" FontWeight="SemiBold"
+                               Foreground="#334155"
+                               Margin="0,0,0,10"/>
+                    <Grid>
+                        <lvc:CartesianChart x:Name="PriceChart"
+                                            Series="{Binding PriceSeries}"
+                                            XAxes="{Binding PriceXAxes}"
+                                            YAxes="{Binding PriceYAxes}"
+                                            TooltipPosition="Hidden"
+                                            TooltipFindingStrategy="{Binding TooltipFindingStrategy}"
+                                            ZoomMode="X"/>
+                        <Border x:Name="PriceTooltip"
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Left"
+                                IsHitTestVisible="False"
+                                Visibility="Collapsed"
+                                Background="#E516a34a"
+                                CornerRadius="4"
+                                Padding="10,6"
+                                Margin="0,8,0,0">
+                            <Border.RenderTransform>
+                                <TranslateTransform x:Name="PriceTooltipTransform"/>
+                            </Border.RenderTransform>
+                            <TextBlock x:Name="PriceTooltipText"
+                                       Foreground="White"
+                                       FontSize="12"/>
+                        </Border>
+                    </Grid>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </DockPanel>
+</UserControl>

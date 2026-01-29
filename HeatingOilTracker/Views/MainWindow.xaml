@@ -1,0 +1,62 @@
+<Window x:Class="HeatingOilTracker.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:prism="http://prismlibrary.com/"
+        Title="Heating Oil Tracker"
+        Height="600" Width="900"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="180"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar -->
+        <Border Grid.Column="0" Background="{StaticResource SidebarBackground}">
+            <DockPanel>
+                <!-- App Title -->
+                <TextBlock DockPanel.Dock="Top"
+                           Text="Oil Tracker"
+                           Foreground="White"
+                           FontSize="20"
+                           FontWeight="Bold"
+                           Margin="15,20,15,25"
+                           HorizontalAlignment="Center"/>
+
+                <!-- Navigation -->
+                <StackPanel DockPanel.Dock="Top" Margin="8,0">
+                    <Button Content="Deliveries"
+                            Style="{StaticResource SidebarButtonStyle}"
+                            Margin="0,2"
+                            Command="{Binding NavigateCommand}"
+                            CommandParameter="DeliveriesView"/>
+                    <Button Content="Charts"
+                            Style="{StaticResource SidebarButtonStyle}"
+                            Margin="0,2"
+                            Command="{Binding NavigateCommand}"
+                            CommandParameter="ChartsView"/>
+                    <Button Content="Settings"
+                            Style="{StaticResource SidebarButtonStyle}"
+                            Margin="0,2"
+                            Command="{Binding NavigateCommand}"
+                            CommandParameter="SettingsView"/>
+                </StackPanel>
+
+                <!-- Spacer + Exit -->
+                <StackPanel DockPanel.Dock="Bottom" Margin="8,0,8,15">
+                    <Separator Background="#334155" Margin="0,0,0,10"/>
+                    <Button Content="Exit"
+                            Style="{StaticResource SidebarButtonStyle}"
+                            Command="{Binding ExitCommand}"/>
+                </StackPanel>
+
+                <!-- Empty fill -->
+                <Border/>
+            </DockPanel>
+        </Border>
+
+        <!-- Content Region -->
+        <ContentControl Grid.Column="1"
+                        prism:RegionManager.RegionName="ContentRegion"/>
+    </Grid>
+</Window>
