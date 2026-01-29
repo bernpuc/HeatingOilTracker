@@ -14,6 +14,8 @@ public class DeliveryDisplayItem
 
     public int? DaysSinceLastFill { get; }
     public decimal? GallonsPerDay { get; }
+    public decimal? HDD { get; }
+    public decimal? KFactor { get; }
 
     public string DaysSinceLastFillDisplay => DaysSinceLastFill.HasValue
         ? DaysSinceLastFill.Value.ToString()
@@ -23,9 +25,18 @@ public class DeliveryDisplayItem
         ? GallonsPerDay.Value.ToString("F1")
         : "--";
 
-    public DeliveryDisplayItem(OilDelivery delivery, OilDelivery? previousDelivery)
+    public string HDDDisplay => HDD.HasValue
+        ? HDD.Value.ToString("F0")
+        : "--";
+
+    public string KFactorDisplay => KFactor.HasValue
+        ? KFactor.Value.ToString("F3")
+        : "--";
+
+    public DeliveryDisplayItem(OilDelivery delivery, OilDelivery? previousDelivery, decimal? hdd = null)
     {
         Delivery = delivery;
+        HDD = hdd;
 
         if (previousDelivery != null)
         {
@@ -34,6 +45,12 @@ public class DeliveryDisplayItem
             {
                 DaysSinceLastFill = days;
                 GallonsPerDay = Math.Round(delivery.Gallons / days, 1);
+
+                // Calculate K-Factor if we have HDD data
+                if (hdd.HasValue && hdd.Value > 0)
+                {
+                    KFactor = Math.Round(delivery.Gallons / hdd.Value, 4);
+                }
             }
         }
     }

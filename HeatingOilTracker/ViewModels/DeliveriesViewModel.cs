@@ -15,6 +15,7 @@ public class DeliveriesViewModel : BindableBase, INavigationAware
 {
     private readonly IDataService _dataService;
     private readonly ICsvImportService _csvImportService;
+    private readonly IWeatherService _weatherService;
 
     private ObservableCollection<DeliveryDisplayItem> _deliveries = new();
     private DeliveryDisplayItem? _selectedDelivery;
@@ -22,6 +23,7 @@ public class DeliveriesViewModel : BindableBase, INavigationAware
     private string _totalDeliveriesText = string.Empty;
     private string _averagePriceText = string.Empty;
     private string _averageBurnRateText = string.Empty;
+    private string _averageKFactorText = string.Empty;
 
     public ObservableCollection<DeliveryDisplayItem> Deliveries
     {
@@ -59,16 +61,23 @@ public class DeliveriesViewModel : BindableBase, INavigationAware
         set => SetProperty(ref _averageBurnRateText, value);
     }
 
+    public string AverageKFactorText
+    {
+        get => _averageKFactorText;
+        set => SetProperty(ref _averageKFactorText, value);
+    }
+
     public DelegateCommand AddCommand { get; }
     public DelegateCommand EditCommand { get; }
     public DelegateCommand DeleteCommand { get; }
     public DelegateCommand ImportCommand { get; }
     public DelegateCommand ExportCommand { get; }
 
-    public DeliveriesViewModel(IDataService dataService, ICsvImportService csvImportService)
+    public DeliveriesViewModel(IDataService dataService, ICsvImportService csvImportService, IWeatherService weatherService)
     {
         _dataService = dataService;
         _csvImportService = csvImportService;
+        _weatherService = weatherService;
 
         AddCommand = new DelegateCommand(AddDelivery);
         EditCommand = new DelegateCommand(EditDelivery, () => SelectedDelivery != null)
@@ -87,6 +96,7 @@ public class DeliveriesViewModel : BindableBase, INavigationAware
         try
         {
             var deliveries = await _dataService.GetDeliveriesAsync();
+            var weatherData = await _dataService.GetWeatherHistoryAsync();
 
             // Sort ascending by date to compute "previous" correctly
             var sorted = deliveries.OrderBy(d => d.Date).ToList();
@@ -95,7 +105,16 @@ public class DeliveriesViewModel : BindableBase, INavigationAware
             for (int i = 0; i < sorted.Count; i++)
             {
                 var previous = i > 0 ? sorted[i - 1] : null;
-                displayItems.Add(new DeliveryDisplayItem(sorted[i], previous));
+
+                // Calculate HDD between previous delivery and this one
+                decimal? hdd = null;
+                if (previous != null && weatherData.Count > 0)
+                {
+                    hdd = _weatherService.CalculateHDD(weatherData, previous.Date, sorted[i].Date);
+                    if (hdd == 0) hdd = null; // No data for this period
+                }
+
+                displayItems.Add(new DeliveryDisplayItem(sorted[i], previous, hdd));
             }
 
             // Show descending in the grid
@@ -103,7 +122,7 @@ public class DeliveriesViewModel : BindableBase, INavigationAware
             Deliveries = new ObservableCollection<DeliveryDisplayItem>(displayItems);
 
             HasDeliveries = Deliveries.Count > 0;
-            UpdateSummary(sorted);
+            UpdateSummary(displayItems);
         }
         catch (Exception ex)
         {
@@ -112,35 +131,41 @@ public class DeliveriesViewModel : BindableBase, INavigationAware
         }
     }
 
-    private void UpdateSummary(List<OilDelivery> sortedAsc)
+    private void UpdateSummary(List<DeliveryDisplayItem> displayItems)
     {
-        if (sortedAsc.Count == 0)
+        if (displayItems.Count == 0)
         {
             TotalDeliveriesText = "No deliveries";
             AveragePriceText = "--";
             AverageBurnRateText = "--";
+            AverageKFactorText = "--";
             return;
         }
 
-        TotalDeliveriesText = $"{sortedAsc.Count} deliveries";
+        TotalDeliveriesText = $"{displayItems.Count} deliveries";
 
-        var avgPrice = sortedAsc.Average(d => d.PricePerGallon);
+        var avgPrice = displayItems.Average(d => d.PricePerGallon);
         AveragePriceText = $"Avg $/gal: {avgPrice:F3}";
 
         // Compute average burn rate from items that have a previous delivery
-        var burnRates = new List<decimal>();
-        for (int i = 1; i < sortedAsc.Count; i++)
-        {
-            var days = (sortedAsc[i].Date - sortedAsc[i - 1].Date).TotalDays;
-            if (days > 0)
-            {
-                burnRates.Add(sortedAsc[i].Gallons / (decimal)days);
-            }
-        }
+        var burnRates = displayItems
+            .Where(d => d.GallonsPerDay.HasValue)
+            .Select(d => d.GallonsPerDay!.Value)
+            .ToList();
 
         AverageBurnRateText = burnRates.Count > 0
             ? $"Avg burn: {burnRates.Average():F1} gal/day"
             : "Avg burn: --";
+
+        // Compute average K-Factor from items that have HDD data
+        var kFactors = displayItems
+            .Where(d => d.KFactor.HasValue)
+            .Select(d => d.KFactor!.Value)
+            .ToList();
+
+        AverageKFactorText = kFactors.Count > 0
+            ? $"Avg K: {kFactors.Average():F3} gal/HDD"
+            : "Avg K: --";
     }
 
     private void AddDelivery()

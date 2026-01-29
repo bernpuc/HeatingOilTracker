@@ -4,32 +4,119 @@
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
              Background="White">
-    <StackPanel Margin="30" MaxWidth="500" HorizontalAlignment="Left">
-        <TextBlock Text="Settings"
-                   FontSize="24" FontWeight="Bold"
-                   Foreground="#1e293b"
-                   Margin="0,0,0,25"/>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="30" MaxWidth="500" HorizontalAlignment="Left">
+            <TextBlock Text="Settings"
+                       FontSize="24" FontWeight="Bold"
+                       Foreground="#1e293b"
+                       Margin="0,0,0,25"/>
 
-        <!-- Tank Capacity -->
-        <StackPanel Margin="0,0,0,20">
-            <TextBlock Text="Tank Capacity (Gallons)" FontWeight="SemiBold" Margin="0,0,0,5"/>
-            <TextBox Text="{Binding TankCapacity, UpdateSourceTrigger=PropertyChanged}"
-                     Width="200" HorizontalAlignment="Left"/>
+            <!-- Tank Capacity -->
+            <StackPanel Margin="0,0,0,20">
+                <TextBlock Text="Tank Capacity (Gallons)" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding TankCapacity, UpdateSourceTrigger=PropertyChanged}"
+                         Width="200" HorizontalAlignment="Left"/>
+            </StackPanel>
+
+            <!-- Location Section -->
+            <Border BorderBrush="{StaticResource BorderColor}"
+                    BorderThickness="0,1,0,0"
+                    Padding="0,20,0,0"
+                    Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="Location (for Degree Day Tracking)"
+                               FontSize="16" FontWeight="SemiBold"
+                               Foreground="#334155"
+                               Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Current Location" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBlock Text="{Binding LocationDisplay}"
+                               Foreground="#64748b"
+                               Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Enter ZIP Code" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBox Text="{Binding ZipCode, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="120"
+                                 VerticalContentAlignment="Center"/>
+                        <Button Style="{StaticResource SecondaryButtonStyle}"
+                                Command="{Binding LookupZipCommand}"
+                                Margin="10,0,0,0"
+                                Padding="15,8">
+                            <TextBlock>
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="Set Location"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsLookingUpZip}" Value="True">
+                                                <Setter Property="Text" Value="Looking up..."/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Weather Data Section -->
+            <Border BorderBrush="{StaticResource BorderColor}"
+                    BorderThickness="0,1,0,0"
+                    Padding="0,20,0,0"
+                    Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="Weather Data"
+                               FontSize="16" FontWeight="SemiBold"
+                               Foreground="#334155"
+                               Margin="0,0,0,15"/>
+
+                    <TextBlock Text="{Binding WeatherStatus}"
+                               Foreground="#64748b"
+                               Margin="0,0,0,15"/>
+
+                    <Button Command="{Binding FetchWeatherCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            HorizontalAlignment="Left"
+                            Padding="15,8">
+                        <Button.Content>
+                            <TextBlock>
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="Fetch Weather Data"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsFetchingWeather}" Value="True">
+                                                <Setter Property="Text" Value="Fetching..."/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+
+                    <TextBlock Text="Fetches historical temperature data from Open-Meteo API to calculate heating degree days."
+                               Foreground="#94a3b8"
+                               FontSize="11"
+                               TextWrapping="Wrap"
+                               Margin="0,10,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Data File Location -->
+            <StackPanel Margin="0,0,0,25">
+                <TextBlock Text="Data File Location" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding DataFilePath, Mode=OneWay}"
+                         IsReadOnly="True"
+                         Background="#f8fafc"
+                         Foreground="#64748b"/>
+            </StackPanel>
+
+            <!-- Save Button -->
+            <Button Content="Save Settings"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding SaveCommand}"
+                    HorizontalAlignment="Left"/>
         </StackPanel>
-
-        <!-- Data File Location -->
-        <StackPanel Margin="0,0,0,25">
-            <TextBlock Text="Data File Location" FontWeight="SemiBold" Margin="0,0,0,5"/>
-            <TextBox Text="{Binding DataFilePath, Mode=OneWay}"
-                     IsReadOnly="True"
-                     Background="#f8fafc"
-                     Foreground="#64748b"/>
-        </StackPanel>
-
-        <!-- Save Button -->
-        <Button Content="Save Settings"
-                Style="{StaticResource PrimaryButtonStyle}"
-                Command="{Binding SaveCommand}"
-                HorizontalAlignment="Left"/>
-    </StackPanel>
+    </ScrollViewer>
 </UserControl>

@@ -12,5 +12,9 @@ public interface IDataService
     Task DeleteDeliveryAsync(Guid id);
     Task<decimal> GetTankCapacityAsync();
     Task SetTankCapacityAsync(decimal capacity);
+    Task<Location> GetLocationAsync();
+    Task SetLocationAsync(Location location);
+    Task<List<DailyWeather>> GetWeatherHistoryAsync();
+    Task AddWeatherDataAsync(List<DailyWeather> weatherData);
     string GetDataFilePath();
 }

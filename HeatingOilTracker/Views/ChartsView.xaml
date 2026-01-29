@@ -21,12 +21,16 @@
                    Visibility="{Binding HasData, Converter={StaticResource InverseBoolToVisibility}}"/>
 
         <!-- Charts Container -->
-        <Grid Visibility="{Binding HasData, Converter={StaticResource BoolToVisibility}}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="20"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      Visibility="{Binding HasData, Converter={StaticResource BoolToVisibility}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="300"/>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="300"/>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="300"/>
+                </Grid.RowDefinitions>
 
             <!-- Burn Rate Chart -->
             <Border Grid.Row="0"
@@ -107,6 +111,48 @@
                     </Grid>
                 </DockPanel>
             </Border>
+
+            <!-- K-Factor Chart -->
+            <Border Grid.Row="4"
+                    BorderBrush="{StaticResource BorderColor}"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="10"
+                    Visibility="{Binding HasKFactorData, Converter={StaticResource BoolToVisibility}}">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top"
+                               Text="K-Factor (Gallons per Heating Degree Day)"
+                               FontSize="16" FontWeight="SemiBold"
+                               Foreground="#334155"
+                               Margin="0,0,0,10"/>
+                    <Grid>
+                        <lvc:CartesianChart x:Name="KFactorChart"
+                                            Series="{Binding KFactorSeries}"
+                                            XAxes="{Binding KFactorXAxes}"
+                                            YAxes="{Binding KFactorYAxes}"
+                                            TooltipPosition="Hidden"
+                                            TooltipFindingStrategy="{Binding TooltipFindingStrategy}"
+                                            ZoomMode="X"/>
+                        <Border x:Name="KFactorTooltip"
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Left"
+                                IsHitTestVisible="False"
+                                Visibility="Collapsed"
+                                Background="#E5dc2626"
+                                CornerRadius="4"
+                                Padding="10,6"
+                                Margin="0,8,0,0">
+                            <Border.RenderTransform>
+                                <TranslateTransform x:Name="KFactorTooltipTransform"/>
+                            </Border.RenderTransform>
+                            <TextBlock x:Name="KFactorTooltipText"
+                                       Foreground="White"
+                                       FontSize="12"/>
+                        </Border>
+                    </Grid>
+                </DockPanel>
+            </Border>
         </Grid>
+        </ScrollViewer>
     </DockPanel>
 </UserControl>

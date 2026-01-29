@@ -99,4 +99,38 @@ public class DataService : IDataService
         data.TankCapacityGallons = capacity;
         await SaveAsync(data);
     }
+
+    public async Task<Location> GetLocationAsync()
+    {
+        var data = await LoadAsync();
+        return data.Location;
+    }
+
+    public async Task SetLocationAsync(Location location)
+    {
+        var data = await LoadAsync();
+        data.Location = location;
+        await SaveAsync(data);
+    }
+
+    public async Task<List<DailyWeather>> GetWeatherHistoryAsync()
+    {
+        var data = await LoadAsync();
+        return data.WeatherHistory;
+    }
+
+    public async Task AddWeatherDataAsync(List<DailyWeather> weatherData)
+    {
+        var data = await LoadAsync();
+
+        // Merge with existing, avoiding duplicates by date
+        var existingDates = data.WeatherHistory.Select(w => w.Date.Date).ToHashSet();
+        var newData = weatherData.Where(w => !existingDates.Contains(w.Date.Date));
+        data.WeatherHistory.AddRange(newData);
+
+        // Keep sorted by date
+        data.WeatherHistory = data.WeatherHistory.OrderBy(w => w.Date).ToList();
+
+        await SaveAsync(data);
+    }
 }

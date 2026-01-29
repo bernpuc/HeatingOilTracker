@@ -28,6 +28,18 @@ public partial class ChartsView : UserControl
 
         PriceChart.MouseLeave += (_, _) =>
             PriceTooltip.Visibility = Visibility.Collapsed;
+
+        KFactorChart.MouseMove += (s, e) =>
+            UpdateTooltip(KFactorChart, KFactorTooltip, KFactorTooltipText, KFactorTooltipTransform, e,
+                p => $"{p.DateTime:MMM d, yyyy}   {p.Value:F3} gal/HDD");
+
+        KFactorChart.MouseLeave += (_, _) =>
+            KFactorTooltip.Visibility = Visibility.Collapsed;
+
+        // Prevent mouse wheel from bubbling to ScrollViewer (let charts handle zoom)
+        BurnRateChart.MouseWheel += (_, e) => e.Handled = true;
+        PriceChart.MouseWheel += (_, e) => e.Handled = true;
+        KFactorChart.MouseWheel += (_, e) => e.Handled = true;
     }
 
     private static void UpdateTooltip(

@@ -50,7 +50,9 @@
                            FontWeight="SemiBold" Margin="0,0,30,0"/>
                 <TextBlock Text="{Binding AveragePriceText}"
                            Margin="0,0,30,0"/>
-                <TextBlock Text="{Binding AverageBurnRateText}"/>
+                <TextBlock Text="{Binding AverageBurnRateText}"
+                           Margin="0,0,30,0"/>
+                <TextBlock Text="{Binding AverageKFactorText}"/>
             </StackPanel>
         </Border>
 
@@ -119,7 +121,25 @@
                 </DataGridTextColumn>
                 <DataGridTextColumn Header="Gal/Day"
                                     Binding="{Binding GallonsPerDayDisplay}"
-                                    Width="80">
+                                    Width="70">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="HDD"
+                                    Binding="{Binding HDDDisplay}"
+                                    Width="60">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="K-Factor"
+                                    Binding="{Binding KFactorDisplay}"
+                                    Width="70">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="HorizontalAlignment" Value="Center"/>

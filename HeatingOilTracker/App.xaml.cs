@@ -26,6 +26,7 @@ public partial class App : PrismApplication
         // Services
         containerRegistry.RegisterSingleton<IDataService, DataService>();
         containerRegistry.Register<ICsvImportService, CsvImportService>();
+        containerRegistry.Register<IWeatherService, WeatherService>();
 
         // Views for navigation
         containerRegistry.RegisterForNavigation<DeliveriesView, DeliveriesViewModel>();
