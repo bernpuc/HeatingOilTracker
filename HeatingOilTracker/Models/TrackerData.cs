@@ -6,4 +6,5 @@ public class TrackerData
     public List<OilDelivery> Deliveries { get; set; } = new();
     public Location Location { get; set; } = new();
     public List<DailyWeather> WeatherHistory { get; set; } = new();
+    public ReminderSettings ReminderSettings { get; set; } = new();
 }

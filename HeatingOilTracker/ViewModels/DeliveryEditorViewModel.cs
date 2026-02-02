@@ -11,6 +11,7 @@ public class DeliveryEditorViewModel : BindableBase
     private decimal _pricePerGallon;
     private string _notes = string.Empty;
     private string _title;
+    private bool _filledToCapacity = true;
 
     public DateTime Date
     {
@@ -56,6 +57,12 @@ public class DeliveryEditorViewModel : BindableBase
         set => SetProperty(ref _title, value);
     }
 
+    public bool FilledToCapacity
+    {
+        get => _filledToCapacity;
+        set => SetProperty(ref _filledToCapacity, value);
+    }
+
     public decimal TotalCost => Math.Round(Gallons * PricePerGallon, 2);
 
     public DelegateCommand<System.Windows.Window> SaveCommand { get; }
@@ -70,11 +77,13 @@ public class DeliveryEditorViewModel : BindableBase
             _gallons = existing.Gallons;
             _pricePerGallon = existing.PricePerGallon;
             _notes = existing.Notes;
+            _filledToCapacity = existing.FilledToCapacity;
         }
         else
         {
             _title = "Add Delivery";
             _date = DateTime.Today;
+            _filledToCapacity = true;
         }
 
         SaveCommand = new DelegateCommand<System.Windows.Window>(Save, CanSave);

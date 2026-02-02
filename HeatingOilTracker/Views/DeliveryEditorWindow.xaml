@@ -2,12 +2,13 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="{Binding Title}"
-        Height="400" Width="450"
+        Height="440" Width="450"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         ShowInTaskbar="False">
     <Grid Margin="25">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -43,8 +44,20 @@
                        FontSize="18" FontWeight="Bold" Foreground="#16a34a"/>
         </StackPanel>
 
-        <!-- Notes -->
+        <!-- Filled to Capacity -->
         <StackPanel Grid.Row="4" Margin="0,0,0,15">
+            <CheckBox IsChecked="{Binding FilledToCapacity}"
+                      Content="Tank was filled to capacity"
+                      FontWeight="SemiBold"/>
+            <TextBlock Text="Check if the tank was topped off. Uncheck if you ordered a specific amount (e.g., '$200 worth')."
+                       Foreground="#94a3b8"
+                       FontSize="11"
+                       TextWrapping="Wrap"
+                       Margin="0,5,0,0"/>
+        </StackPanel>
+
+        <!-- Notes -->
+        <StackPanel Grid.Row="5" Margin="0,0,0,15">
             <TextBlock Text="Notes" FontWeight="SemiBold" Margin="0,0,0,5"/>
             <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
                      AcceptsReturn="True"
@@ -54,7 +67,7 @@
         </StackPanel>
 
         <!-- Buttons -->
-        <StackPanel Grid.Row="6" Orientation="Horizontal"
+        <StackPanel Grid.Row="7" Orientation="Horizontal"
                     HorizontalAlignment="Right">
             <Button Content="Cancel"
                     Style="{StaticResource SecondaryButtonStyle}"

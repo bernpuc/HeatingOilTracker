@@ -20,6 +20,11 @@ public class SettingsViewModel : BindableBase, INavigationAware
     private bool _isFetchingWeather;
     private string _weatherStatus = string.Empty;
 
+    // Reminder settings
+    private bool _reminderEnabled = true;
+    private decimal _thresholdGallons = 50m;
+    private int? _thresholdDays;
+
     public decimal TankCapacity
     {
         get => _tankCapacity;
@@ -70,6 +75,24 @@ public class SettingsViewModel : BindableBase, INavigationAware
         set => SetProperty(ref _weatherStatus, value);
     }
 
+    public bool ReminderEnabled
+    {
+        get => _reminderEnabled;
+        set => SetProperty(ref _reminderEnabled, value);
+    }
+
+    public decimal ThresholdGallons
+    {
+        get => _thresholdGallons;
+        set => SetProperty(ref _thresholdGallons, value);
+    }
+
+    public int? ThresholdDays
+    {
+        get => _thresholdDays;
+        set => SetProperty(ref _thresholdDays, value);
+    }
+
     public DelegateCommand SaveCommand { get; }
     public DelegateCommand LookupZipCommand { get; }
     public DelegateCommand FetchWeatherCommand { get; }
@@ -113,6 +136,12 @@ public class SettingsViewModel : BindableBase, INavigationAware
         {
             WeatherStatus = "No weather data";
         }
+
+        // Load reminder settings
+        var reminderSettings = await _dataService.GetReminderSettingsAsync();
+        ReminderEnabled = reminderSettings.IsEnabled;
+        ThresholdGallons = reminderSettings.ThresholdGallons;
+        ThresholdDays = reminderSettings.ThresholdDays;
     }
 
     private async Task SaveAsync()
@@ -124,7 +153,24 @@ public class SettingsViewModel : BindableBase, INavigationAware
             return;
         }
 
+        if (ThresholdGallons < 0)
+        {
+            MessageBox.Show("Threshold gallons must be zero or greater.", "Validation Error",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
         await _dataService.SetTankCapacityAsync(TankCapacity);
+
+        // Save reminder settings
+        var reminderSettings = new ReminderSettings
+        {
+            IsEnabled = ReminderEnabled,
+            ThresholdGallons = ThresholdGallons,
+            ThresholdDays = ThresholdDays
+        };
+        await _dataService.SetReminderSettingsAsync(reminderSettings);
+
         MessageBox.Show("Settings saved.", "Settings", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 

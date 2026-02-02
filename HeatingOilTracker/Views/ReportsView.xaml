@@ -1,0 +1,341 @@
+<UserControl x:Class="HeatingOilTracker.Views.ReportsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:prism="http://prismlibrary.com/"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             Background="White">
+    <DockPanel Margin="20">
+        <!-- Header -->
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,20">
+            <TextBlock Text="Cost Reports"
+                       FontSize="24" FontWeight="Bold"
+                       Foreground="#1e293b"
+                       VerticalAlignment="Center"/>
+
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        DockPanel.Dock="Right"
+                        VerticalAlignment="Center">
+                <TextBlock Text="Year:"
+                           VerticalAlignment="Center"
+                           Margin="0,0,8,0"
+                           Foreground="#64748b"/>
+                <ComboBox ItemsSource="{Binding AvailableYears}"
+                          SelectedItem="{Binding SelectedYear}"
+                          Width="100"
+                          Padding="8,6"/>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Empty State -->
+        <TextBlock DockPanel.Dock="Top"
+                   Text="No delivery data available. Add deliveries to see cost reports."
+                   FontSize="16" Foreground="#94a3b8"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Margin="0,50"
+                   Visibility="{Binding HasData, Converter={StaticResource InverseBoolToVisibility}}"/>
+
+        <!-- Main Content -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      Visibility="{Binding HasData, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel>
+                <!-- Summary Cards Row -->
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="15"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="15"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Total Cost Card -->
+                    <Border Grid.Column="0"
+                            Background="#dbeafe"
+                            BorderBrush="#2563eb"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="TOTAL COST"
+                                       FontSize="11"
+                                       FontWeight="Bold"
+                                       Foreground="#1e40af"
+                                       Margin="0,0,0,8"/>
+                            <TextBlock Text="{Binding TotalCost}"
+                                       FontSize="28"
+                                       FontWeight="Bold"
+                                       Foreground="#1e40af"/>
+                            <TextBlock Text="{Binding DeliveryCount, StringFormat='{}{0} deliveries'}"
+                                       FontSize="12"
+                                       Foreground="#3b82f6"
+                                       Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Total Gallons Card -->
+                    <Border Grid.Column="2"
+                            Background="#dcfce7"
+                            BorderBrush="#16a34a"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="TOTAL GALLONS"
+                                       FontSize="11"
+                                       FontWeight="Bold"
+                                       Foreground="#166534"
+                                       Margin="0,0,0,8"/>
+                            <TextBlock FontSize="28" FontWeight="Bold" Foreground="#166534">
+                                <Run Text="{Binding TotalGallons}"/>
+                                <Run Text=" gal" FontSize="14"/>
+                            </TextBlock>
+                            <TextBlock Text="{Binding TotalHDD, StringFormat='{}{0} HDD'}"
+                                       FontSize="12"
+                                       Foreground="#22c55e"
+                                       Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Avg Price Card -->
+                    <Border Grid.Column="4"
+                            Background="#fef3c7"
+                            BorderBrush="#d97706"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="AVG PRICE/GAL"
+                                       FontSize="11"
+                                       FontWeight="Bold"
+                                       Foreground="#92400e"
+                                       Margin="0,0,0,8"/>
+                            <TextBlock FontSize="28" FontWeight="Bold" Foreground="#92400e">
+                                <Run Text="$"/>
+                                <Run Text="{Binding AvgPricePerGallon}"/>
+                            </TextBlock>
+                            <TextBlock Text="{Binding AvgKFactor, StringFormat='K-Factor: {0}'}"
+                                       FontSize="12"
+                                       Foreground="#f59e0b"
+                                       Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Seasonal Breakdown -->
+                <Border Background="#f8fafc"
+                        BorderBrush="{StaticResource BorderColor}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="20"
+                        Margin="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock Text="SEASONAL BREAKDOWN"
+                                   FontSize="11"
+                                   FontWeight="Bold"
+                                   Foreground="#64748b"
+                                   Margin="0,0,0,15"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Heating Season -->
+                            <Border Grid.Column="0"
+                                    Background="White"
+                                    BorderBrush="{StaticResource BorderColor}"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    Padding="15">
+                                <StackPanel>
+                                    <TextBlock Text="Heating Season (Oct-Mar)"
+                                               FontWeight="SemiBold"
+                                               Foreground="#1e293b"
+                                               Margin="0,0,0,10"/>
+                                    <Grid Margin="0,0,0,5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Cost:" Foreground="#64748b"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding CurrentBreakdown.HeatingSeasonCost, StringFormat=C2, FallbackValue='--'}"
+                                                   FontWeight="SemiBold"/>
+                                    </Grid>
+                                    <Grid Margin="0,0,0,5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Gallons:" Foreground="#64748b"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding CurrentBreakdown.HeatingSeasonGallons, StringFormat='{}{0:F1} gal', FallbackValue='--'}"
+                                                   FontWeight="SemiBold"/>
+                                    </Grid>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="% of Total:" Foreground="#64748b"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding HeatingSeasonCostPercent}"
+                                                   FontWeight="Bold"
+                                                   Foreground="#dc2626"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Off-Season -->
+                            <Border Grid.Column="2"
+                                    Background="White"
+                                    BorderBrush="{StaticResource BorderColor}"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    Padding="15">
+                                <StackPanel>
+                                    <TextBlock Text="Off-Season (Apr-Sep)"
+                                               FontWeight="SemiBold"
+                                               Foreground="#1e293b"
+                                               Margin="0,0,0,10"/>
+                                    <Grid Margin="0,0,0,5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Cost:" Foreground="#64748b"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding CurrentBreakdown.OffSeasonCost, StringFormat=C2, FallbackValue='--'}"
+                                                   FontWeight="SemiBold"/>
+                                    </Grid>
+                                    <Grid Margin="0,0,0,5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Gallons:" Foreground="#64748b"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding CurrentBreakdown.OffSeasonGallons, StringFormat='{}{0:F1} gal', FallbackValue='--'}"
+                                                   FontWeight="SemiBold"/>
+                                    </Grid>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="% of Total:" Foreground="#64748b"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding OffSeasonCostPercent}"
+                                                   FontWeight="Bold"
+                                                   Foreground="#16a34a"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Year-over-Year Comparison Table -->
+                <Border Background="#f8fafc"
+                        BorderBrush="{StaticResource BorderColor}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="20">
+                    <StackPanel>
+                        <TextBlock Text="YEAR-OVER-YEAR COMPARISON"
+                                   FontSize="11"
+                                   FontWeight="Bold"
+                                   Foreground="#64748b"
+                                   Margin="0,0,0,15"/>
+
+                        <DataGrid ItemsSource="{Binding AllSummaries}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  CanUserReorderColumns="False"
+                                  CanUserResizeRows="False"
+                                  SelectionMode="Single"
+                                  GridLinesVisibility="Horizontal"
+                                  HorizontalGridLinesBrush="{StaticResource BorderColor}"
+                                  HeadersVisibility="Column"
+                                  MaxHeight="300">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Year"
+                                                    Binding="{Binding Year}"
+                                                    Width="70">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="Deliveries"
+                                                    Binding="{Binding DeliveryCount}"
+                                                    Width="80">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="Gallons"
+                                                    Binding="{Binding TotalGallons, StringFormat=\{0:F0\}}"
+                                                    Width="90">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                                            <Setter Property="Padding" Value="0,0,10,0"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="Total Cost"
+                                                    Binding="{Binding TotalCost, StringFormat=\{0:C2\}}"
+                                                    Width="100">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                                            <Setter Property="Padding" Value="0,0,10,0"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="Avg $/Gal"
+                                                    Binding="{Binding AvgPricePerGallon, StringFormat=\{0:F3\}}"
+                                                    Width="90">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                                            <Setter Property="Padding" Value="0,0,10,0"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="HDD"
+                                                    Binding="{Binding TotalHDD, StringFormat=\{0:F0\}}"
+                                                    Width="80">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                                            <Setter Property="Padding" Value="0,0,10,0"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="$/HDD"
+                                                    Binding="{Binding CostPerHDD, StringFormat=\{0:F2\}}"
+                                                    Width="*">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                                            <Setter Property="Padding" Value="0,0,10,0"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

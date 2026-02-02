@@ -27,10 +27,14 @@ public partial class App : PrismApplication
         containerRegistry.RegisterSingleton<IDataService, DataService>();
         containerRegistry.Register<ICsvImportService, CsvImportService>();
         containerRegistry.Register<IWeatherService, WeatherService>();
+        containerRegistry.Register<ITankEstimatorService, TankEstimatorService>();
+        containerRegistry.Register<IReportService, ReportService>();
 
         // Views for navigation
+        containerRegistry.RegisterForNavigation<DashboardView, DashboardViewModel>();
         containerRegistry.RegisterForNavigation<DeliveriesView, DeliveriesViewModel>();
         containerRegistry.RegisterForNavigation<ChartsView, ChartsViewModel>();
+        containerRegistry.RegisterForNavigation<ReportsView, ReportsViewModel>();
         containerRegistry.RegisterForNavigation<SettingsView, SettingsViewModel>();
     }
 
@@ -39,6 +43,6 @@ public partial class App : PrismApplication
         base.OnInitialized();
 
         var regionManager = Container.Resolve<IRegionManager>();
-        regionManager.RequestNavigate("ContentRegion", "DeliveriesView");
+        regionManager.RequestNavigate("ContentRegion", "DashboardView");
     }
 }

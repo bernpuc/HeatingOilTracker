@@ -25,6 +25,11 @@
 
                 <!-- Navigation -->
                 <StackPanel DockPanel.Dock="Top" Margin="8,0">
+                    <Button Content="Dashboard"
+                            Style="{StaticResource SidebarButtonStyle}"
+                            Margin="0,2"
+                            Command="{Binding NavigateCommand}"
+                            CommandParameter="DashboardView"/>
                     <Button Content="Deliveries"
                             Style="{StaticResource SidebarButtonStyle}"
                             Margin="0,2"
@@ -35,6 +40,11 @@
                             Margin="0,2"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="ChartsView"/>
+                    <Button Content="Reports"
+                            Style="{StaticResource SidebarButtonStyle}"
+                            Margin="0,2"
+                            Command="{Binding NavigateCommand}"
+                            CommandParameter="ReportsView"/>
                     <Button Content="Settings"
                             Style="{StaticResource SidebarButtonStyle}"
                             Margin="0,2"

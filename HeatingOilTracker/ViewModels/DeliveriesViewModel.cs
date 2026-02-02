@@ -181,7 +181,8 @@ public class DeliveriesViewModel : BindableBase, INavigationAware
                 Date = vm.Date,
                 Gallons = vm.Gallons,
                 PricePerGallon = vm.PricePerGallon,
-                Notes = vm.Notes
+                Notes = vm.Notes,
+                FilledToCapacity = vm.FilledToCapacity
             };
 
             _ = SaveAndReloadAsync(async () => await _dataService.AddDeliveryAsync(delivery));
@@ -203,6 +204,7 @@ public class DeliveriesViewModel : BindableBase, INavigationAware
             existing.Gallons = vm.Gallons;
             existing.PricePerGallon = vm.PricePerGallon;
             existing.Notes = vm.Notes;
+            existing.FilledToCapacity = vm.FilledToCapacity;
 
             _ = SaveAndReloadAsync(async () => await _dataService.UpdateDeliveryAsync(existing));
         }

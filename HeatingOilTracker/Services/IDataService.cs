@@ -16,5 +16,7 @@ public interface IDataService
     Task SetLocationAsync(Location location);
     Task<List<DailyWeather>> GetWeatherHistoryAsync();
     Task AddWeatherDataAsync(List<DailyWeather> weatherData);
+    Task<ReminderSettings> GetReminderSettingsAsync();
+    Task SetReminderSettingsAsync(ReminderSettings settings);
     string GetDataFilePath();
 }

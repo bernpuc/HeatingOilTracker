@@ -133,4 +133,17 @@ public class DataService : IDataService
 
         await SaveAsync(data);
     }
+
+    public async Task<ReminderSettings> GetReminderSettingsAsync()
+    {
+        var data = await LoadAsync();
+        return data.ReminderSettings;
+    }
+
+    public async Task SetReminderSettingsAsync(ReminderSettings settings)
+    {
+        var data = await LoadAsync();
+        data.ReminderSettings = settings;
+        await SaveAsync(data);
+    }
 }

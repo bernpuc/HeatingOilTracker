@@ -103,6 +103,46 @@
                 </StackPanel>
             </Border>
 
+            <!-- Delivery Reminders Section -->
+            <Border BorderBrush="{StaticResource BorderColor}"
+                    BorderThickness="0,1,0,0"
+                    Padding="0,20,0,0"
+                    Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="Delivery Reminders"
+                               FontSize="16" FontWeight="SemiBold"
+                               Foreground="#334155"
+                               Margin="0,0,0,15"/>
+
+                    <CheckBox IsChecked="{Binding ReminderEnabled}"
+                              Content="Enable low-tank reminders"
+                              Margin="0,0,0,15"/>
+
+                    <StackPanel Margin="0,0,0,10">
+                        <TextBlock Text="Alert when tank falls below (gallons):"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding ThresholdGallons, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="120"
+                                 HorizontalAlignment="Left"/>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,10">
+                        <TextBlock Text="Or when days remaining falls below (optional):"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding ThresholdDays, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="120"
+                                 HorizontalAlignment="Left"/>
+                    </StackPanel>
+
+                    <TextBlock Text="Alerts appear on the Dashboard when your estimated tank level drops below the threshold."
+                               Foreground="#94a3b8"
+                               FontSize="11"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
             <!-- Data File Location -->
             <StackPanel Margin="0,0,0,25">
                 <TextBlock Text="Data File Location" FontWeight="SemiBold" Margin="0,0,0,5"/>
