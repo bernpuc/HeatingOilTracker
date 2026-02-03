@@ -109,7 +109,7 @@
                 <!-- K-Factor -->
                 <TextBlock Text="K-Factor" Style="{StaticResource SectionTitle}"/>
                 <TextBlock Style="{StaticResource BodyText}">
-                    The K-Factor represents your home's heating efficiency — how many gallons of oil are needed per Heating Degree Day.
+                    The K-Factor represents your home's heating consumption rate — how many gallons of oil are burned per Heating Degree Day.
                     A lower K-Factor means better efficiency (less fuel needed per degree of heating).
                 </TextBlock>
                 <Border Style="{StaticResource Formula}">
@@ -118,8 +118,13 @@
                     </TextBlock>
                 </Border>
                 <TextBlock Style="{StaticResource BodyText}">
-                    Typical residential K-Factors range from 3 to 7 depending on home size, insulation,
-                    and heating system efficiency. The app calculates your K-Factor from delivery history.
+                    Typical residential K-Factors in this app range from 0.12 to 0.25 gal/HDD depending on home size,
+                    insulation quality, and heating system efficiency. Smaller, well-insulated homes tend toward 0.12-0.15,
+                    while larger or older homes may see 0.20-0.30 or higher.
+                </TextBlock>
+                <TextBlock Style="{StaticResource BodyText}" FontStyle="Italic" Foreground="#64748b">
+                    Note: The heating oil industry often uses the inverse formula (HDD/Gallons), where typical values are 4-8.
+                    This app uses Gallons/HDD for more intuitive consumption tracking.
                 </TextBlock>
 
                 <!-- Burn Rate -->
