@@ -35,12 +35,13 @@ public class TankEstimatorService : ITankEstimatorService
         status.LastDeliveryDate = lastDelivery.Date;
         status.DaysSinceLastDelivery = (int)(DateTime.Today - lastDelivery.Date.Date).TotalDays;
 
-        // Calculate average burn rate
+        // Calculate average burn rate (used as fallback and for days remaining estimate)
         var burnRate = await GetAverageBurnRateAsync();
         status.EstimatedBurnRate = burnRate;
 
         // Calculate average K-Factor
-        status.AverageKFactor = await GetAverageKFactorAsync();
+        var kFactor = await GetAverageKFactorAsync();
+        status.AverageKFactor = kFactor;
 
         // Calculate tank level after last delivery
         decimal tankLevelAfterDelivery;
@@ -58,10 +59,22 @@ public class TankEstimatorService : ITankEstimatorService
         }
 
         // Estimate current gallons by subtracting usage since last delivery
-        var estimatedUsage = burnRate * status.DaysSinceLastDelivery;
+        // Prefer K-Factor based calculation when weather data is available
+        decimal estimatedUsage;
+        if (kFactor.HasValue && kFactor.Value > 0 && weatherData.Count > 0)
+        {
+            // Use K-Factor: Gallons = HDD / K-Factor
+            var hddSinceDelivery = _weatherService.CalculateHDD(weatherData, lastDelivery.Date, DateTime.Today);
+            estimatedUsage = hddSinceDelivery / kFactor.Value;
+        }
+        else
+        {
+            // Fall back to burn rate when no weather data
+            estimatedUsage = burnRate * status.DaysSinceLastDelivery;
+        }
         status.EstimatedGallons = Math.Max(0, tankLevelAfterDelivery - estimatedUsage);
 
-        // Calculate days remaining
+        // Calculate days remaining using burn rate (we can't predict future HDD)
         if (burnRate > 0)
         {
             status.EstimatedDaysRemaining = (int)(status.EstimatedGallons / burnRate);
@@ -72,12 +85,18 @@ public class TankEstimatorService : ITankEstimatorService
 
     /// <summary>
     /// Calculates the estimated tank level at a specific date by walking through delivery history.
+    /// Uses K-Factor with HDD when available, falls back to burn rate.
     /// </summary>
     private async Task<decimal> CalculateLevelAtDateAsync(DateTime targetDate, Guid? excludeDeliveryId = null)
     {
         var deliveries = await _dataService.GetDeliveriesAsync();
         var tankCapacity = await _dataService.GetTankCapacityAsync();
+        var weatherData = await _dataService.GetWeatherHistoryAsync();
         var burnRate = await GetAverageBurnRateAsync();
+        var kFactor = await GetAverageKFactorAsync();
+
+        // Determine if we can use K-Factor based estimation
+        var useKFactor = kFactor.HasValue && kFactor.Value > 0 && weatherData.Count > 0;
 
         // Filter and sort deliveries before target date
         var relevantDeliveries = deliveries
@@ -100,8 +119,18 @@ public class TankEstimatorService : ITankEstimatorService
             if (lastKnownDate.HasValue)
             {
                 // Subtract usage between last known date and this delivery
-                var daysBetween = (decimal)(delivery.Date - lastKnownDate.Value).TotalDays;
-                currentLevel = Math.Max(0, currentLevel - (burnRate * daysBetween));
+                decimal usage;
+                if (useKFactor)
+                {
+                    var hdd = _weatherService.CalculateHDD(weatherData, lastKnownDate.Value, delivery.Date);
+                    usage = hdd / kFactor!.Value;
+                }
+                else
+                {
+                    var daysBetween = (decimal)(delivery.Date - lastKnownDate.Value).TotalDays;
+                    usage = burnRate * daysBetween;
+                }
+                currentLevel = Math.Max(0, currentLevel - usage);
             }
 
             // Apply this delivery
@@ -120,8 +149,18 @@ public class TankEstimatorService : ITankEstimatorService
         // Now subtract usage from last delivery to target date
         if (lastKnownDate.HasValue)
         {
-            var daysToTarget = (decimal)(targetDate - lastKnownDate.Value).TotalDays;
-            currentLevel = Math.Max(0, currentLevel - (burnRate * daysToTarget));
+            decimal usage;
+            if (useKFactor)
+            {
+                var hdd = _weatherService.CalculateHDD(weatherData, lastKnownDate.Value, targetDate);
+                usage = hdd / kFactor!.Value;
+            }
+            else
+            {
+                var daysToTarget = (decimal)(targetDate - lastKnownDate.Value).TotalDays;
+                usage = burnRate * daysToTarget;
+            }
+            currentLevel = Math.Max(0, currentLevel - usage);
         }
 
         return currentLevel;
