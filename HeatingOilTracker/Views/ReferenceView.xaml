@@ -235,24 +235,39 @@
 
                 <StackPanel Margin="0,5,0,0">
                     <TextBlock Style="{StaticResource LinkText}">
-                        <Run FontWeight="SemiBold">Heating Degree Days:</Run>
-                        <Run>energy.gov/energysaver/heating-degree-days</Run>
+                        <Run FontWeight="SemiBold">Heating Degree Days: </Run>
+                        <Hyperlink NavigateUri="https://www.energy.gov/energysaver/heating-degree-days"
+                                   RequestNavigate="Hyperlink_RequestNavigate">
+                            energy.gov/energysaver/heating-degree-days
+                        </Hyperlink>
                     </TextBlock>
                     <TextBlock Style="{StaticResource LinkText}">
-                        <Run FontWeight="SemiBold">CO₂ Emission Factors:</Run>
-                        <Run>eia.gov/environment/emissions/co2_vol_mass.php</Run>
+                        <Run FontWeight="SemiBold">CO₂ Emission Factors: </Run>
+                        <Hyperlink NavigateUri="https://www.eia.gov/environment/emissions/co2_vol_mass.php"
+                                   RequestNavigate="Hyperlink_RequestNavigate">
+                            eia.gov/environment/emissions/co2_vol_mass.php
+                        </Hyperlink>
                     </TextBlock>
                     <TextBlock Style="{StaticResource LinkText}">
-                        <Run FontWeight="SemiBold">Carbon Offsets Guide:</Run>
-                        <Run>epa.gov/climateleadership/offset-credit-faqs</Run>
+                        <Run FontWeight="SemiBold">Carbon Offsets Guide: </Run>
+                        <Hyperlink NavigateUri="https://www.epa.gov/climateleadership/offset-credit-faqs"
+                                   RequestNavigate="Hyperlink_RequestNavigate">
+                            epa.gov/climateleadership/offset-credit-faqs
+                        </Hyperlink>
                     </TextBlock>
                     <TextBlock Style="{StaticResource LinkText}">
-                        <Run FontWeight="SemiBold">Home Heating Efficiency:</Run>
-                        <Run>energystar.gov/campaign/heating_cooling</Run>
+                        <Run FontWeight="SemiBold">Home Heating Efficiency: </Run>
+                        <Hyperlink NavigateUri="https://www.energystar.gov/campaign/heating_cooling"
+                                   RequestNavigate="Hyperlink_RequestNavigate">
+                            energystar.gov/campaign/heating_cooling
+                        </Hyperlink>
                     </TextBlock>
                     <TextBlock Style="{StaticResource LinkText}">
-                        <Run FontWeight="SemiBold">Weather Data Source:</Run>
-                        <Run>open-meteo.com</Run>
+                        <Run FontWeight="SemiBold">Weather Data Source: </Run>
+                        <Hyperlink NavigateUri="https://open-meteo.com"
+                                   RequestNavigate="Hyperlink_RequestNavigate">
+                            open-meteo.com
+                        </Hyperlink>
                     </TextBlock>
                 </StackPanel>
 
