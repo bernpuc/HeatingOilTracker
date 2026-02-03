@@ -88,7 +88,7 @@
                                        Foreground="#166534"
                                        Margin="0,0,0,8"/>
                             <TextBlock FontSize="28" FontWeight="Bold" Foreground="#166534">
-                                <Run Text="{Binding TotalGallons}"/>
+                                <Run Text="{Binding TotalGallons, Mode=OneWay}"/>
                                 <Run Text=" gal" FontSize="14"/>
                             </TextBlock>
                             <TextBlock Text="{Binding TotalHDD, StringFormat='{}{0} HDD'}"
@@ -113,7 +113,7 @@
                                        Margin="0,0,0,8"/>
                             <TextBlock FontSize="28" FontWeight="Bold" Foreground="#92400e">
                                 <Run Text="$"/>
-                                <Run Text="{Binding AvgPricePerGallon}"/>
+                                <Run Text="{Binding AvgPricePerGallon, Mode=OneWay}"/>
                             </TextBlock>
                             <TextBlock Text="{Binding AvgKFactor, StringFormat='K-Factor: {0}'}"
                                        FontSize="12"
