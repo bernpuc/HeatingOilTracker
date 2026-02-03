@@ -50,6 +50,11 @@
                             Margin="0,2"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="SettingsView"/>
+                    <Button Content="Reference"
+                            Style="{StaticResource SidebarButtonStyle}"
+                            Margin="0,2"
+                            Command="{Binding NavigateCommand}"
+                            CommandParameter="ReferenceView"/>
                 </StackPanel>
 
                 <!-- Spacer + Exit -->

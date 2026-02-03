@@ -36,6 +36,7 @@ public partial class App : PrismApplication
         containerRegistry.RegisterForNavigation<ChartsView, ChartsViewModel>();
         containerRegistry.RegisterForNavigation<ReportsView, ReportsViewModel>();
         containerRegistry.RegisterForNavigation<SettingsView, SettingsViewModel>();
+        containerRegistry.RegisterForNavigation<ReferenceView, ReferenceViewModel>();
     }
 
     protected override void OnInitialized()
