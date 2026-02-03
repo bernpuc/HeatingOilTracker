@@ -236,9 +236,9 @@
                 <StackPanel Margin="0,5,0,0">
                     <TextBlock Style="{StaticResource LinkText}">
                         <Run FontWeight="SemiBold">Heating Degree Days: </Run>
-                        <Hyperlink NavigateUri="https://www.energy.gov/energysaver/heating-degree-days"
+                        <Hyperlink NavigateUri="https://www.eia.gov/energyexplained/units-and-calculators/degree-days.php"
                                    RequestNavigate="Hyperlink_RequestNavigate">
-                            energy.gov/energysaver/heating-degree-days
+                            eia.gov/energyexplained/units-and-calculators/degree-days.php
                         </Hyperlink>
                     </TextBlock>
                     <TextBlock Style="{StaticResource LinkText}">
