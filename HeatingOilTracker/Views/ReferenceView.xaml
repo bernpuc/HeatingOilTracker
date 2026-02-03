@@ -250,16 +250,16 @@
                     </TextBlock>
                     <TextBlock Style="{StaticResource LinkText}">
                         <Run FontWeight="SemiBold">Carbon Offsets Guide: </Run>
-                        <Hyperlink NavigateUri="https://www.epa.gov/climateleadership/offset-credit-faqs"
+                        <Hyperlink NavigateUri="https://www.epa.gov/green-power-markets/market-instruments"
                                    RequestNavigate="Hyperlink_RequestNavigate">
-                            epa.gov/climateleadership/offset-credit-faqs
+                            epa.gov/green-power-markets/market-instruments
                         </Hyperlink>
                     </TextBlock>
                     <TextBlock Style="{StaticResource LinkText}">
                         <Run FontWeight="SemiBold">Home Heating Efficiency: </Run>
-                        <Hyperlink NavigateUri="https://www.energystar.gov/campaign/heating_cooling"
+                        <Hyperlink NavigateUri="https://www.energystar.gov/saveathome/heating-cooling"
                                    RequestNavigate="Hyperlink_RequestNavigate">
-                            energystar.gov/campaign/heating_cooling
+                            energystar.gov/saveathome/heating-cooling
                         </Hyperlink>
                     </TextBlock>
                     <TextBlock Style="{StaticResource LinkText}">
