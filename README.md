@@ -5,7 +5,7 @@ A Windows desktop application for tracking heating oil deliveries, monitoring ta
 ## Features
 
 ### Dashboard
-- **Tank Level Estimation**: Real-time estimate of remaining gallons based on delivery history and burn rate
+- **Tank Level Estimation**: Real-time estimate of remaining gallons using K-Factor with weather data (falls back to burn rate)
 - **Days Remaining**: Predicted days until tank reaches threshold
 - **Low Tank Alerts**: Configurable alerts when tank level or days remaining drops below threshold
 - **Refill Prediction**: Estimated date when you'll need to reorder
@@ -95,7 +95,8 @@ Optional cloud backup can be configured to sync this data to a cloud-synced fold
 |--------|---------|-------------|
 | HDD | max(0, 65 - avg temp) | Heating Degree Days per day |
 | K-Factor | HDD / Gallons | Efficiency metric (higher = better) |
-| Burn Rate | Gallons / Days | Average daily consumption |
+| Tank Estimate | HDD / K-Factor | Gallons used since last fill |
+| Burn Rate | Gallons / Days | Average daily consumption (fallback) |
 | CO₂ | Gallons × 22.38 | Pounds of CO₂ emitted |
 | Offset Cost | CO₂ tons × $15-$50 | Estimated carbon offset cost |
 
