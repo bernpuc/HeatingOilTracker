@@ -17,7 +17,8 @@ A Windows desktop application for tracking heating oil deliveries, monitoring ta
 - **CSV Import/Export**: Import historical data or export for backup and analysis
 
 ### Weather Integration
-- **Heating Degree Days (HDD)**: Fetches historical temperature data from Open-Meteo API
+- **Automatic Updates**: Weather data fetched automatically on startup when location is configured
+- **Heating Degree Days (HDD)**: Historical temperature data from Open-Meteo API
 - **Weather-Normalized Metrics**: Compare efficiency across years with different temperatures
 - **ZIP Code Lookup**: Automatic location detection from ZIP code
 
