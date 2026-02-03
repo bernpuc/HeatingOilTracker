@@ -229,8 +229,9 @@
                     The app uses your configured ZIP code to determine location and retrieves daily high/low temperatures.
                 </TextBlock>
                 <TextBlock Style="{StaticResource BodyText}">
-                    Weather data must be fetched manually from Settings. The app stores historical data locally,
-                    so you only need to fetch new data periodically to keep calculations current.
+                    When a location is configured, the app automatically fetches the latest weather data on startup.
+                    This ensures tank estimates using K-Factor stay accurate without manual intervention.
+                    You can also manually fetch weather data from Settings if needed.
                 </TextBlock>
 
                 <!-- Further Reading -->
