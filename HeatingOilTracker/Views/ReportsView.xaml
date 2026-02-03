@@ -123,6 +123,95 @@
                     </Border>
                 </Grid>
 
+                <!-- Carbon Footprint Cards Row -->
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="15"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="15"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Total CO2 Card -->
+                    <Border Grid.Column="0"
+                            Background="#fce7f3"
+                            BorderBrush="#db2777"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="CARBON FOOTPRINT"
+                                       FontSize="11"
+                                       FontWeight="Bold"
+                                       Foreground="#9d174d"
+                                       Margin="0,0,0,8"/>
+                            <TextBlock FontSize="28" FontWeight="Bold" Foreground="#9d174d">
+                                <Run Text="{Binding TotalCO2Lbs, Mode=OneWay}"/>
+                                <Run Text=" lbs" FontSize="14"/>
+                            </TextBlock>
+                            <TextBlock FontSize="12"
+                                       Foreground="#ec4899"
+                                       Margin="0,5,0,0">
+                                <Run Text="{Binding TotalCO2MetricTons, Mode=OneWay}"/>
+                                <Run Text=" metric tons CO₂"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- CO2 per HDD Card -->
+                    <Border Grid.Column="2"
+                            Background="#ede9fe"
+                            BorderBrush="#7c3aed"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="CO₂ PER HDD"
+                                       FontSize="11"
+                                       FontWeight="Bold"
+                                       Foreground="#5b21b6"
+                                       Margin="0,0,0,8"/>
+                            <TextBlock FontSize="28" FontWeight="Bold" Foreground="#5b21b6">
+                                <Run Text="{Binding CO2LbsPerHDD, Mode=OneWay}"/>
+                                <Run Text=" lbs" FontSize="14"/>
+                            </TextBlock>
+                            <TextBlock Text="Weather-normalized emissions"
+                                       FontSize="12"
+                                       Foreground="#8b5cf6"
+                                       Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Offset Cost Estimator Card -->
+                    <Border Grid.Column="4"
+                            Background="#ecfdf5"
+                            BorderBrush="#059669"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="OFFSET COST ESTIMATE"
+                                       FontSize="11"
+                                       FontWeight="Bold"
+                                       Foreground="#065f46"
+                                       Margin="0,0,0,8"/>
+                            <TextBlock Text="{Binding OffsetCostRange}"
+                                       FontSize="24"
+                                       FontWeight="Bold"
+                                       Foreground="#065f46"/>
+                            <TextBlock Text="To neutralize your emissions"
+                                       FontSize="12"
+                                       Foreground="#10b981"
+                                       Margin="0,5,0,0"/>
+                            <TextBlock Text="Based on $15–$50/ton offset prices"
+                                       FontSize="10"
+                                       Foreground="#6ee7b7"
+                                       Margin="0,3,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
                 <!-- Seasonal Breakdown -->
                 <Border Background="#f8fafc"
                         BorderBrush="{StaticResource BorderColor}"
@@ -176,16 +265,37 @@
                                                    Text="{Binding CurrentBreakdown.HeatingSeasonGallons, StringFormat='{}{0:F1} gal', FallbackValue='--'}"
                                                    FontWeight="SemiBold"/>
                                     </Grid>
+                                    <Grid Margin="0,0,0,5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="% of Cost:" Foreground="#64748b"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding HeatingSeasonCostPercent}"
+                                                   FontWeight="Bold"
+                                                   Foreground="#dc2626"/>
+                                    </Grid>
+                                    <Grid Margin="0,0,0,5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="CO₂:" Foreground="#64748b"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding CurrentBreakdown.HeatingSeasonCO2Lbs, StringFormat='{}{0:N0} lbs', FallbackValue='--'}"
+                                                   FontWeight="SemiBold"/>
+                                    </Grid>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="% of Total:" Foreground="#64748b"/>
+                                        <TextBlock Text="% of CO₂:" Foreground="#64748b"/>
                                         <TextBlock Grid.Column="1"
-                                                   Text="{Binding HeatingSeasonCostPercent}"
+                                                   Text="{Binding HeatingSeasonCO2Percent}"
                                                    FontWeight="Bold"
-                                                   Foreground="#dc2626"/>
+                                                   Foreground="#db2777"/>
                                     </Grid>
                                 </StackPanel>
                             </Border>
@@ -222,16 +332,37 @@
                                                    Text="{Binding CurrentBreakdown.OffSeasonGallons, StringFormat='{}{0:F1} gal', FallbackValue='--'}"
                                                    FontWeight="SemiBold"/>
                                     </Grid>
+                                    <Grid Margin="0,0,0,5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="% of Cost:" Foreground="#64748b"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding OffSeasonCostPercent}"
+                                                   FontWeight="Bold"
+                                                   Foreground="#16a34a"/>
+                                    </Grid>
+                                    <Grid Margin="0,0,0,5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="CO₂:" Foreground="#64748b"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding CurrentBreakdown.OffSeasonCO2Lbs, StringFormat='{}{0:N0} lbs', FallbackValue='--'}"
+                                                   FontWeight="SemiBold"/>
+                                    </Grid>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="% of Total:" Foreground="#64748b"/>
+                                        <TextBlock Text="% of CO₂:" Foreground="#64748b"/>
                                         <TextBlock Grid.Column="1"
-                                                   Text="{Binding OffSeasonCostPercent}"
+                                                   Text="{Binding OffSeasonCO2Percent}"
                                                    FontWeight="Bold"
-                                                   Foreground="#16a34a"/>
+                                                   Foreground="#db2777"/>
                                     </Grid>
                                 </StackPanel>
                             </Border>
@@ -323,11 +454,33 @@
                                 </DataGridTextColumn>
                                 <DataGridTextColumn Header="$/HDD"
                                                     Binding="{Binding CostPerHDD, StringFormat=\{0:F2\}}"
+                                                    Width="70">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                                            <Setter Property="Padding" Value="0,0,10,0"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="CO₂ (lbs)"
+                                                    Binding="{Binding TotalCO2Lbs, StringFormat=\{0:N0\}}"
+                                                    Width="90">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                                            <Setter Property="Padding" Value="0,0,10,0"/>
+                                            <Setter Property="Foreground" Value="#db2777"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="CO₂/HDD"
+                                                    Binding="{Binding CO2LbsPerHDD, StringFormat=\{0:F2\}}"
                                                     Width="*">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="HorizontalAlignment" Value="Right"/>
                                             <Setter Property="Padding" Value="0,0,10,0"/>
+                                            <Setter Property="Foreground" Value="#7c3aed"/>
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>

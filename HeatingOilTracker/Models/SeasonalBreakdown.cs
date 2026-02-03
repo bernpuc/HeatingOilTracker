@@ -25,4 +25,11 @@ public class SeasonalBreakdown
 
     public decimal TotalCost => HeatingSeasonCost + OffSeasonCost;
     public decimal TotalGallons => HeatingSeasonGallons + OffSeasonGallons;
+
+    // Carbon footprint metrics
+    public decimal HeatingSeasonCO2Lbs => HeatingSeasonGallons * YearlySummary.CO2LbsPerGallon;
+    public decimal OffSeasonCO2Lbs => OffSeasonGallons * YearlySummary.CO2LbsPerGallon;
+    public decimal TotalCO2Lbs => TotalGallons * YearlySummary.CO2LbsPerGallon;
+    public decimal HeatingSeasonCO2Percent => TotalCO2Lbs > 0 ? (HeatingSeasonCO2Lbs / TotalCO2Lbs) * 100 : 0;
+    public decimal OffSeasonCO2Percent => TotalCO2Lbs > 0 ? (OffSeasonCO2Lbs / TotalCO2Lbs) * 100 : 0;
 }

@@ -57,6 +57,12 @@ public class ReportsViewModel : BindableBase, INavigationAware
             RaisePropertyChanged(nameof(TotalHDD));
             RaisePropertyChanged(nameof(CostPerHDD));
             RaisePropertyChanged(nameof(AvgKFactor));
+            RaisePropertyChanged(nameof(TotalCO2Lbs));
+            RaisePropertyChanged(nameof(TotalCO2MetricTons));
+            RaisePropertyChanged(nameof(CO2LbsPerHDD));
+            RaisePropertyChanged(nameof(OffsetCostRange));
+            RaisePropertyChanged(nameof(OffsetCostLow));
+            RaisePropertyChanged(nameof(OffsetCostHigh));
         }
     }
 
@@ -68,6 +74,8 @@ public class ReportsViewModel : BindableBase, INavigationAware
             SetProperty(ref _currentBreakdown, value);
             RaisePropertyChanged(nameof(HeatingSeasonCostPercent));
             RaisePropertyChanged(nameof(OffSeasonCostPercent));
+            RaisePropertyChanged(nameof(HeatingSeasonCO2Percent));
+            RaisePropertyChanged(nameof(OffSeasonCO2Percent));
         }
     }
 
@@ -95,6 +103,20 @@ public class ReportsViewModel : BindableBase, INavigationAware
     // Display properties from CurrentBreakdown
     public string HeatingSeasonCostPercent => CurrentBreakdown != null ? $"{CurrentBreakdown.HeatingSeasonCostPercent:F0}%" : "--";
     public string OffSeasonCostPercent => CurrentBreakdown != null ? $"{CurrentBreakdown.OffSeasonCostPercent:F0}%" : "--";
+
+    // Carbon footprint display properties
+    public string TotalCO2Lbs => CurrentSummary != null ? $"{CurrentSummary.TotalCO2Lbs:N0}" : "--";
+    public string TotalCO2MetricTons => CurrentSummary != null ? $"{CurrentSummary.TotalCO2MetricTons:F2}" : "--";
+    public string CO2LbsPerHDD => CurrentSummary?.CO2LbsPerHDD.HasValue == true ? $"{CurrentSummary.CO2LbsPerHDD.Value:F2}" : "--";
+    public string HeatingSeasonCO2Percent => CurrentBreakdown != null ? $"{CurrentBreakdown.HeatingSeasonCO2Percent:F0}%" : "--";
+    public string OffSeasonCO2Percent => CurrentBreakdown != null ? $"{CurrentBreakdown.OffSeasonCO2Percent:F0}%" : "--";
+
+    // Carbon offset cost estimates
+    public string OffsetCostLow => CurrentSummary != null ? CurrentSummary.OffsetCostLow.ToString("C0") : "--";
+    public string OffsetCostHigh => CurrentSummary != null ? CurrentSummary.OffsetCostHigh.ToString("C0") : "--";
+    public string OffsetCostRange => CurrentSummary != null
+        ? $"{CurrentSummary.OffsetCostLow:C0} – {CurrentSummary.OffsetCostHigh:C0}"
+        : "--";
 
     public DelegateCommand RefreshCommand { get; }
 
