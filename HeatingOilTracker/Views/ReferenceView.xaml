@@ -64,23 +64,28 @@
                 <TextBlock Text="Tank Level Estimation" Style="{StaticResource SectionTitle}"/>
                 <TextBlock Style="{StaticResource BodyText}">
                     The app estimates your current tank level by tracking how much oil has been used since your last delivery.
-                    Two methods are used depending on available data:
+                    The preferred method uses K-Factor with weather data for accuracy; burn rate is used as a fallback.
                 </TextBlock>
 
-                <TextBlock Text="Method 1: K-Factor Based (Weather-Adjusted)" Style="{StaticResource SubsectionTitle}"/>
+                <TextBlock Text="Primary Method: K-Factor (Weather-Adjusted)" Style="{StaticResource SubsectionTitle}"/>
                 <TextBlock Style="{StaticResource BodyText}">
                     When weather data is available, consumption is calculated using your K-Factor and accumulated Heating Degree Days (HDD).
-                    This adjusts for temperature changes automatically.
+                    This automatically adjusts for temperature changes — a cold snap will show higher usage, a mild spell will show less.
                 </TextBlock>
                 <Border Style="{StaticResource Formula}">
                     <TextBlock Style="{StaticResource FormulaText}">
-                        Gallons Used = HDD since last fill × K-Factor
+                        Gallons Used = HDD since last fill / K-Factor
                     </TextBlock>
                 </Border>
+                <TextBlock Style="{StaticResource BodyText}">
+                    This is more accurate than burn rate because it accounts for actual weather conditions rather than assuming
+                    constant daily consumption.
+                </TextBlock>
 
-                <TextBlock Text="Method 2: Average Burn Rate" Style="{StaticResource SubsectionTitle}"/>
+                <TextBlock Text="Fallback Method: Average Burn Rate" Style="{StaticResource SubsectionTitle}"/>
                 <TextBlock Style="{StaticResource BodyText}">
                     When weather data isn't available, a simple daily average is used based on historical consumption.
+                    This is less accurate during temperature swings but works when no weather data has been fetched.
                 </TextBlock>
                 <Border Style="{StaticResource Formula}">
                     <TextBlock Style="{StaticResource FormulaText}">
