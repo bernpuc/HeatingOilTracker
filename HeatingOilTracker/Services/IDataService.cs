@@ -18,5 +18,7 @@ public interface IDataService
     Task AddWeatherDataAsync(List<DailyWeather> weatherData);
     Task<ReminderSettings> GetReminderSettingsAsync();
     Task SetReminderSettingsAsync(ReminderSettings settings);
+    Task<string?> GetBackupFolderPathAsync();
+    Task SetBackupFolderPathAsync(string? path);
     string GetDataFilePath();
 }

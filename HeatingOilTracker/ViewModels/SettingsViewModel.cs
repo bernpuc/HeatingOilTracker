@@ -25,6 +25,10 @@ public class SettingsViewModel : BindableBase, INavigationAware
     private decimal _thresholdGallons = 50m;
     private int? _thresholdDays;
 
+    // Backup settings
+    private string _backupFolderPath = string.Empty;
+    private string _backupStatus = string.Empty;
+
     public decimal TankCapacity
     {
         get => _tankCapacity;
@@ -93,9 +97,25 @@ public class SettingsViewModel : BindableBase, INavigationAware
         set => SetProperty(ref _thresholdDays, value);
     }
 
+    public string BackupFolderPath
+    {
+        get => _backupFolderPath;
+        set => SetProperty(ref _backupFolderPath, value);
+    }
+
+    public string BackupStatus
+    {
+        get => _backupStatus;
+        set => SetProperty(ref _backupStatus, value);
+    }
+
+    public bool HasBackupFolder => !string.IsNullOrWhiteSpace(BackupFolderPath);
+
     public DelegateCommand SaveCommand { get; }
     public DelegateCommand LookupZipCommand { get; }
     public DelegateCommand FetchWeatherCommand { get; }
+    public DelegateCommand BrowseBackupFolderCommand { get; }
+    public DelegateCommand ClearBackupFolderCommand { get; }
 
     public SettingsViewModel(IDataService dataService, IWeatherService weatherService)
     {
@@ -111,6 +131,8 @@ public class SettingsViewModel : BindableBase, INavigationAware
         FetchWeatherCommand = new DelegateCommand(
             async () => await FetchWeatherAsync(),
             () => !IsFetchingWeather);
+        BrowseBackupFolderCommand = new DelegateCommand(BrowseBackupFolder);
+        ClearBackupFolderCommand = new DelegateCommand(ClearBackupFolder);
 
         _ = LoadAsync();
     }
@@ -142,6 +164,10 @@ public class SettingsViewModel : BindableBase, INavigationAware
         ReminderEnabled = reminderSettings.IsEnabled;
         ThresholdGallons = reminderSettings.ThresholdGallons;
         ThresholdDays = reminderSettings.ThresholdDays;
+
+        // Load backup settings
+        BackupFolderPath = await _dataService.GetBackupFolderPathAsync() ?? string.Empty;
+        UpdateBackupStatus();
     }
 
     private async Task SaveAsync()
@@ -171,7 +197,66 @@ public class SettingsViewModel : BindableBase, INavigationAware
         };
         await _dataService.SetReminderSettingsAsync(reminderSettings);
 
+        // Save backup folder path
+        var backupPath = string.IsNullOrWhiteSpace(BackupFolderPath) ? null : BackupFolderPath;
+        await _dataService.SetBackupFolderPathAsync(backupPath);
+        UpdateBackupStatus();
+
         MessageBox.Show("Settings saved.", "Settings", MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
+    private void BrowseBackupFolder()
+    {
+        using var dialog = new System.Windows.Forms.FolderBrowserDialog
+        {
+            Description = "Select backup folder (e.g., OneDrive, Dropbox, Google Drive folder)",
+            ShowNewFolderButton = true,
+            UseDescriptionForTitle = true
+        };
+
+        if (!string.IsNullOrWhiteSpace(BackupFolderPath) && System.IO.Directory.Exists(BackupFolderPath))
+        {
+            dialog.SelectedPath = BackupFolderPath;
+        }
+
+        if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+        {
+            BackupFolderPath = dialog.SelectedPath;
+            RaisePropertyChanged(nameof(HasBackupFolder));
+            UpdateBackupStatus();
+        }
+    }
+
+    private void ClearBackupFolder()
+    {
+        BackupFolderPath = string.Empty;
+        RaisePropertyChanged(nameof(HasBackupFolder));
+        UpdateBackupStatus();
+    }
+
+    private void UpdateBackupStatus()
+    {
+        if (string.IsNullOrWhiteSpace(BackupFolderPath))
+        {
+            BackupStatus = "No backup folder configured";
+        }
+        else if (!System.IO.Directory.Exists(BackupFolderPath))
+        {
+            BackupStatus = "Warning: Folder does not exist";
+        }
+        else
+        {
+            var backupFile = System.IO.Path.Combine(BackupFolderPath, "HeatingOilTracker_backup.json");
+            if (System.IO.File.Exists(backupFile))
+            {
+                var lastModified = System.IO.File.GetLastWriteTime(backupFile);
+                BackupStatus = $"Last backup: {lastModified:MMM d, yyyy h:mm tt}";
+            }
+            else
+            {
+                BackupStatus = "Backup folder set (no backup yet)";
+            }
+        }
     }
 
     private async Task LookupZipAsync()

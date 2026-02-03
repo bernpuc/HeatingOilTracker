@@ -143,6 +143,46 @@
                 </StackPanel>
             </Border>
 
+            <!-- Cloud Backup Section -->
+            <Border BorderBrush="{StaticResource BorderColor}"
+                    BorderThickness="0,1,0,0"
+                    Padding="0,20,0,0"
+                    Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="Cloud Backup"
+                               FontSize="16" FontWeight="SemiBold"
+                               Foreground="#334155"
+                               Margin="0,0,0,15"/>
+
+                    <TextBlock Text="{Binding BackupStatus}"
+                               Foreground="#64748b"
+                               Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Backup Folder" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding BackupFolderPath, UpdateSourceTrigger=PropertyChanged}"
+                             IsReadOnly="True"
+                             Background="#f8fafc"
+                             Margin="0,0,0,10"/>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="Browse..."
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Command="{Binding BrowseBackupFolderCommand}"
+                                Padding="15,8"/>
+                        <Button Content="Clear"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Command="{Binding ClearBackupFolderCommand}"
+                                Margin="10,0,0,0"
+                                Padding="15,8"/>
+                    </StackPanel>
+
+                    <TextBlock Text="Select a cloud-synced folder (OneDrive, Dropbox, Google Drive) to automatically backup your data on every save."
+                               Foreground="#94a3b8"
+                               FontSize="11"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
             <!-- Data File Location -->
             <StackPanel Margin="0,0,0,25">
                 <TextBlock Text="Data File Location" FontWeight="SemiBold" Margin="0,0,0,5"/>

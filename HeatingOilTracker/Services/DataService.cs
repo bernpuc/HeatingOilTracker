@@ -54,6 +54,39 @@ public class DataService : IDataService
 
         File.Move(tempPath, DataFilePath);
         _cachedData = data;
+
+        // Auto-backup to configured folder if set
+        await BackupToCloudFolderAsync(data);
+    }
+
+    private async Task BackupToCloudFolderAsync(TrackerData data)
+    {
+        if (string.IsNullOrWhiteSpace(data.BackupFolderPath))
+            return;
+
+        try
+        {
+            if (!Directory.Exists(data.BackupFolderPath))
+                Directory.CreateDirectory(data.BackupFolderPath);
+
+            var backupFileName = "HeatingOilTracker_backup.json";
+            var backupPath = Path.Combine(data.BackupFolderPath, backupFileName);
+            var json = JsonSerializer.Serialize(data, JsonOptions);
+
+            // Atomic write to backup location
+            var tempBackupPath = backupPath + ".tmp";
+            await File.WriteAllTextAsync(tempBackupPath, json);
+
+            if (File.Exists(backupPath))
+                File.Delete(backupPath);
+
+            File.Move(tempBackupPath, backupPath);
+        }
+        catch (Exception ex)
+        {
+            // Log but don't fail the main save operation
+            System.Diagnostics.Debug.WriteLine($"Backup failed: {ex.Message}");
+        }
     }
 
     public async Task<List<OilDelivery>> GetDeliveriesAsync()
@@ -144,6 +177,19 @@ public class DataService : IDataService
     {
         var data = await LoadAsync();
         data.ReminderSettings = settings;
+        await SaveAsync(data);
+    }
+
+    public async Task<string?> GetBackupFolderPathAsync()
+    {
+        var data = await LoadAsync();
+        return data.BackupFolderPath;
+    }
+
+    public async Task SetBackupFolderPathAsync(string? path)
+    {
+        var data = await LoadAsync();
+        data.BackupFolderPath = path;
         await SaveAsync(data);
     }
 }
