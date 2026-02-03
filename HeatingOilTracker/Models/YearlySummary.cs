@@ -26,7 +26,7 @@ public class YearlySummary
     public int DeliveryCount { get; set; }
     public decimal? TotalHDD { get; set; }
     public decimal? CostPerHDD => TotalHDD > 0 ? TotalCost / TotalHDD : null;
-    public decimal? AvgKFactor => TotalHDD > 0 ? TotalGallons / TotalHDD : null;
+    public decimal? AvgKFactor => TotalGallons > 0 ? TotalHDD / TotalGallons : null;
 
     // Carbon footprint metrics
     public decimal TotalCO2Lbs => TotalGallons * CO2LbsPerGallon;

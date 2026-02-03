@@ -12,5 +12,5 @@ public class TankStatus
     public int DaysSinceLastDelivery { get; set; }
     public decimal EstimatedBurnRate { get; set; }  // gal/day
     public int? EstimatedDaysRemaining { get; set; }
-    public decimal? AverageKFactor { get; set; }  // gal/HDD
+    public decimal? AverageKFactor { get; set; }  // HDD/gal (industry standard)
 }

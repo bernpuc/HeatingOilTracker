@@ -46,10 +46,10 @@ public class DeliveryDisplayItem
                 DaysSinceLastFill = days;
                 GallonsPerDay = Math.Round(delivery.Gallons / days, 1);
 
-                // Calculate K-Factor if we have HDD data
-                if (hdd.HasValue && hdd.Value > 0)
+                // Calculate K-Factor (HDD/gallon) if we have HDD data
+                if (hdd.HasValue && delivery.Gallons > 0)
                 {
-                    KFactor = Math.Round(delivery.Gallons / hdd.Value, 4);
+                    KFactor = Math.Round(hdd.Value / delivery.Gallons, 2);
                 }
             }
         }

@@ -68,8 +68,8 @@ public class WeatherService : IWeatherService
 
     public decimal CalculateKFactor(decimal gallonsDelivered, decimal hddAccumulated)
     {
-        if (hddAccumulated <= 0) return 0;
-        return gallonsDelivered / hddAccumulated;
+        if (gallonsDelivered <= 0) return 0;
+        return hddAccumulated / gallonsDelivered;
     }
 
     public async Task<Location?> GeocodeZipCodeAsync(string zipCode)

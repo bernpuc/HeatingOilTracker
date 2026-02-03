@@ -109,22 +109,18 @@
                 <!-- K-Factor -->
                 <TextBlock Text="K-Factor" Style="{StaticResource SectionTitle}"/>
                 <TextBlock Style="{StaticResource BodyText}">
-                    The K-Factor represents your home's heating consumption rate — how many gallons of oil are burned per Heating Degree Day.
-                    A lower K-Factor means better efficiency (less fuel needed per degree of heating).
+                    The K-Factor is the industry standard measure of heating efficiency — how many Heating Degree Days
+                    it takes to burn one gallon of oil. A higher K-Factor means better efficiency (more degree days per gallon).
                 </TextBlock>
                 <Border Style="{StaticResource Formula}">
                     <TextBlock Style="{StaticResource FormulaText}">
-                        K-Factor = Gallons Used / Total HDD during that period
+                        K-Factor = Total HDD / Gallons Used
                     </TextBlock>
                 </Border>
                 <TextBlock Style="{StaticResource BodyText}">
-                    Typical residential K-Factors in this app range from 0.12 to 0.25 gal/HDD depending on home size,
-                    insulation quality, and heating system efficiency. Smaller, well-insulated homes tend toward 0.12-0.15,
-                    while larger or older homes may see 0.20-0.30 or higher.
-                </TextBlock>
-                <TextBlock Style="{StaticResource BodyText}" FontStyle="Italic" Foreground="#64748b">
-                    Note: The heating oil industry often uses the inverse formula (HDD/Gallons), where typical values are 4-8.
-                    This app uses Gallons/HDD for more intuitive consumption tracking.
+                    Typical residential K-Factors range from 4 to 8 HDD/gallon depending on home size,
+                    insulation quality, and heating system efficiency. Smaller, well-insulated homes tend toward 6-8,
+                    while larger or older homes may see 3-5.
                 </TextBlock>
 
                 <!-- Burn Rate -->

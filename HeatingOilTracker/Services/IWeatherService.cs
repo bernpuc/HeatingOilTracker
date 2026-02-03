@@ -15,7 +15,7 @@ public interface IWeatherService
     decimal CalculateHDD(List<DailyWeather> weatherData, DateTime startDate, DateTime endDate);
 
     /// <summary>
-    /// Calculates K-Factor (gallons per HDD) for a delivery.
+    /// Calculates K-Factor (HDD per gallon) for a delivery. Industry standard measure of heating efficiency.
     /// </summary>
     decimal CalculateKFactor(decimal gallonsDelivered, decimal hddAccumulated);
 

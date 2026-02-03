@@ -20,7 +20,7 @@ public interface ITankEstimatorService
     Task<decimal> GetAverageBurnRateAsync();
 
     /// <summary>
-    /// Gets the average K-Factor (gallons per HDD) based on delivery history.
+    /// Gets the average K-Factor (HDD per gallon) based on delivery history.
     /// </summary>
     Task<decimal?> GetAverageKFactorAsync();
 }

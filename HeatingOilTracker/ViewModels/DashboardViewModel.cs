@@ -124,7 +124,7 @@ public class DashboardViewModel : BindableBase, INavigationAware
     }
 
     public string BurnRateDisplay => BurnRate > 0 ? $"{BurnRate:F1} gal/day" : "--";
-    public string KFactorDisplay => AverageKFactor.HasValue ? $"{AverageKFactor.Value:F3} gal/HDD" : "--";
+    public string KFactorDisplay => AverageKFactor.HasValue ? $"{AverageKFactor.Value:F1} HDD/gal" : "--";
     public string DaysRemainingDisplay => DaysRemaining.HasValue ? $"~{DaysRemaining.Value} days" : "--";
     public string LastDeliveryDateDisplay => LastDeliveryDate.HasValue ? LastDeliveryDate.Value.ToString("MMM d, yyyy") : "--";
 

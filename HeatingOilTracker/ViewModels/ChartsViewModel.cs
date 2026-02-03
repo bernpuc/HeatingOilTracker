@@ -180,10 +180,10 @@ public class ChartsViewModel : BindableBase, INavigationAware
         [
             new Axis
             {
-                Name = "K-Factor (gal/HDD)",
+                Name = "K-Factor (HDD/gal)",
                 NamePaint = new SolidColorPaint(SKColors.Gray),
                 LabelsPaint = new SolidColorPaint(SKColors.Gray),
-                Labeler = value => value.ToString("F3"),
+                Labeler = value => value.ToString("F1"),
                 MinLimit = 0
             }
         ];
