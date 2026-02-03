@@ -250,9 +250,9 @@
                     </TextBlock>
                     <TextBlock Style="{StaticResource LinkText}">
                         <Run FontWeight="SemiBold">Carbon Offsets Guide: </Run>
-                        <Hyperlink NavigateUri="https://www.epa.gov/green-power-markets/market-instruments"
+                        <Hyperlink NavigateUri="https://offsetguide.org/what-are-carbon-credits/"
                                    RequestNavigate="Hyperlink_RequestNavigate">
-                            epa.gov/green-power-markets/market-instruments
+                            offsetguide.org/what-are-carbon-credits
                         </Hyperlink>
                     </TextBlock>
                     <TextBlock Style="{StaticResource LinkText}">
