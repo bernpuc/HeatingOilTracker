@@ -1,6 +1,8 @@
+using HeatingOilTracker.Events;
 using HeatingOilTracker.Models;
 using HeatingOilTracker.Services;
 using Prism.Commands;
+using Prism.Events;
 using Prism.Mvvm;
 using Prism.Navigation.Regions;
 using System.Collections.ObjectModel;
@@ -14,6 +16,8 @@ public class DashboardViewModel : BindableBase, INavigationAware
     private readonly ITankEstimatorService _tankEstimatorService;
     private readonly IWeatherService _weatherService;
     private readonly IRegionManager _regionManager;
+    private readonly IEventAggregator _eventAggregator;
+    private SubscriptionToken? _refreshSubscription;
 
     // Tank Status
     private decimal _estimatedGallons;
@@ -135,18 +139,31 @@ public class DashboardViewModel : BindableBase, INavigationAware
         IDataService dataService,
         ITankEstimatorService tankEstimatorService,
         IWeatherService weatherService,
-        IRegionManager regionManager)
+        IRegionManager regionManager,
+        IEventAggregator eventAggregator)
     {
         _dataService = dataService;
         _tankEstimatorService = tankEstimatorService;
         _weatherService = weatherService;
         _regionManager = regionManager;
+        _eventAggregator = eventAggregator;
 
         NavigateToDeliveriesCommand = new DelegateCommand(() =>
             _regionManager.RequestNavigate("ContentRegion", "DeliveriesView"));
         NavigateToSettingsCommand = new DelegateCommand(() =>
             _regionManager.RequestNavigate("ContentRegion", "SettingsView"));
 
+        // Subscribe to refresh events
+        _refreshSubscription = _eventAggregator
+            .GetEvent<DashboardRefreshRequestedEvent>()
+            .Subscribe(OnRefreshRequested, ThreadOption.UIThread);
+
+        _ = LoadDashboardAsync();
+    }
+
+    private void OnRefreshRequested()
+    {
+        System.Diagnostics.Debug.WriteLine("Dashboard refresh requested via event");
         _ = LoadDashboardAsync();
     }
 
