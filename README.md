@@ -60,14 +60,23 @@ A Windows desktop application for tracking heating oil deliveries, monitoring ta
 - Open-Meteo API for weather data
 - Zippopotam.us for ZIP code geocoding
 
-## Getting Started
+## Installation
 
-### Prerequisites
+### Using the Installer (Recommended)
+
+Download the latest `HeatingOilTracker x.x.x Installer.exe` from the [Releases](https://github.com/bernpuc/HeatingOilTracker/releases) page and run it. The installer will:
+- Install to `C:\Program Files\HeatingOilTracker`
+- Create Start Menu and Desktop shortcuts
+- Register in Programs & Features for easy uninstall
+
+### Build from Source
+
+#### Prerequisites
 
 - [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
 - Windows 10/11
 
-### Build and Run
+#### Build and Run
 
 ```bash
 # Clone the repository
@@ -79,6 +88,19 @@ dotnet build
 
 # Run
 dotnet run --project HeatingOilTracker
+```
+
+#### Build the Installer
+
+Requires [NSIS](https://nsis.sourceforge.io/Download) (Nullsoft Scriptable Install System).
+
+```bash
+# Build Release version
+dotnet publish HeatingOilTracker -c Release
+
+# Create installer
+cd HeatingOilTracker/Package
+makensis -DVERSION=1.0.0 Installer.nsi
 ```
 
 ## Data Storage
