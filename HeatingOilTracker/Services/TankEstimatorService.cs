@@ -64,7 +64,8 @@ public class TankEstimatorService : ITankEstimatorService
         if (kFactor.HasValue && kFactor.Value > 0 && weatherData.Count > 0)
         {
             // Use K-Factor: Gallons = HDD / K-Factor
-            var hddSinceDelivery = _weatherService.CalculateHDD(weatherData, lastDelivery.Date, DateTime.Today);
+            // Start from day after delivery (no consumption on fill day)
+            var hddSinceDelivery = _weatherService.CalculateHDD(weatherData, lastDelivery.Date.AddDays(1), DateTime.Today);
             estimatedUsage = hddSinceDelivery / kFactor.Value;
         }
         else
@@ -119,10 +120,11 @@ public class TankEstimatorService : ITankEstimatorService
             if (lastKnownDate.HasValue)
             {
                 // Subtract usage between last known date and this delivery
+                // Start from day after last delivery (no consumption on fill day)
                 decimal usage;
                 if (useKFactor)
                 {
-                    var hdd = _weatherService.CalculateHDD(weatherData, lastKnownDate.Value, delivery.Date);
+                    var hdd = _weatherService.CalculateHDD(weatherData, lastKnownDate.Value.AddDays(1), delivery.Date);
                     usage = hdd / kFactor!.Value;
                 }
                 else
@@ -147,12 +149,13 @@ public class TankEstimatorService : ITankEstimatorService
         }
 
         // Now subtract usage from last delivery to target date
+        // Start from day after last delivery (no consumption on fill day)
         if (lastKnownDate.HasValue)
         {
             decimal usage;
             if (useKFactor)
             {
-                var hdd = _weatherService.CalculateHDD(weatherData, lastKnownDate.Value, targetDate);
+                var hdd = _weatherService.CalculateHDD(weatherData, lastKnownDate.Value.AddDays(1), targetDate);
                 usage = hdd / kFactor!.Value;
             }
             else
@@ -248,7 +251,8 @@ public class TankEstimatorService : ITankEstimatorService
             var prev = sortedDeliveries[i - 1];
             var curr = sortedDeliveries[i];
 
-            var hdd = _weatherService.CalculateHDD(weatherData, prev.Date, curr.Date);
+            // Start from day after previous delivery (no consumption on fill day)
+            var hdd = _weatherService.CalculateHDD(weatherData, prev.Date.AddDays(1), curr.Date);
 
             // Only include K-factors where we have meaningful HDD data
             // (filtering out summer months where HDD is too low)
