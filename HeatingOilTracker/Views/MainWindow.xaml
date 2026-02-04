@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:prism="http://prismlibrary.com/"
         Title="Heating Oil Tracker"
+        Icon="pack://application:,,,/Assets/app.ico"
         Height="600" Width="900"
         WindowStartupLocation="CenterScreen">
     <Grid>
