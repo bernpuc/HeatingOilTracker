@@ -2,6 +2,8 @@
 
 A Windows desktop application for tracking heating oil deliveries, monitoring tank levels, analyzing usage patterns, and understanding your carbon footprint.
 
+![Dashboard Screenshot](docs/Screenshot%20Dashboard.png)
+
 ## Features
 
 ### Dashboard
