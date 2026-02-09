@@ -286,7 +286,7 @@
                         Padding="15"
                         Margin="0,30,0,0">
                     <TextBlock Style="{StaticResource BodyText}" Margin="0" Foreground="#64748b">
-                        <Run FontWeight="SemiBold">Heating Oil Tracker v1.0</Run>
+                        <Run FontWeight="SemiBold">Heating Oil Tracker v1.1</Run>
                         <LineBreak/>
                         Calculations use standard industry formulas and U.S. EIA emission factors.
                         Actual consumption may vary based on equipment efficiency, home characteristics, and usage patterns.
