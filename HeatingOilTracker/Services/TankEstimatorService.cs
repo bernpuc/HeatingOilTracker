@@ -173,18 +173,15 @@ public class TankEstimatorService : ITankEstimatorService
     {
         var status = await GetCurrentStatusAsync();
 
-        if (status.EstimatedBurnRate <= 0)
+        if (status.EstimatedBurnRate <= 0 || !status.EstimatedDaysRemaining.HasValue)
             return null;
 
         // If already below threshold, return today
         if (status.EstimatedGallons <= thresholdGallons)
             return DateTime.Today;
 
-        // Calculate days until we hit the threshold
-        var gallonsUntilThreshold = status.EstimatedGallons - thresholdGallons;
-        var daysUntilThreshold = (int)(gallonsUntilThreshold / status.EstimatedBurnRate);
-
-        return DateTime.Today.AddDays(daysUntilThreshold);
+        // Use days remaining (consistent with the displayed "days remaining" value)
+        return DateTime.Today.AddDays(status.EstimatedDaysRemaining.Value);
     }
 
     public async Task<decimal> GetAverageBurnRateAsync()
