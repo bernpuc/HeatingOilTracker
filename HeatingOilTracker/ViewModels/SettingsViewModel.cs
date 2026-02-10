@@ -16,15 +16,15 @@ public class SettingsViewModel : BindableBase, INavigationAware
 
     private decimal _tankCapacity;
     private string _dataFilePath = string.Empty;
-    private string _postalCode = string.Empty;
+    private string _locationSearch = string.Empty;
     private string _locationDisplay = "Not set";
-    private bool _isLookingUpPostalCode;
+    private bool _isSearchingLocation;
     private bool _isFetchingWeather;
     private string _weatherStatus = string.Empty;
+    private Location? _selectedSearchResult;
 
     // Regional settings
-    private CountryInfo _selectedCountry = SupportedCountries.All[0];
-    private string _selectedCultureCode = "en-US";
+    private CultureOption _selectedCulture = SupportedCultures.All[0];
 
     // Reminder settings
     private bool _reminderEnabled = true;
@@ -35,29 +35,17 @@ public class SettingsViewModel : BindableBase, INavigationAware
     private string _backupFolderPath = string.Empty;
     private string _backupStatus = string.Empty;
 
-    public ObservableCollection<CountryInfo> Countries { get; } = new(SupportedCountries.All);
+    // Location search results
+    public ObservableCollection<Location> LocationSearchResults { get; } = new();
 
-    public CountryInfo SelectedCountry
+    // Supported currencies
+    public ObservableCollection<CultureOption> Currencies { get; } = new(SupportedCultures.All);
+
+    public CultureOption SelectedCulture
     {
-        get => _selectedCountry;
-        set
-        {
-            if (SetProperty(ref _selectedCountry, value))
-            {
-                RaisePropertyChanged(nameof(PostalCodeLabel));
-                // Auto-set culture when country changes
-                SelectedCultureCode = value.DefaultCulture;
-            }
-        }
+        get => _selectedCulture;
+        set => SetProperty(ref _selectedCulture, value);
     }
-
-    public string SelectedCultureCode
-    {
-        get => _selectedCultureCode;
-        set => SetProperty(ref _selectedCultureCode, value);
-    }
-
-    public string PostalCodeLabel => SelectedCountry?.PostalCodeLabel ?? "Postal Code";
 
     public decimal TankCapacity
     {
@@ -71,10 +59,34 @@ public class SettingsViewModel : BindableBase, INavigationAware
         set => SetProperty(ref _dataFilePath, value);
     }
 
-    public string PostalCode
+    public string LocationSearch
     {
-        get => _postalCode;
-        set => SetProperty(ref _postalCode, value);
+        get => _locationSearch;
+        set => SetProperty(ref _locationSearch, value);
+    }
+
+    public Location? SelectedSearchResult
+    {
+        get => _selectedSearchResult;
+        set
+        {
+            if (SetProperty(ref _selectedSearchResult, value) && value != null)
+            {
+                _ = SetLocationAsync(value);
+            }
+        }
+    }
+
+    public bool HasSearchResults => LocationSearchResults.Count > 0;
+
+    public bool IsSearchingLocation
+    {
+        get => _isSearchingLocation;
+        set
+        {
+            SetProperty(ref _isSearchingLocation, value);
+            SearchLocationCommand.RaiseCanExecuteChanged();
+        }
     }
 
     public string LocationDisplay
@@ -83,15 +95,6 @@ public class SettingsViewModel : BindableBase, INavigationAware
         set => SetProperty(ref _locationDisplay, value);
     }
 
-    public bool IsLookingUpPostalCode
-    {
-        get => _isLookingUpPostalCode;
-        set
-        {
-            SetProperty(ref _isLookingUpPostalCode, value);
-            LookupPostalCodeCommand.RaiseCanExecuteChanged();
-        }
-    }
 
     public bool IsFetchingWeather
     {
@@ -142,7 +145,7 @@ public class SettingsViewModel : BindableBase, INavigationAware
     public bool HasBackupFolder => !string.IsNullOrWhiteSpace(BackupFolderPath);
 
     public DelegateCommand SaveCommand { get; }
-    public DelegateCommand LookupPostalCodeCommand { get; }
+    public DelegateCommand SearchLocationCommand { get; }
     public DelegateCommand FetchWeatherCommand { get; }
     public DelegateCommand BrowseBackupFolderCommand { get; }
     public DelegateCommand ClearBackupFolderCommand { get; }
@@ -154,10 +157,10 @@ public class SettingsViewModel : BindableBase, INavigationAware
         DataFilePath = _dataService.GetDataFilePath();
 
         SaveCommand = new DelegateCommand(async () => await SaveAsync());
-        LookupPostalCodeCommand = new DelegateCommand(
-            async () => await LookupPostalCodeAsync(),
-            () => !IsLookingUpPostalCode && !string.IsNullOrWhiteSpace(PostalCode))
-            .ObservesProperty(() => PostalCode);
+        SearchLocationCommand = new DelegateCommand(
+            async () => await SearchLocationAsync(),
+            () => !IsSearchingLocation && !string.IsNullOrWhiteSpace(LocationSearch))
+            .ObservesProperty(() => LocationSearch);
         FetchWeatherCommand = new DelegateCommand(
             async () => await FetchWeatherAsync(),
             () => !IsFetchingWeather);
@@ -173,8 +176,7 @@ public class SettingsViewModel : BindableBase, INavigationAware
 
         // Load regional settings
         var regionalSettings = await _dataService.GetRegionalSettingsAsync();
-        SelectedCountry = SupportedCountries.GetByCode(regionalSettings.CountryCode);
-        SelectedCultureCode = regionalSettings.CultureCode;
+        SelectedCulture = SupportedCultures.GetByCode(regionalSettings.CultureCode);
 
         var location = await _dataService.GetLocationAsync();
         if (location.IsSet)
@@ -226,13 +228,12 @@ public class SettingsViewModel : BindableBase, INavigationAware
         // Save regional settings
         var regionalSettings = new RegionalSettings
         {
-            CountryCode = SelectedCountry.Code,
-            CultureCode = SelectedCultureCode
+            CultureCode = SelectedCulture.Code
         };
         await _dataService.SetRegionalSettingsAsync(regionalSettings);
 
         // Update currency formatter immediately
-        CurrencyConverter.CurrentCultureCode = SelectedCultureCode;
+        CurrencyConverter.CurrentCultureCode = SelectedCulture.Code;
 
         // Save reminder settings
         var reminderSettings = new ReminderSettings
@@ -305,36 +306,47 @@ public class SettingsViewModel : BindableBase, INavigationAware
         }
     }
 
-    private async Task LookupPostalCodeAsync()
+    private async Task SearchLocationAsync()
     {
-        if (string.IsNullOrWhiteSpace(PostalCode)) return;
+        if (string.IsNullOrWhiteSpace(LocationSearch)) return;
 
-        IsLookingUpPostalCode = true;
+        IsSearchingLocation = true;
+        LocationSearchResults.Clear();
+
         try
         {
-            var location = await _weatherService.GeocodePostalCodeAsync(PostalCode.Trim(), SelectedCountry.Code);
-            if (location != null)
+            var results = await _weatherService.SearchLocationsAsync(LocationSearch.Trim());
+            if (results.Count > 0)
             {
-                await _dataService.SetLocationAsync(location);
-                LocationDisplay = location.DisplayName;
-                MessageBox.Show($"Location set to {location.DisplayName}", "Location Set",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                foreach (var location in results)
+                {
+                    LocationSearchResults.Add(location);
+                }
+                RaisePropertyChanged(nameof(HasSearchResults));
             }
             else
             {
-                MessageBox.Show($"Could not find that {PostalCodeLabel.ToLower()}. Please check and try again.",
-                    "Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("No locations found. Try a different search term.",
+                    "No Results", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error looking up {PostalCodeLabel.ToLower()}: {ex.Message}", "Error",
+            MessageBox.Show($"Error searching for location: {ex.Message}", "Error",
                 MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {
-            IsLookingUpPostalCode = false;
+            IsSearchingLocation = false;
         }
+    }
+
+    private async Task SetLocationAsync(Location location)
+    {
+        await _dataService.SetLocationAsync(location);
+        LocationDisplay = location.DisplayName;
+        LocationSearchResults.Clear();
+        RaisePropertyChanged(nameof(HasSearchResults));
     }
 
     private async Task FetchWeatherAsync()

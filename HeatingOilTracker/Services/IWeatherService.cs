@@ -20,9 +20,10 @@ public interface IWeatherService
     decimal CalculateKFactor(decimal gallonsDelivered, decimal hddAccumulated);
 
     /// <summary>
-    /// Looks up coordinates for a postal code using Zippopotam.us geocoding.
+    /// Searches for locations by city/place name using Open-Meteo geocoding.
+    /// Returns multiple matches for user selection.
     /// </summary>
-    /// <param name="postalCode">The postal code to look up</param>
-    /// <param name="countryCode">ISO 3166-1 alpha-2 country code (default: US)</param>
-    Task<Location?> GeocodePostalCodeAsync(string postalCode, string countryCode = "US");
+    /// <param name="searchQuery">City or place name to search for</param>
+    /// <param name="maxResults">Maximum number of results to return (default: 5)</param>
+    Task<List<Location>> SearchLocationsAsync(string searchQuery, int maxResults = 5);
 }

@@ -18,27 +18,6 @@
                          Width="200" HorizontalAlignment="Left"/>
             </StackPanel>
 
-            <!-- Region Section -->
-            <Border BorderBrush="{StaticResource BorderColor}"
-                    BorderThickness="0,1,0,0"
-                    Padding="0,20,0,0"
-                    Margin="0,0,0,20">
-                <StackPanel>
-                    <TextBlock Text="Region"
-                               FontSize="16" FontWeight="SemiBold"
-                               Foreground="#334155"
-                               Margin="0,0,0,15"/>
-
-                    <TextBlock Text="Country" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                    <ComboBox ItemsSource="{Binding Countries}"
-                              SelectedItem="{Binding SelectedCountry}"
-                              DisplayMemberPath="Name"
-                              Width="200"
-                              HorizontalAlignment="Left"
-                              Margin="0,0,0,15"/>
-                </StackPanel>
-            </Border>
-
             <!-- Location Section -->
             <Border BorderBrush="{StaticResource BorderColor}"
                     BorderThickness="0,1,0,0"
@@ -55,22 +34,22 @@
                                Foreground="#64748b"
                                Margin="0,0,0,15"/>
 
-                    <TextBlock Text="{Binding PostalCodeLabel, StringFormat='Enter {0}'}" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBlock Text="Search for City/Town" FontWeight="SemiBold" Margin="0,0,0,5"/>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <TextBox Text="{Binding PostalCode, UpdateSourceTrigger=PropertyChanged}"
-                                 Width="120"
+                        <TextBox Text="{Binding LocationSearch, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="200"
                                  VerticalContentAlignment="Center"/>
                         <Button Style="{StaticResource SecondaryButtonStyle}"
-                                Command="{Binding LookupPostalCodeCommand}"
+                                Command="{Binding SearchLocationCommand}"
                                 Margin="10,0,0,0"
                                 Padding="15,8">
                             <TextBlock>
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
-                                        <Setter Property="Text" Value="Set Location"/>
+                                        <Setter Property="Text" Value="Search"/>
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsLookingUpPostalCode}" Value="True">
-                                                <Setter Property="Text" Value="Looking up..."/>
+                                            <DataTrigger Binding="{Binding IsSearchingLocation}" Value="True">
+                                                <Setter Property="Text" Value="Searching..."/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -78,6 +57,39 @@
                             </TextBlock>
                         </Button>
                     </StackPanel>
+
+                    <!-- Search Results -->
+                    <ListBox ItemsSource="{Binding LocationSearchResults}"
+                             SelectedItem="{Binding SelectedSearchResult}"
+                             DisplayMemberPath="DisplayName"
+                             MaxHeight="150"
+                             Margin="0,0,0,10"
+                             Visibility="{Binding HasSearchResults, Converter={StaticResource BoolToVisibility}}"/>
+
+                    <TextBlock Text="Enter a city name and click Search. Select from results to set your location."
+                               Foreground="#94a3b8"
+                               FontSize="11"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Currency Section -->
+            <Border BorderBrush="{StaticResource BorderColor}"
+                    BorderThickness="0,1,0,0"
+                    Padding="0,20,0,0"
+                    Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="Currency"
+                               FontSize="16" FontWeight="SemiBold"
+                               Foreground="#334155"
+                               Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Display Currency" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <ComboBox ItemsSource="{Binding Currencies}"
+                              SelectedItem="{Binding SelectedCulture}"
+                              DisplayMemberPath="DisplayName"
+                              Width="200"
+                              HorizontalAlignment="Left"/>
                 </StackPanel>
             </Border>
 
