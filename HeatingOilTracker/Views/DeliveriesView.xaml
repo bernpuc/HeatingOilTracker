@@ -149,7 +149,8 @@
                 </DataGridTextColumn>
                 <DataGridTextColumn Header="Notes"
                                     Binding="{Binding Notes}"
-                                    Width="*"/>
+                                    MinWidth="25"
+                                    Width="Auto"/>
             </DataGrid.Columns>
         </DataGrid>
     </DockPanel>
