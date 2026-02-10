@@ -74,7 +74,8 @@
                   GridLinesVisibility="Horizontal"
                   HorizontalGridLinesBrush="{StaticResource BorderColor}"
                   HeadersVisibility="Column"
-                  CanUserSortColumns="True">
+                  CanUserSortColumns="True"
+                  ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Date"
                                     Binding="{Binding Date, StringFormat=\{0:MM/dd/yyyy\}}"
