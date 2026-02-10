@@ -114,6 +114,15 @@ Data is stored locally in JSON format at:
 
 Optional cloud backup can be configured to sync this data to a cloud-synced folder.
 
+## Sample Data
+
+A sample dataset is included in the `samples/` folder to demonstrate the app's features without entering real data. To use it:
+
+1. Go to **Deliveries** > **Import CSV**
+2. Select `samples/demo-deliveries.csv`
+
+See [samples/README.md](samples/README.md) for details.
+
 ## Key Calculations
 
 | Metric | Formula | Description |

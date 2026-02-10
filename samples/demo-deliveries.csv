@@ -1,0 +1,27 @@
+Date,Gallons,PricePerGallon,Notes
+2022-01-15,175.0,3.25,Demo data - Winter fill
+2022-02-10,160.0,3.35,Demo data
+2022-03-05,150.0,3.40,Demo data
+2022-03-28,140.0,3.50,Demo data - Late season
+2022-10-20,100.0,3.75,Demo data - Season start
+2022-11-15,155.0,3.80,Demo data
+2022-12-10,165.0,3.85,Demo data
+2022-12-30,170.0,3.90,Demo data - Holiday fill
+2023-01-18,175.0,3.85,Demo data
+2023-02-08,165.0,3.75,Demo data
+2023-02-28,155.0,3.65,Demo data
+2023-03-20,145.0,3.55,Demo data
+2023-04-10,120.0,3.45,Demo data - Season end
+2023-10-15,95.0,3.60,Demo data - Season start
+2023-11-10,160.0,3.70,Demo data
+2023-12-05,170.0,3.75,Demo data
+2023-12-28,175.0,3.80,Demo data
+2024-01-15,180.0,3.75,Demo data
+2024-02-05,165.0,3.65,Demo data
+2024-02-25,155.0,3.55,Demo data
+2024-03-15,145.0,3.50,Demo data
+2024-04-05,110.0,3.45,Demo data - Season end
+2024-10-12,90.0,3.55,Demo data - Season start
+2024-11-08,155.0,3.60,Demo data
+2024-12-02,165.0,3.65,Demo data
+2024-12-22,170.0,3.70,Demo data
