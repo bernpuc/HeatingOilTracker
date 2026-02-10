@@ -176,11 +176,7 @@ public class TankEstimatorService : ITankEstimatorService
         if (status.EstimatedBurnRate <= 0 || !status.EstimatedDaysRemaining.HasValue)
             return null;
 
-        // If already below threshold, return today
-        if (status.EstimatedGallons <= thresholdGallons)
-            return DateTime.Today;
-
-        // Use days remaining (consistent with the displayed "days remaining" value)
+        // Always use days remaining for consistency with the displayed value
         return DateTime.Today.AddDays(status.EstimatedDaysRemaining.Value);
     }
 
