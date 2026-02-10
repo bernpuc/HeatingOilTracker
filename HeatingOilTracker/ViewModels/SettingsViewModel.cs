@@ -1,8 +1,10 @@
+using HeatingOilTracker.Converters;
 using HeatingOilTracker.Models;
 using HeatingOilTracker.Services;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Navigation.Regions;
+using System.Collections.ObjectModel;
 using System.Windows;
 
 namespace HeatingOilTracker.ViewModels;
@@ -14,11 +16,15 @@ public class SettingsViewModel : BindableBase, INavigationAware
 
     private decimal _tankCapacity;
     private string _dataFilePath = string.Empty;
-    private string _zipCode = string.Empty;
+    private string _postalCode = string.Empty;
     private string _locationDisplay = "Not set";
-    private bool _isLookingUpZip;
+    private bool _isLookingUpPostalCode;
     private bool _isFetchingWeather;
     private string _weatherStatus = string.Empty;
+
+    // Regional settings
+    private CountryInfo _selectedCountry = SupportedCountries.All[0];
+    private string _selectedCultureCode = "en-US";
 
     // Reminder settings
     private bool _reminderEnabled = true;
@@ -28,6 +34,30 @@ public class SettingsViewModel : BindableBase, INavigationAware
     // Backup settings
     private string _backupFolderPath = string.Empty;
     private string _backupStatus = string.Empty;
+
+    public ObservableCollection<CountryInfo> Countries { get; } = new(SupportedCountries.All);
+
+    public CountryInfo SelectedCountry
+    {
+        get => _selectedCountry;
+        set
+        {
+            if (SetProperty(ref _selectedCountry, value))
+            {
+                RaisePropertyChanged(nameof(PostalCodeLabel));
+                // Auto-set culture when country changes
+                SelectedCultureCode = value.DefaultCulture;
+            }
+        }
+    }
+
+    public string SelectedCultureCode
+    {
+        get => _selectedCultureCode;
+        set => SetProperty(ref _selectedCultureCode, value);
+    }
+
+    public string PostalCodeLabel => SelectedCountry?.PostalCodeLabel ?? "Postal Code";
 
     public decimal TankCapacity
     {
@@ -41,10 +71,10 @@ public class SettingsViewModel : BindableBase, INavigationAware
         set => SetProperty(ref _dataFilePath, value);
     }
 
-    public string ZipCode
+    public string PostalCode
     {
-        get => _zipCode;
-        set => SetProperty(ref _zipCode, value);
+        get => _postalCode;
+        set => SetProperty(ref _postalCode, value);
     }
 
     public string LocationDisplay
@@ -53,13 +83,13 @@ public class SettingsViewModel : BindableBase, INavigationAware
         set => SetProperty(ref _locationDisplay, value);
     }
 
-    public bool IsLookingUpZip
+    public bool IsLookingUpPostalCode
     {
-        get => _isLookingUpZip;
+        get => _isLookingUpPostalCode;
         set
         {
-            SetProperty(ref _isLookingUpZip, value);
-            LookupZipCommand.RaiseCanExecuteChanged();
+            SetProperty(ref _isLookingUpPostalCode, value);
+            LookupPostalCodeCommand.RaiseCanExecuteChanged();
         }
     }
 
@@ -112,7 +142,7 @@ public class SettingsViewModel : BindableBase, INavigationAware
     public bool HasBackupFolder => !string.IsNullOrWhiteSpace(BackupFolderPath);
 
     public DelegateCommand SaveCommand { get; }
-    public DelegateCommand LookupZipCommand { get; }
+    public DelegateCommand LookupPostalCodeCommand { get; }
     public DelegateCommand FetchWeatherCommand { get; }
     public DelegateCommand BrowseBackupFolderCommand { get; }
     public DelegateCommand ClearBackupFolderCommand { get; }
@@ -124,10 +154,10 @@ public class SettingsViewModel : BindableBase, INavigationAware
         DataFilePath = _dataService.GetDataFilePath();
 
         SaveCommand = new DelegateCommand(async () => await SaveAsync());
-        LookupZipCommand = new DelegateCommand(
-            async () => await LookupZipAsync(),
-            () => !IsLookingUpZip && !string.IsNullOrWhiteSpace(ZipCode))
-            .ObservesProperty(() => ZipCode);
+        LookupPostalCodeCommand = new DelegateCommand(
+            async () => await LookupPostalCodeAsync(),
+            () => !IsLookingUpPostalCode && !string.IsNullOrWhiteSpace(PostalCode))
+            .ObservesProperty(() => PostalCode);
         FetchWeatherCommand = new DelegateCommand(
             async () => await FetchWeatherAsync(),
             () => !IsFetchingWeather);
@@ -140,6 +170,11 @@ public class SettingsViewModel : BindableBase, INavigationAware
     private async Task LoadAsync()
     {
         TankCapacity = await _dataService.GetTankCapacityAsync();
+
+        // Load regional settings
+        var regionalSettings = await _dataService.GetRegionalSettingsAsync();
+        SelectedCountry = SupportedCountries.GetByCode(regionalSettings.CountryCode);
+        SelectedCultureCode = regionalSettings.CultureCode;
 
         var location = await _dataService.GetLocationAsync();
         if (location.IsSet)
@@ -187,6 +222,17 @@ public class SettingsViewModel : BindableBase, INavigationAware
         }
 
         await _dataService.SetTankCapacityAsync(TankCapacity);
+
+        // Save regional settings
+        var regionalSettings = new RegionalSettings
+        {
+            CountryCode = SelectedCountry.Code,
+            CultureCode = SelectedCultureCode
+        };
+        await _dataService.SetRegionalSettingsAsync(regionalSettings);
+
+        // Update currency formatter immediately
+        CurrencyConverter.CurrentCultureCode = SelectedCultureCode;
 
         // Save reminder settings
         var reminderSettings = new ReminderSettings
@@ -259,14 +305,14 @@ public class SettingsViewModel : BindableBase, INavigationAware
         }
     }
 
-    private async Task LookupZipAsync()
+    private async Task LookupPostalCodeAsync()
     {
-        if (string.IsNullOrWhiteSpace(ZipCode)) return;
+        if (string.IsNullOrWhiteSpace(PostalCode)) return;
 
-        IsLookingUpZip = true;
+        IsLookingUpPostalCode = true;
         try
         {
-            var location = await _weatherService.GeocodeZipCodeAsync(ZipCode.Trim());
+            var location = await _weatherService.GeocodePostalCodeAsync(PostalCode.Trim(), SelectedCountry.Code);
             if (location != null)
             {
                 await _dataService.SetLocationAsync(location);
@@ -276,18 +322,18 @@ public class SettingsViewModel : BindableBase, INavigationAware
             }
             else
             {
-                MessageBox.Show("Could not find that ZIP code. Please check and try again.",
-                    "ZIP Code Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show($"Could not find that {PostalCodeLabel.ToLower()}. Please check and try again.",
+                    "Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error looking up ZIP code: {ex.Message}", "Error",
+            MessageBox.Show($"Error looking up {PostalCodeLabel.ToLower()}: {ex.Message}", "Error",
                 MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {
-            IsLookingUpZip = false;
+            IsLookingUpPostalCode = false;
         }
     }
 

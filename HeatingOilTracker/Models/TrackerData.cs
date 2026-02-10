@@ -7,6 +7,7 @@ public class TrackerData
     public Location Location { get; set; } = new();
     public List<DailyWeather> WeatherHistory { get; set; } = new();
     public ReminderSettings ReminderSettings { get; set; } = new();
+    public RegionalSettings RegionalSettings { get; set; } = new();
 
     /// <summary>
     /// Path to folder where data backups are automatically saved.

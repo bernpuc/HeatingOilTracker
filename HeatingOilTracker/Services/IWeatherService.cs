@@ -20,7 +20,9 @@ public interface IWeatherService
     decimal CalculateKFactor(decimal gallonsDelivered, decimal hddAccumulated);
 
     /// <summary>
-    /// Looks up coordinates for a US ZIP code using Open-Meteo geocoding.
+    /// Looks up coordinates for a postal code using Zippopotam.us geocoding.
     /// </summary>
-    Task<Location?> GeocodeZipCodeAsync(string zipCode);
+    /// <param name="postalCode">The postal code to look up</param>
+    /// <param name="countryCode">ISO 3166-1 alpha-2 country code (default: US)</param>
+    Task<Location?> GeocodePostalCodeAsync(string postalCode, string countryCode = "US");
 }

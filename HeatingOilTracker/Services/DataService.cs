@@ -192,4 +192,17 @@ public class DataService : IDataService
         data.BackupFolderPath = path;
         await SaveAsync(data);
     }
+
+    public async Task<RegionalSettings> GetRegionalSettingsAsync()
+    {
+        var data = await LoadAsync();
+        return data.RegionalSettings;
+    }
+
+    public async Task SetRegionalSettingsAsync(RegionalSettings settings)
+    {
+        var data = await LoadAsync();
+        data.RegionalSettings = settings;
+        await SaveAsync(data);
+    }
 }

@@ -18,6 +18,27 @@
                          Width="200" HorizontalAlignment="Left"/>
             </StackPanel>
 
+            <!-- Region Section -->
+            <Border BorderBrush="{StaticResource BorderColor}"
+                    BorderThickness="0,1,0,0"
+                    Padding="0,20,0,0"
+                    Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="Region"
+                               FontSize="16" FontWeight="SemiBold"
+                               Foreground="#334155"
+                               Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Country" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <ComboBox ItemsSource="{Binding Countries}"
+                              SelectedItem="{Binding SelectedCountry}"
+                              DisplayMemberPath="Name"
+                              Width="200"
+                              HorizontalAlignment="Left"
+                              Margin="0,0,0,15"/>
+                </StackPanel>
+            </Border>
+
             <!-- Location Section -->
             <Border BorderBrush="{StaticResource BorderColor}"
                     BorderThickness="0,1,0,0"
@@ -34,13 +55,13 @@
                                Foreground="#64748b"
                                Margin="0,0,0,15"/>
 
-                    <TextBlock Text="Enter ZIP Code" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBlock Text="{Binding PostalCodeLabel, StringFormat='Enter {0}'}" FontWeight="SemiBold" Margin="0,0,0,5"/>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <TextBox Text="{Binding ZipCode, UpdateSourceTrigger=PropertyChanged}"
+                        <TextBox Text="{Binding PostalCode, UpdateSourceTrigger=PropertyChanged}"
                                  Width="120"
                                  VerticalContentAlignment="Center"/>
                         <Button Style="{StaticResource SecondaryButtonStyle}"
-                                Command="{Binding LookupZipCommand}"
+                                Command="{Binding LookupPostalCodeCommand}"
                                 Margin="10,0,0,0"
                                 Padding="15,8">
                             <TextBlock>
@@ -48,7 +69,7 @@
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Text" Value="Set Location"/>
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsLookingUpZip}" Value="True">
+                                            <DataTrigger Binding="{Binding IsLookingUpPostalCode}" Value="True">
                                                 <Setter Property="Text" Value="Looking up..."/>
                                             </DataTrigger>
                                         </Style.Triggers>

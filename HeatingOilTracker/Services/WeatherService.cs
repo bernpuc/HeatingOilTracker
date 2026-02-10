@@ -72,10 +72,11 @@ public class WeatherService : IWeatherService
         return hddAccumulated / gallonsDelivered;
     }
 
-    public async Task<Location?> GeocodeZipCodeAsync(string zipCode)
+    public async Task<Location?> GeocodePostalCodeAsync(string postalCode, string countryCode = "US")
     {
-        // Use Zippopotam.us for ZIP code lookup (free, no API key)
-        var url = $"https://api.zippopotam.us/us/{zipCode}";
+        // Use Zippopotam.us for postal code lookup (free, no API key)
+        // Supports multiple countries: US, GB, CA, DE, FR, NL, BE, AT, CH, etc.
+        var url = $"https://api.zippopotam.us/{countryCode.ToLower()}/{postalCode}";
 
         try
         {
@@ -89,15 +90,29 @@ public class WeatherService : IWeatherService
                 var lat = decimal.Parse(place.GetProperty("latitude").GetString()!);
                 var lon = decimal.Parse(place.GetProperty("longitude").GetString()!);
                 var city = place.GetProperty("place name").GetString();
-                var state = place.GetProperty("state abbreviation").GetString();
+
+                // State/region field varies by country
+                string? region = null;
+                if (place.TryGetProperty("state abbreviation", out var stateAbbr))
+                    region = stateAbbr.GetString();
+                else if (place.TryGetProperty("state", out var state))
+                    region = state.GetString();
+
+                var displayName = string.IsNullOrEmpty(region)
+                    ? $"{city} {postalCode}"
+                    : $"{city}, {region} {postalCode}";
 
                 return new Location
                 {
                     Latitude = lat,
                     Longitude = lon,
-                    DisplayName = $"{city}, {state} {zipCode}"
+                    DisplayName = displayName
                 };
             }
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            System.Diagnostics.Debug.WriteLine($"Postal code not found: {postalCode}");
         }
         catch (Exception ex)
         {

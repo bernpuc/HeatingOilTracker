@@ -20,5 +20,7 @@ public interface IDataService
     Task SetReminderSettingsAsync(ReminderSettings settings);
     Task<string?> GetBackupFolderPathAsync();
     Task SetBackupFolderPathAsync(string? path);
+    Task<RegionalSettings> GetRegionalSettingsAsync();
+    Task SetRegionalSettingsAsync(RegionalSettings settings);
     string GetDataFilePath();
 }

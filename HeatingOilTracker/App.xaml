@@ -13,6 +13,8 @@
             <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility"/>
             <converters:PercentToHeightConverter x:Key="PercentToHeight"/>
             <converters:TotalCostConverter x:Key="TotalCostConverter"/>
+            <converters:CurrencyConverter x:Key="CurrencyConverter"/>
+            <converters:PricePerGallonConverter x:Key="PricePerGallonConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </prism:PrismApplication>

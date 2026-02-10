@@ -1,3 +1,4 @@
+using HeatingOilTracker.Converters;
 using HeatingOilTracker.Events;
 using HeatingOilTracker.Services;
 using HeatingOilTracker.ViewModels;
@@ -49,6 +50,9 @@ public partial class App : PrismApplication
     {
         base.OnInitialized();
 
+        // Load regional settings and set currency culture
+        _ = InitializeRegionalSettingsAsync();
+
         var regionManager = Container.Resolve<IRegionManager>();
         regionManager.RequestNavigate("ContentRegion", "DashboardView");
 
@@ -63,6 +67,20 @@ public partial class App : PrismApplication
         if (MainWindow != null)
         {
             MainWindow.Activated += OnMainWindowActivated;
+        }
+    }
+
+    private async Task InitializeRegionalSettingsAsync()
+    {
+        try
+        {
+            var dataService = Container.Resolve<IDataService>();
+            var regionalSettings = await dataService.GetRegionalSettingsAsync();
+            CurrencyConverter.CurrentCultureCode = regionalSettings.CultureCode;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to load regional settings: {ex.Message}");
         }
     }
 

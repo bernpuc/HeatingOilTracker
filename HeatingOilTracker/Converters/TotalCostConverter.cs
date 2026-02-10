@@ -9,14 +9,29 @@ public class TotalCostConverter : IMultiValueConverter
     {
         if (values.Length == 2 && values[0] is decimal gallons && values[1] is decimal pricePerGallon)
         {
-            return (gallons * pricePerGallon).ToString("C2");
+            var total = gallons * pricePerGallon;
+            var formatCulture = GetCulture();
+            return total.ToString("C2", formatCulture);
         }
 
-        return "$0.00";
+        var defaultCulture = GetCulture();
+        return 0m.ToString("C2", defaultCulture);
     }
 
     public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
     {
         throw new NotImplementedException();
+    }
+
+    private static CultureInfo GetCulture()
+    {
+        try
+        {
+            return CultureInfo.GetCultureInfo(CurrencyConverter.CurrentCultureCode);
+        }
+        catch
+        {
+            return CultureInfo.GetCultureInfo("en-US");
+        }
     }
 }
