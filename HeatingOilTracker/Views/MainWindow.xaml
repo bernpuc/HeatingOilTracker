@@ -4,7 +4,7 @@
         xmlns:prism="http://prismlibrary.com/"
         Title="Heating Oil Tracker"
         Icon="pack://application:,,,/Assets/app.ico"
-        Height="600" Width="900"
+        Height="660" Width="1080"
         WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.ColumnDefinitions>

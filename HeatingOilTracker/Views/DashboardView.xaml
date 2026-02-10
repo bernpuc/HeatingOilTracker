@@ -129,6 +129,7 @@
                             BorderBrush="{StaticResource BorderColor}"
                             BorderThickness="1"
                             CornerRadius="8"
+                    Margin="0 0 20 0"
                             Padding="20">
                         <StackPanel>
                             <TextBlock Text="QUICK STATS"
@@ -228,6 +229,7 @@
                         BorderBrush="{StaticResource BorderColor}"
                         BorderThickness="1"
                         CornerRadius="8"
+                        Margin="0 0 20 0"
                         Padding="20">
                     <StackPanel>
                         <DockPanel Margin="0,0,0,15">
