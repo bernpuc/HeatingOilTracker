@@ -28,13 +28,19 @@
         <!-- Gallons -->
         <StackPanel Grid.Row="1" Margin="0,0,0,15">
             <TextBlock Text="Gallons" FontWeight="SemiBold" Margin="0,0,0,5"/>
-            <TextBox Text="{Binding Gallons, UpdateSourceTrigger=PropertyChanged, StringFormat=F1}"/>
+            <TextBox x:Name="GallonsTextBox"
+                     Text="{Binding Gallons}"
+                     GotKeyboardFocus="TextBox_GotKeyboardFocus"
+                     GotMouseCapture="TextBox_GotMouseCapture"/>
         </StackPanel>
 
         <!-- Price Per Gallon -->
         <StackPanel Grid.Row="2" Margin="0,0,0,15">
             <TextBlock Text="Price Per Gallon ($)" FontWeight="SemiBold" Margin="0,0,0,5"/>
-            <TextBox Text="{Binding PricePerGallon, UpdateSourceTrigger=PropertyChanged, StringFormat=F3}"/>
+            <TextBox x:Name="PriceTextBox"
+                     Text="{Binding PricePerGallon}"
+                     GotKeyboardFocus="TextBox_GotKeyboardFocus"
+                     GotMouseCapture="TextBox_GotMouseCapture"/>
         </StackPanel>
 
         <!-- Total Cost (computed, read-only) -->
