@@ -41,6 +41,11 @@
                             Margin="0,2"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="ChartsView"/>
+                    <Button Content="Weather"
+                            Style="{StaticResource SidebarButtonStyle}"
+                            Margin="0,2"
+                            Command="{Binding NavigateCommand}"
+                            CommandParameter="WeatherView"/>
                     <Button Content="Reports"
                             Style="{StaticResource SidebarButtonStyle}"
                             Margin="0,2"

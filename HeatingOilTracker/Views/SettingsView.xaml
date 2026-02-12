@@ -73,13 +73,13 @@
                 </StackPanel>
             </Border>
 
-            <!-- Currency Section -->
+            <!-- Regional Settings Section -->
             <Border BorderBrush="{StaticResource BorderColor}"
                     BorderThickness="0,1,0,0"
                     Padding="0,20,0,0"
                     Margin="0,0,0,20">
                 <StackPanel>
-                    <TextBlock Text="Currency"
+                    <TextBlock Text="Regional Settings"
                                FontSize="16" FontWeight="SemiBold"
                                Foreground="#334155"
                                Margin="0,0,0,15"/>
@@ -89,7 +89,29 @@
                               SelectedItem="{Binding SelectedCulture}"
                               DisplayMemberPath="DisplayName"
                               Width="200"
+                              HorizontalAlignment="Left"
+                              Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Temperature Unit" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <ComboBox ItemsSource="{Binding TemperatureUnitsCollection}"
+                              SelectedItem="{Binding SelectedTemperatureUnit}"
+                              DisplayMemberPath="DisplayName"
+                              Width="200"
+                              HorizontalAlignment="Left"
+                              Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Fuel Type" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <ComboBox ItemsSource="{Binding FuelTypesCollection}"
+                              SelectedItem="{Binding SelectedFuelType}"
+                              DisplayMemberPath="DisplayName"
+                              Width="200"
                               HorizontalAlignment="Left"/>
+
+                    <TextBlock Text="Fuel type affects CO2 emission calculations in reports."
+                               Foreground="#94a3b8"
+                               FontSize="11"
+                               TextWrapping="Wrap"
+                               Margin="0,10,0,0"/>
                 </StackPanel>
             </Border>
 

@@ -9,7 +9,7 @@ public class YearlySummaryTests
     [Fact]
     public void Constants_HaveCorrectValues()
     {
-        YearlySummary.CO2LbsPerGallon.Should().Be(22.38m);
+        YearlySummary.DefaultCO2LbsPerGallon.Should().Be(22.38m);
         YearlySummary.OffsetPriceLowPerTon.Should().Be(15m);
         YearlySummary.OffsetPriceHighPerTon.Should().Be(50m);
     }

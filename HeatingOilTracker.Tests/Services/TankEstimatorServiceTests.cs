@@ -21,6 +21,9 @@ public class TankEstimatorServiceTests
 
         // Default tank capacity
         _mockDataService.Setup(x => x.GetTankCapacityAsync()).ReturnsAsync(275m);
+
+        // Default regional settings
+        _mockDataService.Setup(x => x.GetRegionalSettingsAsync()).ReturnsAsync(new RegionalSettings());
     }
 
     #region GetAverageBurnRateAsync Tests
@@ -174,7 +177,7 @@ public class TankEstimatorServiceTests
         _mockDataService.Setup(x => x.GetWeatherHistoryAsync()).ReturnsAsync(weatherData);
 
         // HDD for 30 days at 5 HDD/day = 150 (below 200 threshold)
-        _mockWeatherService.Setup(x => x.CalculateHDD(weatherData, baseDate.AddDays(1), baseDate.AddDays(30)))
+        _mockWeatherService.Setup(x => x.CalculateHDD(weatherData, baseDate.AddDays(1), baseDate.AddDays(30), It.IsAny<decimal>()))
             .Returns(150m);
 
         // Act
@@ -201,12 +204,12 @@ public class TankEstimatorServiceTests
         _mockDataService.Setup(x => x.GetWeatherHistoryAsync()).ReturnsAsync(weatherData);
 
         // Period 1: 600 HDD / 150 gallons = 4.0 K-Factor
-        _mockWeatherService.Setup(x => x.CalculateHDD(weatherData, baseDate.AddDays(1), baseDate.AddDays(30)))
+        _mockWeatherService.Setup(x => x.CalculateHDD(weatherData, baseDate.AddDays(1), baseDate.AddDays(30), It.IsAny<decimal>()))
             .Returns(600m);
         _mockWeatherService.Setup(x => x.CalculateKFactor(150m, 600m)).Returns(4.0m);
 
         // Period 2: 480 HDD / 120 gallons = 4.0 K-Factor
-        _mockWeatherService.Setup(x => x.CalculateHDD(weatherData, baseDate.AddDays(31), baseDate.AddDays(60)))
+        _mockWeatherService.Setup(x => x.CalculateHDD(weatherData, baseDate.AddDays(31), baseDate.AddDays(60), It.IsAny<decimal>()))
             .Returns(480m);
         _mockWeatherService.Setup(x => x.CalculateKFactor(120m, 480m)).Returns(4.0m);
 
@@ -233,12 +236,12 @@ public class TankEstimatorServiceTests
         _mockDataService.Setup(x => x.GetWeatherHistoryAsync()).ReturnsAsync(weatherData);
 
         // Period 1 (Winter): 600 HDD / 150 gallons = 4.0 K-Factor (included)
-        _mockWeatherService.Setup(x => x.CalculateHDD(weatherData, new DateTime(2024, 1, 2), new DateTime(2024, 2, 1)))
+        _mockWeatherService.Setup(x => x.CalculateHDD(weatherData, new DateTime(2024, 1, 2), new DateTime(2024, 2, 1), It.IsAny<decimal>()))
             .Returns(600m);
         _mockWeatherService.Setup(x => x.CalculateKFactor(150m, 600m)).Returns(4.0m);
 
         // Period 2 (Summer): 100 HDD (excluded - below 200)
-        _mockWeatherService.Setup(x => x.CalculateHDD(weatherData, new DateTime(2024, 2, 2), new DateTime(2024, 7, 1)))
+        _mockWeatherService.Setup(x => x.CalculateHDD(weatherData, new DateTime(2024, 2, 2), new DateTime(2024, 7, 1), It.IsAny<decimal>()))
             .Returns(100m);
 
         // Act
@@ -310,7 +313,8 @@ public class TankEstimatorServiceTests
         _mockWeatherService.Setup(x => x.CalculateHDD(
             weatherData,
             DateTime.Today.AddDays(-39), // Day after first delivery
-            deliveryDate))
+            deliveryDate,
+            It.IsAny<decimal>()))
             .Returns(600m);
         _mockWeatherService.Setup(x => x.CalculateKFactor(150m, 600m)).Returns(4.0m);
 
@@ -318,7 +322,8 @@ public class TankEstimatorServiceTests
         _mockWeatherService.Setup(x => x.CalculateHDD(
             weatherData,
             deliveryDate.AddDays(1), // Day after delivery
-            DateTime.Today))
+            DateTime.Today,
+            It.IsAny<decimal>()))
             .Returns(180m); // 9 days * 20 HDD average
 
         // Act
@@ -400,7 +405,8 @@ public class TankEstimatorServiceTests
         _mockWeatherService.Setup(x => x.CalculateHDD(
             weatherData,
             DateTime.Today.AddDays(-34), // Day AFTER first delivery
-            deliveryDate))
+            deliveryDate,
+            It.IsAny<decimal>()))
             .Returns(725m);
         _mockWeatherService.Setup(x => x.CalculateKFactor(150m, 725m)).Returns(4.833m);
 
@@ -408,7 +414,8 @@ public class TankEstimatorServiceTests
         _mockWeatherService.Setup(x => x.CalculateHDD(
             weatherData,
             deliveryDate.AddDays(1), // Day AFTER delivery (excludes delivery day)
-            DateTime.Today))
+            DateTime.Today,
+            It.IsAny<decimal>()))
             .Returns(100m); // 4 days * 25 HDD
 
         // Act
@@ -418,7 +425,8 @@ public class TankEstimatorServiceTests
         _mockWeatherService.Verify(x => x.CalculateHDD(
             weatherData,
             deliveryDate.AddDays(1),
-            DateTime.Today), Times.AtLeastOnce);
+            DateTime.Today,
+            It.IsAny<decimal>()), Times.AtLeastOnce);
     }
 
     [Fact]

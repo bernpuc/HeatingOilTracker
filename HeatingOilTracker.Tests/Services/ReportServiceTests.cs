@@ -18,6 +18,9 @@ public class ReportServiceTests
         _mockDataService = new Mock<IDataService>();
         _mockWeatherService = new Mock<IWeatherService>();
         _sut = new ReportService(_mockDataService.Object, _mockWeatherService.Object);
+
+        // Default regional settings
+        _mockDataService.Setup(x => x.GetRegionalSettingsAsync()).ReturnsAsync(new RegionalSettings());
     }
 
     #region GetYearlySummaryAsync Tests
@@ -85,7 +88,8 @@ public class ReportServiceTests
         _mockWeatherService.Setup(x => x.CalculateHDD(
             weatherData,
             new DateTime(2024, 1, 1),
-            new DateTime(2024, 12, 31)))
+            new DateTime(2024, 12, 31),
+            It.IsAny<decimal>()))
             .Returns(5490m); // 366 days * 15 HDD
 
         // Act
@@ -200,21 +204,24 @@ public class ReportServiceTests
         _mockWeatherService.Setup(x => x.CalculateHDD(
             weatherData,
             new DateTime(2024, 10, 1),
-            new DateTime(2024, 12, 31)))
+            new DateTime(2024, 12, 31),
+            It.IsAny<decimal>()))
             .Returns(1500m);
 
         // Jan-Mar HDD
         _mockWeatherService.Setup(x => x.CalculateHDD(
             weatherData,
             new DateTime(2024, 1, 1),
-            new DateTime(2024, 3, 31)))
+            new DateTime(2024, 3, 31),
+            It.IsAny<decimal>()))
             .Returns(2000m);
 
         // Apr-Sep HDD (off-season)
         _mockWeatherService.Setup(x => x.CalculateHDD(
             weatherData,
             new DateTime(2024, 4, 1),
-            new DateTime(2024, 9, 30)))
+            new DateTime(2024, 9, 30),
+            It.IsAny<decimal>()))
             .Returns(300m);
 
         // Act

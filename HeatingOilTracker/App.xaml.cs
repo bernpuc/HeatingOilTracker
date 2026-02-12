@@ -43,6 +43,7 @@ public partial class App : PrismApplication
         containerRegistry.RegisterForNavigation<ChartsView, ChartsViewModel>();
         containerRegistry.RegisterForNavigation<ReportsView, ReportsViewModel>();
         containerRegistry.RegisterForNavigation<SettingsView, SettingsViewModel>();
+        containerRegistry.RegisterForNavigation<WeatherView, WeatherViewModel>();
         containerRegistry.RegisterForNavigation<ReferenceView, ReferenceViewModel>();
     }
 

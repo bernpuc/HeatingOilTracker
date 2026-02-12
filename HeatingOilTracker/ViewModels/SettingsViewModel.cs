@@ -25,6 +25,8 @@ public class SettingsViewModel : BindableBase, INavigationAware
 
     // Regional settings
     private CultureOption _selectedCulture = SupportedCultures.All[0];
+    private TemperatureUnitOption _selectedTemperatureUnit = TemperatureUnits.All[0];
+    private FuelTypeOption _selectedFuelType = FuelTypes.All[0];
 
     // Reminder settings
     private bool _reminderEnabled = true;
@@ -41,10 +43,28 @@ public class SettingsViewModel : BindableBase, INavigationAware
     // Supported currencies
     public ObservableCollection<CultureOption> Currencies { get; } = new(SupportedCultures.All);
 
+    // Temperature units
+    public ObservableCollection<TemperatureUnitOption> TemperatureUnitsCollection { get; } = new(TemperatureUnits.All);
+
+    // Fuel types
+    public ObservableCollection<FuelTypeOption> FuelTypesCollection { get; } = new(FuelTypes.All);
+
     public CultureOption SelectedCulture
     {
         get => _selectedCulture;
         set => SetProperty(ref _selectedCulture, value);
+    }
+
+    public TemperatureUnitOption SelectedTemperatureUnit
+    {
+        get => _selectedTemperatureUnit;
+        set => SetProperty(ref _selectedTemperatureUnit, value);
+    }
+
+    public FuelTypeOption SelectedFuelType
+    {
+        get => _selectedFuelType;
+        set => SetProperty(ref _selectedFuelType, value);
     }
 
     public decimal TankCapacity
@@ -177,6 +197,8 @@ public class SettingsViewModel : BindableBase, INavigationAware
         // Load regional settings
         var regionalSettings = await _dataService.GetRegionalSettingsAsync();
         SelectedCulture = SupportedCultures.GetByCode(regionalSettings.CultureCode);
+        SelectedTemperatureUnit = TemperatureUnits.GetByCode(regionalSettings.TemperatureUnit);
+        SelectedFuelType = FuelTypes.GetByCode(regionalSettings.FuelTypeCode);
 
         var location = await _dataService.GetLocationAsync();
         if (location.IsSet)
@@ -228,7 +250,9 @@ public class SettingsViewModel : BindableBase, INavigationAware
         // Save regional settings
         var regionalSettings = new RegionalSettings
         {
-            CultureCode = SelectedCulture.Code
+            CultureCode = SelectedCulture.Code,
+            TemperatureUnit = SelectedTemperatureUnit.Code,
+            FuelTypeCode = SelectedFuelType.Code
         };
         await _dataService.SetRegionalSettingsAsync(regionalSettings);
 

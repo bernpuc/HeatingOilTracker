@@ -10,9 +10,15 @@ public interface IWeatherService
     Task<List<DailyWeather>> GetHistoricalWeatherAsync(decimal latitude, decimal longitude, DateTime startDate, DateTime endDate);
 
     /// <summary>
-    /// Calculates total HDD between two dates using stored weather data.
+    /// Calculates total HDD between two dates using stored weather data with default base (65°F).
     /// </summary>
     decimal CalculateHDD(List<DailyWeather> weatherData, DateTime startDate, DateTime endDate);
+
+    /// <summary>
+    /// Calculates total HDD between two dates using a custom base temperature.
+    /// </summary>
+    /// <param name="baseTemperatureF">Base temperature in Fahrenheit (e.g., 65 for US, 64.4 for 18°C)</param>
+    decimal CalculateHDD(List<DailyWeather> weatherData, DateTime startDate, DateTime endDate, decimal baseTemperatureF);
 
     /// <summary>
     /// Calculates K-Factor (HDD per gallon) for a delivery. Industry standard measure of heating efficiency.

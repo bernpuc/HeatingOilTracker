@@ -61,9 +61,14 @@ public class WeatherService : IWeatherService
 
     public decimal CalculateHDD(List<DailyWeather> weatherData, DateTime startDate, DateTime endDate)
     {
+        return CalculateHDD(weatherData, startDate, endDate, DailyWeather.DefaultHddBaseF);
+    }
+
+    public decimal CalculateHDD(List<DailyWeather> weatherData, DateTime startDate, DateTime endDate, decimal baseTemperatureF)
+    {
         return weatherData
             .Where(w => w.Date >= startDate.Date && w.Date <= endDate.Date)
-            .Sum(w => w.HDD);
+            .Sum(w => w.CalculateHDD(baseTemperatureF));
     }
 
     public decimal CalculateKFactor(decimal gallonsDelivered, decimal hddAccumulated)

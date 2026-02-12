@@ -18,6 +18,8 @@ public class TankEstimatorService : ITankEstimatorService
         var deliveries = await _dataService.GetDeliveriesAsync();
         var tankCapacity = await _dataService.GetTankCapacityAsync();
         var weatherData = await _dataService.GetWeatherHistoryAsync();
+        var regionalSettings = await _dataService.GetRegionalSettingsAsync();
+        var hddBaseF = DailyWeather.GetHddBase(regionalSettings.TemperatureUnit);
 
         var status = new TankStatus
         {
@@ -65,7 +67,7 @@ public class TankEstimatorService : ITankEstimatorService
         {
             // Use K-Factor: Gallons = HDD / K-Factor
             // Start from day after delivery (no consumption on fill day)
-            var hddSinceDelivery = _weatherService.CalculateHDD(weatherData, lastDelivery.Date.AddDays(1), DateTime.Today);
+            var hddSinceDelivery = _weatherService.CalculateHDD(weatherData, lastDelivery.Date.AddDays(1), DateTime.Today, hddBaseF);
             estimatedUsage = hddSinceDelivery / kFactor.Value;
         }
         else
@@ -93,6 +95,8 @@ public class TankEstimatorService : ITankEstimatorService
         var deliveries = await _dataService.GetDeliveriesAsync();
         var tankCapacity = await _dataService.GetTankCapacityAsync();
         var weatherData = await _dataService.GetWeatherHistoryAsync();
+        var regionalSettings = await _dataService.GetRegionalSettingsAsync();
+        var hddBaseF = DailyWeather.GetHddBase(regionalSettings.TemperatureUnit);
         var burnRate = await GetAverageBurnRateAsync();
         var kFactor = await GetAverageKFactorAsync();
 
@@ -124,7 +128,7 @@ public class TankEstimatorService : ITankEstimatorService
                 decimal usage;
                 if (useKFactor)
                 {
-                    var hdd = _weatherService.CalculateHDD(weatherData, lastKnownDate.Value.AddDays(1), delivery.Date);
+                    var hdd = _weatherService.CalculateHDD(weatherData, lastKnownDate.Value.AddDays(1), delivery.Date, hddBaseF);
                     usage = hdd / kFactor!.Value;
                 }
                 else
@@ -155,7 +159,7 @@ public class TankEstimatorService : ITankEstimatorService
             decimal usage;
             if (useKFactor)
             {
-                var hdd = _weatherService.CalculateHDD(weatherData, lastKnownDate.Value.AddDays(1), targetDate);
+                var hdd = _weatherService.CalculateHDD(weatherData, lastKnownDate.Value.AddDays(1), targetDate, hddBaseF);
                 usage = hdd / kFactor!.Value;
             }
             else
@@ -231,6 +235,8 @@ public class TankEstimatorService : ITankEstimatorService
     {
         var deliveries = await _dataService.GetDeliveriesAsync();
         var weatherData = await _dataService.GetWeatherHistoryAsync();
+        var regionalSettings = await _dataService.GetRegionalSettingsAsync();
+        var hddBaseF = DailyWeather.GetHddBase(regionalSettings.TemperatureUnit);
 
         if (deliveries.Count < 2 || weatherData.Count == 0)
             return null;
@@ -245,7 +251,7 @@ public class TankEstimatorService : ITankEstimatorService
             var curr = sortedDeliveries[i];
 
             // Start from day after previous delivery (no consumption on fill day)
-            var hdd = _weatherService.CalculateHDD(weatherData, prev.Date.AddDays(1), curr.Date);
+            var hdd = _weatherService.CalculateHDD(weatherData, prev.Date.AddDays(1), curr.Date, hddBaseF);
 
             // Only include K-factors where we have meaningful HDD data
             // (filtering out summer months where HDD is too low)

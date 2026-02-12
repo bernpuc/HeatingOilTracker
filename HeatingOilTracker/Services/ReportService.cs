@@ -17,15 +17,21 @@ public class ReportService : IReportService
     {
         var deliveries = await _dataService.GetDeliveriesAsync();
         var weatherData = await _dataService.GetWeatherHistoryAsync();
+        var regionalSettings = await _dataService.GetRegionalSettingsAsync();
 
         var yearDeliveries = deliveries.Where(d => d.Date.Year == year).ToList();
+
+        // Get CO2 factor from fuel type setting
+        var fuelType = FuelTypes.GetByCode(regionalSettings.FuelTypeCode);
+        var hddBaseF = DailyWeather.GetHddBase(regionalSettings.TemperatureUnit);
 
         var summary = new YearlySummary
         {
             Year = year,
             TotalGallons = yearDeliveries.Sum(d => d.Gallons),
             TotalCost = yearDeliveries.Sum(d => d.Gallons * d.PricePerGallon),
-            DeliveryCount = yearDeliveries.Count
+            DeliveryCount = yearDeliveries.Count,
+            CO2LbsPerGallon = fuelType.CO2LbsPerGallon
         };
 
         // Calculate HDD for the year if weather data available
@@ -33,7 +39,7 @@ public class ReportService : IReportService
         {
             var startDate = new DateTime(year, 1, 1);
             var endDate = new DateTime(year, 12, 31);
-            summary.TotalHDD = _weatherService.CalculateHDD(weatherData, startDate, endDate);
+            summary.TotalHDD = _weatherService.CalculateHDD(weatherData, startDate, endDate, hddBaseF);
         }
 
         return summary;
@@ -57,8 +63,13 @@ public class ReportService : IReportService
     {
         var deliveries = await _dataService.GetDeliveriesAsync();
         var weatherData = await _dataService.GetWeatherHistoryAsync();
+        var regionalSettings = await _dataService.GetRegionalSettingsAsync();
 
         var yearDeliveries = deliveries.Where(d => d.Date.Year == year).ToList();
+
+        // Get CO2 factor from fuel type setting
+        var fuelType = FuelTypes.GetByCode(regionalSettings.FuelTypeCode);
+        var hddBaseF = DailyWeather.GetHddBase(regionalSettings.TemperatureUnit);
 
         // Heating season: October - March (months 10, 11, 12, 1, 2, 3)
         // Off-season: April - September (months 4, 5, 6, 7, 8, 9)
@@ -75,7 +86,8 @@ public class ReportService : IReportService
             HeatingSeasonDeliveries = heatingDeliveries.Count,
             OffSeasonGallons = offSeasonDeliveries.Sum(d => d.Gallons),
             OffSeasonCost = offSeasonDeliveries.Sum(d => d.Gallons * d.PricePerGallon),
-            OffSeasonDeliveries = offSeasonDeliveries.Count
+            OffSeasonDeliveries = offSeasonDeliveries.Count,
+            CO2LbsPerGallon = fuelType.CO2LbsPerGallon
         };
 
         // Calculate HDD for each season if weather data available
@@ -83,14 +95,14 @@ public class ReportService : IReportService
         {
             // Heating season HDD (Oct-Dec of year + Jan-Mar of year)
             var hddOctDec = _weatherService.CalculateHDD(weatherData,
-                new DateTime(year, 10, 1), new DateTime(year, 12, 31));
+                new DateTime(year, 10, 1), new DateTime(year, 12, 31), hddBaseF);
             var hddJanMar = _weatherService.CalculateHDD(weatherData,
-                new DateTime(year, 1, 1), new DateTime(year, 3, 31));
+                new DateTime(year, 1, 1), new DateTime(year, 3, 31), hddBaseF);
             breakdown.HeatingSeasonHDD = hddOctDec + hddJanMar;
 
             // Off-season HDD (Apr-Sep)
             breakdown.OffSeasonHDD = _weatherService.CalculateHDD(weatherData,
-                new DateTime(year, 4, 1), new DateTime(year, 9, 30));
+                new DateTime(year, 4, 1), new DateTime(year, 9, 30), hddBaseF);
         }
 
         return breakdown;
