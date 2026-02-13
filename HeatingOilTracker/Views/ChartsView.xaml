@@ -30,13 +30,63 @@
                     <RowDefinition Height="300"/>
                     <RowDefinition Height="20"/>
                     <RowDefinition Height="300"/>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="300"/>
                 </Grid.RowDefinitions>
 
-            <!-- Burn Rate Chart -->
+            <!-- Delivery Comparison Chart -->
             <Border Grid.Row="0"
                     BorderBrush="{StaticResource BorderColor}"
                     BorderThickness="1"
-                    CornerRadius="6" 
+                    CornerRadius="6"
+                    Margin="0 0 20 0"
+                    Padding="10"
+                    Visibility="{Binding HasDeliveryComparisonData, Converter={StaticResource BoolToVisibility}}">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+                        <TextBlock Text="Actual Delivered vs Estimated Use"
+                                   FontSize="16" FontWeight="SemiBold"
+                                   Foreground="#334155"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <Border Background="#2563eb" Width="12" Height="12" CornerRadius="2" Margin="0,0,5,0"/>
+                            <TextBlock Text="Actual Delivered" Foreground="#64748b" FontSize="11" Margin="0,0,15,0"/>
+                            <Border Background="#f97316" Width="12" Height="12" CornerRadius="2" Margin="0,0,5,0"/>
+                            <TextBlock Text="Estimated Use (HDD/K-Factor)" Foreground="#64748b" FontSize="11"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <Grid>
+                        <lvc:CartesianChart x:Name="DeliveryComparisonChart"
+                                            Series="{Binding DeliveryComparisonSeries}"
+                                            XAxes="{Binding DeliveryComparisonXAxes}"
+                                            YAxes="{Binding DeliveryComparisonYAxes}"
+                                            TooltipPosition="Hidden"
+                                            TooltipFindingStrategy="{Binding TooltipFindingStrategy}"
+                                            ZoomMode="X"/>
+                        <Border x:Name="DeliveryComparisonTooltip"
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Left"
+                                IsHitTestVisible="False"
+                                Visibility="Collapsed"
+                                Background="#E51e293b"
+                                CornerRadius="4"
+                                Padding="10,6"
+                                Margin="0,8,0,0">
+                            <Border.RenderTransform>
+                                <TranslateTransform x:Name="DeliveryComparisonTooltipTransform"/>
+                            </Border.RenderTransform>
+                            <TextBlock x:Name="DeliveryComparisonTooltipText"
+                                       Foreground="White"
+                                       FontSize="12"/>
+                        </Border>
+                    </Grid>
+                </DockPanel>
+            </Border>
+
+            <!-- Burn Rate Chart -->
+            <Border Grid.Row="2"
+                    BorderBrush="{StaticResource BorderColor}"
+                    BorderThickness="1"
+                    CornerRadius="6"
                     Margin="0 0 20 0"
                     Padding="10">
                 <DockPanel>
@@ -74,7 +124,7 @@
             </Border>
 
             <!-- Price Chart -->
-            <Border Grid.Row="2"
+            <Border Grid.Row="4"
                     BorderBrush="{StaticResource BorderColor}"
                     BorderThickness="1"
                     CornerRadius="6"
@@ -115,7 +165,7 @@
             </Border>
 
             <!-- K-Factor Chart -->
-            <Border Grid.Row="4"
+            <Border Grid.Row="6"
                     BorderBrush="{StaticResource BorderColor}"
                     BorderThickness="1"
                     CornerRadius="6"

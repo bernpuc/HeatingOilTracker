@@ -1,3 +1,4 @@
+using LiveChartsCore;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.Drawing;
 using LiveChartsCore.SkiaSharpView;
@@ -36,10 +37,17 @@ public partial class ChartsView : UserControl
         KFactorChart.MouseLeave += (_, _) =>
             KFactorTooltip.Visibility = Visibility.Collapsed;
 
+        DeliveryComparisonChart.MouseMove += (s, e) =>
+            UpdateBarChartTooltip(DeliveryComparisonChart, DeliveryComparisonTooltip, DeliveryComparisonTooltipText, DeliveryComparisonTooltipTransform, e);
+
+        DeliveryComparisonChart.MouseLeave += (_, _) =>
+            DeliveryComparisonTooltip.Visibility = Visibility.Collapsed;
+
         // Prevent mouse wheel from bubbling to ScrollViewer (let charts handle zoom)
         BurnRateChart.MouseWheel += (_, e) => e.Handled = true;
         PriceChart.MouseWheel += (_, e) => e.Handled = true;
         KFactorChart.MouseWheel += (_, e) => e.Handled = true;
+        DeliveryComparisonChart.MouseWheel += (_, e) => e.Handled = true;
     }
 
     private static void UpdateTooltip(
@@ -83,6 +91,83 @@ public partial class ChartsView : UserControl
                 new LvcPointD(nearest.DateTime.Ticks, nearest.Value ?? 0));
 
             tooltipText.Text = formatter(nearest);
+            tooltip.Visibility = Visibility.Visible;
+
+            // Measure to get width for centering
+            tooltip.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            var tooltipWidth = tooltip.DesiredSize.Width;
+
+            var x = nearestPixel.X - tooltipWidth / 2;
+            x = Math.Max(0, Math.Min(x, chart.ActualWidth - tooltipWidth));
+
+            transform.X = x;
+        }
+        catch
+        {
+            tooltip.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private static void UpdateBarChartTooltip(
+        CartesianChart chart,
+        Border tooltip,
+        TextBlock tooltipText,
+        TranslateTransform transform,
+        MouseEventArgs e)
+    {
+        var pos = e.GetPosition(chart);
+
+        var seriesList = chart.Series?.OfType<ColumnSeries<DateTimePoint>>().ToList();
+        if (seriesList == null || seriesList.Count < 2)
+        {
+            tooltip.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        var actualSeries = seriesList[0];
+        var estimatedSeries = seriesList[1];
+
+        if (actualSeries.Values is not IEnumerable<DateTimePoint> actualValues)
+        {
+            tooltip.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        var actualPoints = actualValues.ToList();
+        if (actualPoints.Count == 0)
+        {
+            tooltip.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        try
+        {
+            var dataCoords = chart.ScalePixelsToData(new LvcPointD(pos.X, pos.Y));
+            var hoverTicks = (long)dataCoords.X;
+
+            var nearestActual = actualPoints.MinBy(p => Math.Abs(p.DateTime.Ticks - hoverTicks));
+            if (nearestActual == null)
+            {
+                tooltip.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            // Find matching estimated point
+            double? estimatedValue = null;
+            if (estimatedSeries.Values is IEnumerable<DateTimePoint> estimatedValues)
+            {
+                var estimatedPoints = estimatedValues.ToList();
+                var nearestEstimated = estimatedPoints.FirstOrDefault(p => p.DateTime == nearestActual.DateTime);
+                estimatedValue = nearestEstimated?.Value;
+            }
+
+            // Get pixel X of the nearest data point so tooltip snaps with the crosshair
+            var nearestPixel = chart.ScaleDataToPixels(
+                new LvcPointD(nearestActual.DateTime.Ticks, nearestActual.Value ?? 0));
+
+            var actualStr = nearestActual.Value.HasValue ? $"{nearestActual.Value:F1}" : "N/A";
+            var estimatedStr = estimatedValue.HasValue ? $"{estimatedValue:F1}" : "N/A";
+            tooltipText.Text = $"{nearestActual.DateTime:MMM d, yyyy}\nActual: {actualStr} gal\nEstimated: {estimatedStr} gal";
             tooltip.Visibility = Visibility.Visible;
 
             // Measure to get width for centering

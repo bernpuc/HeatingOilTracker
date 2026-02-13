@@ -25,15 +25,19 @@ public class ChartsViewModel : BindableBase, INavigationAware
 
     private bool _hasData;
     private bool _hasKFactorData;
+    private bool _hasDeliveryComparisonData;
     private ObservableCollection<ISeries> _burnRateSeries = new();
     private ObservableCollection<ISeries> _priceSeries = new();
     private ObservableCollection<ISeries> _kFactorSeries = new();
+    private ObservableCollection<ISeries> _deliveryComparisonSeries = new();
     private Axis[] _burnRateXAxes = [];
     private Axis[] _burnRateYAxes = [];
     private Axis[] _priceXAxes = [];
     private Axis[] _priceYAxes = [];
     private Axis[] _kFactorXAxes = [];
     private Axis[] _kFactorYAxes = [];
+    private Axis[] _deliveryComparisonXAxes = [];
+    private Axis[] _deliveryComparisonYAxes = [];
     private TooltipFindingStrategy _tooltipFindingStrategy = TooltipFindingStrategy.CompareOnlyXTakeClosest;
 
     public bool HasData
@@ -46,6 +50,12 @@ public class ChartsViewModel : BindableBase, INavigationAware
     {
         get => _hasKFactorData;
         set => SetProperty(ref _hasKFactorData, value);
+    }
+
+    public bool HasDeliveryComparisonData
+    {
+        get => _hasDeliveryComparisonData;
+        set => SetProperty(ref _hasDeliveryComparisonData, value);
     }
 
     public ObservableCollection<ISeries> BurnRateSeries
@@ -64,6 +74,12 @@ public class ChartsViewModel : BindableBase, INavigationAware
     {
         get => _kFactorSeries;
         set => SetProperty(ref _kFactorSeries, value);
+    }
+
+    public ObservableCollection<ISeries> DeliveryComparisonSeries
+    {
+        get => _deliveryComparisonSeries;
+        set => SetProperty(ref _deliveryComparisonSeries, value);
     }
 
     public Axis[] BurnRateXAxes
@@ -100,6 +116,18 @@ public class ChartsViewModel : BindableBase, INavigationAware
     {
         get => _kFactorYAxes;
         set => SetProperty(ref _kFactorYAxes, value);
+    }
+
+    public Axis[] DeliveryComparisonXAxes
+    {
+        get => _deliveryComparisonXAxes;
+        set => SetProperty(ref _deliveryComparisonXAxes, value);
+    }
+
+    public Axis[] DeliveryComparisonYAxes
+    {
+        get => _deliveryComparisonYAxes;
+        set => SetProperty(ref _deliveryComparisonYAxes, value);
     }
 
     public TooltipFindingStrategy TooltipFindingStrategy
@@ -187,6 +215,29 @@ public class ChartsViewModel : BindableBase, INavigationAware
                 MinLimit = 0
             }
         ];
+
+        DeliveryComparisonXAxes =
+        [
+            new DateTimeAxis(TimeSpan.FromDays(30), date => date.ToString("MMM yyyy"))
+            {
+                Name = "Date",
+                NamePaint = new SolidColorPaint(SKColors.Gray),
+                LabelsPaint = new SolidColorPaint(SKColors.Gray),
+                CrosshairPaint = CrosshairPaint,
+                CrosshairSnapEnabled = true
+            }
+        ];
+
+        DeliveryComparisonYAxes =
+        [
+            new Axis
+            {
+                Name = "Gallons",
+                NamePaint = new SolidColorPaint(SKColors.Gray),
+                LabelsPaint = new SolidColorPaint(SKColors.Gray),
+                Labeler = value => value.ToString("F0")
+            }
+        ];
     }
 
     private async Task LoadChartsAsync()
@@ -202,7 +253,9 @@ public class ChartsViewModel : BindableBase, INavigationAware
             BurnRateSeries = new ObservableCollection<ISeries>();
             PriceSeries = new ObservableCollection<ISeries>();
             KFactorSeries = new ObservableCollection<ISeries>();
+            DeliveryComparisonSeries = new ObservableCollection<ISeries>();
             HasKFactorData = false;
+            HasDeliveryComparisonData = false;
             return;
         }
 
@@ -284,6 +337,57 @@ public class ChartsViewModel : BindableBase, INavigationAware
                 Stroke = new SolidColorPaint(SKColor.Parse("#dc2626")) { StrokeThickness = 3 },
                 LineSmoothness = 0,
                 YToolTipLabelFormatter = point => $"{point.Model?.Value:F3} gal/HDD"
+            }
+        };
+
+        // Build Delivery Comparison chart (Actual Delivered vs Estimated Use)
+        var actualDeliveredPoints = new List<DateTimePoint>();
+        var estimatedUsePoints = new List<DateTimePoint>();
+
+        if (weatherData.Count > 0 && kFactorPoints.Count > 0)
+        {
+            // Calculate average K-Factor from valid periods
+            var avgKFactor = kFactorPoints.Average(p => p.Value ?? 0);
+
+            for (int i = 1; i < sorted.Count; i++)
+            {
+                var hdd = _weatherService.CalculateHDD(weatherData, sorted[i - 1].Date, sorted[i].Date);
+
+                // Add actual delivered
+                actualDeliveredPoints.Add(new DateTimePoint(sorted[i].Date, (double)sorted[i].Gallons));
+
+                // Calculate estimated use based on HDD and average K-Factor
+                if (avgKFactor > 0 && hdd > 0)
+                {
+                    var estimatedUse = (double)hdd / avgKFactor;
+                    estimatedUsePoints.Add(new DateTimePoint(sorted[i].Date, estimatedUse));
+                }
+                else
+                {
+                    estimatedUsePoints.Add(new DateTimePoint(sorted[i].Date, null));
+                }
+            }
+        }
+
+        HasDeliveryComparisonData = actualDeliveredPoints.Count > 0;
+
+        DeliveryComparisonSeries = new ObservableCollection<ISeries>
+        {
+            new ColumnSeries<DateTimePoint>
+            {
+                Values = actualDeliveredPoints,
+                Name = "Actual Delivered",
+                Fill = new SolidColorPaint(SKColor.Parse("#2563eb")),
+                MaxBarWidth = 8,
+                YToolTipLabelFormatter = point => $"{point.Model?.Value:F1} gal"
+            },
+            new ColumnSeries<DateTimePoint>
+            {
+                Values = estimatedUsePoints,
+                Name = "Estimated Use",
+                Fill = new SolidColorPaint(SKColor.Parse("#f97316")),
+                MaxBarWidth = 8,
+                YToolTipLabelFormatter = point => $"{point.Model?.Value:F1} gal"
             }
         };
     }
