@@ -49,9 +49,11 @@
                                    Foreground="#334155"/>
                         <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                             <Border Background="#2563eb" Width="12" Height="12" CornerRadius="2" Margin="0,0,5,0"/>
-                            <TextBlock Text="Actual Delivered" Foreground="#64748b" FontSize="11" Margin="0,0,15,0"/>
+                            <TextBlock Text="Actual" Foreground="#64748b" FontSize="11" Margin="0,0,12,0"/>
                             <Border Background="#f97316" Width="12" Height="12" CornerRadius="2" Margin="0,0,5,0"/>
-                            <TextBlock Text="Estimated Use (HDD/K-Factor)" Foreground="#64748b" FontSize="11"/>
+                            <TextBlock Text="Est. (HDD)" Foreground="#64748b" FontSize="11" Margin="0,0,12,0"/>
+                            <Border Background="#10b981" Width="12" Height="12" CornerRadius="2" Margin="0,0,5,0"/>
+                            <TextBlock Text="Est. (Burn Rate)" Foreground="#64748b" FontSize="11"/>
                         </StackPanel>
                     </StackPanel>
                     <Grid>

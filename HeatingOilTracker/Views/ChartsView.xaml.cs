@@ -118,14 +118,15 @@ public partial class ChartsView : UserControl
         var pos = e.GetPosition(chart);
 
         var seriesList = chart.Series?.OfType<ColumnSeries<DateTimePoint>>().ToList();
-        if (seriesList == null || seriesList.Count < 2)
+        if (seriesList == null || seriesList.Count < 3)
         {
             tooltip.Visibility = Visibility.Collapsed;
             return;
         }
 
         var actualSeries = seriesList[0];
-        var estimatedSeries = seriesList[1];
+        var hddSeries = seriesList[1];
+        var burnRateSeries = seriesList[2];
 
         if (actualSeries.Values is not IEnumerable<DateTimePoint> actualValues)
         {
@@ -152,13 +153,22 @@ public partial class ChartsView : UserControl
                 return;
             }
 
-            // Find matching estimated point
-            double? estimatedValue = null;
-            if (estimatedSeries.Values is IEnumerable<DateTimePoint> estimatedValues)
+            // Find matching HDD estimate point
+            double? hddValue = null;
+            if (hddSeries.Values is IEnumerable<DateTimePoint> hddValues)
             {
-                var estimatedPoints = estimatedValues.ToList();
-                var nearestEstimated = estimatedPoints.FirstOrDefault(p => p.DateTime == nearestActual.DateTime);
-                estimatedValue = nearestEstimated?.Value;
+                var hddPoints = hddValues.ToList();
+                var nearestHdd = hddPoints.FirstOrDefault(p => p.DateTime == nearestActual.DateTime);
+                hddValue = nearestHdd?.Value;
+            }
+
+            // Find matching burn rate estimate point
+            double? burnRateValue = null;
+            if (burnRateSeries.Values is IEnumerable<DateTimePoint> burnRateValues)
+            {
+                var burnRatePoints = burnRateValues.ToList();
+                var nearestBurnRate = burnRatePoints.FirstOrDefault(p => p.DateTime == nearestActual.DateTime);
+                burnRateValue = nearestBurnRate?.Value;
             }
 
             // Get pixel X of the nearest data point so tooltip snaps with the crosshair
@@ -166,8 +176,9 @@ public partial class ChartsView : UserControl
                 new LvcPointD(nearestActual.DateTime.Ticks, nearestActual.Value ?? 0));
 
             var actualStr = nearestActual.Value.HasValue ? $"{nearestActual.Value:F1}" : "N/A";
-            var estimatedStr = estimatedValue.HasValue ? $"{estimatedValue:F1}" : "N/A";
-            tooltipText.Text = $"{nearestActual.DateTime:MMM d, yyyy}\nActual: {actualStr} gal\nEstimated: {estimatedStr} gal";
+            var hddStr = hddValue.HasValue ? $"{hddValue:F1}" : "N/A";
+            var burnRateStr = burnRateValue.HasValue ? $"{burnRateValue:F1}" : "N/A";
+            tooltipText.Text = $"{nearestActual.DateTime:MMM d, yyyy}\nActual: {actualStr} gal\nEst (HDD): {hddStr} gal\nEst (Burn): {burnRateStr} gal";
             tooltip.Visibility = Visibility.Visible;
 
             // Measure to get width for centering

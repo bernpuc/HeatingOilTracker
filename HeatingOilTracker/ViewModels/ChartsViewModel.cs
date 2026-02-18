@@ -342,7 +342,38 @@ public class ChartsViewModel : BindableBase, INavigationAware
 
         // Build Delivery Comparison chart (Actual Delivered vs Estimated Use)
         var actualDeliveredPoints = new List<DateTimePoint>();
-        var estimatedUsePoints = new List<DateTimePoint>();
+        var estimatedHddPoints = new List<DateTimePoint>();
+        var estimatedBurnRatePoints = new List<DateTimePoint>();
+
+        // Calculate separate burn rates for heating season (Oct-Mar) and off-season (Apr-Sep)
+        var offSeasonRates = new List<double>();
+        var heatingSeasonRates = new List<double>();
+
+        for (int i = 1; i < sorted.Count; i++)
+        {
+            var days = (sorted[i].Date - sorted[i - 1].Date).TotalDays;
+            if (days > 0)
+            {
+                var rate = (double)sorted[i].Gallons / days;
+                var month = sorted[i].Date.Month;
+                // Off-season: Apr (4) through Sep (9)
+                // Check if delivery period is entirely within off-season
+                var prevMonth = sorted[i - 1].Date.Month;
+                var isOffSeasonDelivery = month >= 4 && month <= 9 && prevMonth >= 4 && prevMonth <= 9;
+
+                if (isOffSeasonDelivery)
+                {
+                    offSeasonRates.Add(rate);
+                }
+                else if (month >= 10 || month <= 3)
+                {
+                    heatingSeasonRates.Add(rate);
+                }
+            }
+        }
+
+        var avgOffSeasonBurnRate = offSeasonRates.Count > 0 ? offSeasonRates.Average() : 0;
+        var avgHeatingSeasonBurnRate = heatingSeasonRates.Count > 0 ? heatingSeasonRates.Average() : 0;
 
         if (weatherData.Count > 0 && kFactorPoints.Count > 0)
         {
@@ -352,6 +383,9 @@ public class ChartsViewModel : BindableBase, INavigationAware
             for (int i = 1; i < sorted.Count; i++)
             {
                 var hdd = _weatherService.CalculateHDD(weatherData, sorted[i - 1].Date, sorted[i].Date);
+                var days = (sorted[i].Date - sorted[i - 1].Date).TotalDays;
+                var month = sorted[i].Date.Month;
+                var isOffSeason = month >= 4 && month <= 9;
 
                 // Add actual delivered
                 actualDeliveredPoints.Add(new DateTimePoint(sorted[i].Date, (double)sorted[i].Gallons));
@@ -360,11 +394,23 @@ public class ChartsViewModel : BindableBase, INavigationAware
                 if (avgKFactor > 0 && hdd > 0)
                 {
                     var estimatedUse = (double)hdd / avgKFactor;
-                    estimatedUsePoints.Add(new DateTimePoint(sorted[i].Date, estimatedUse));
+                    estimatedHddPoints.Add(new DateTimePoint(sorted[i].Date, estimatedUse));
                 }
                 else
                 {
-                    estimatedUsePoints.Add(new DateTimePoint(sorted[i].Date, null));
+                    estimatedHddPoints.Add(new DateTimePoint(sorted[i].Date, null));
+                }
+
+                // Calculate estimated use based on seasonal burn rate
+                var burnRate = isOffSeason ? avgOffSeasonBurnRate : avgHeatingSeasonBurnRate;
+                if (burnRate > 0 && days > 0)
+                {
+                    var estimatedBurnRate = burnRate * days;
+                    estimatedBurnRatePoints.Add(new DateTimePoint(sorted[i].Date, estimatedBurnRate));
+                }
+                else
+                {
+                    estimatedBurnRatePoints.Add(new DateTimePoint(sorted[i].Date, null));
                 }
             }
         }
@@ -378,15 +424,23 @@ public class ChartsViewModel : BindableBase, INavigationAware
                 Values = actualDeliveredPoints,
                 Name = "Actual Delivered",
                 Fill = new SolidColorPaint(SKColor.Parse("#2563eb")),
-                MaxBarWidth = 8,
+                MaxBarWidth = 6,
                 YToolTipLabelFormatter = point => $"{point.Model?.Value:F1} gal"
             },
             new ColumnSeries<DateTimePoint>
             {
-                Values = estimatedUsePoints,
-                Name = "Estimated Use",
+                Values = estimatedHddPoints,
+                Name = "Est. (HDD)",
                 Fill = new SolidColorPaint(SKColor.Parse("#f97316")),
-                MaxBarWidth = 8,
+                MaxBarWidth = 6,
+                YToolTipLabelFormatter = point => $"{point.Model?.Value:F1} gal"
+            },
+            new ColumnSeries<DateTimePoint>
+            {
+                Values = estimatedBurnRatePoints,
+                Name = "Est. (Burn Rate)",
+                Fill = new SolidColorPaint(SKColor.Parse("#10b981")),
+                MaxBarWidth = 6,
                 YToolTipLabelFormatter = point => $"{point.Model?.Value:F1} gal"
             }
         };
