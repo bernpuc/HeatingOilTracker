@@ -357,9 +357,10 @@ public class ChartsViewModel : BindableBase, INavigationAware
                 var rate = (double)sorted[i].Gallons / days;
                 var month = sorted[i].Date.Month;
                 // Off-season: Apr (4) through Sep (9)
-                // Check if delivery period is entirely within off-season
+                // Check if delivery period is entirely within off-season AND longer than 60 days
+                // (filters out short shoulder-season periods that still include heating)
                 var prevMonth = sorted[i - 1].Date.Month;
-                var isOffSeasonDelivery = month >= 4 && month <= 9 && prevMonth >= 4 && prevMonth <= 9;
+                var isOffSeasonDelivery = month >= 4 && month <= 9 && prevMonth >= 4 && prevMonth <= 9 && days >= 60;
 
                 if (isOffSeasonDelivery)
                 {
@@ -384,8 +385,6 @@ public class ChartsViewModel : BindableBase, INavigationAware
             {
                 var hdd = _weatherService.CalculateHDD(weatherData, sorted[i - 1].Date, sorted[i].Date);
                 var days = (sorted[i].Date - sorted[i - 1].Date).TotalDays;
-                var month = sorted[i].Date.Month;
-                var isOffSeason = month >= 4 && month <= 9;
 
                 // Add actual delivered
                 actualDeliveredPoints.Add(new DateTimePoint(sorted[i].Date, (double)sorted[i].Gallons));
@@ -402,10 +401,23 @@ public class ChartsViewModel : BindableBase, INavigationAware
                 }
 
                 // Calculate estimated use based on seasonal burn rate
-                var burnRate = isOffSeason ? avgOffSeasonBurnRate : avgHeatingSeasonBurnRate;
-                if (burnRate > 0 && days > 0)
+                // Split the period by season for accurate estimation
+                var offSeasonDays = 0;
+                var heatingSeasonDays = 0;
+                var current = sorted[i - 1].Date.AddDays(1);
+                while (current <= sorted[i].Date)
                 {
-                    var estimatedBurnRate = burnRate * days;
+                    var m = current.Month;
+                    if (m >= 4 && m <= 9)
+                        offSeasonDays++;
+                    else
+                        heatingSeasonDays++;
+                    current = current.AddDays(1);
+                }
+
+                if ((avgOffSeasonBurnRate > 0 || avgHeatingSeasonBurnRate > 0) && days > 0)
+                {
+                    var estimatedBurnRate = (avgOffSeasonBurnRate * offSeasonDays) + (avgHeatingSeasonBurnRate * heatingSeasonDays);
                     estimatedBurnRatePoints.Add(new DateTimePoint(sorted[i].Date, estimatedBurnRate));
                 }
                 else
