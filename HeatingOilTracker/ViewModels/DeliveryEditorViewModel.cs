@@ -1,4 +1,4 @@
-using HeatingOilTracker.Models;
+using HeatingOilTracker.Core.Models;
 using Prism.Commands;
 using Prism.Mvvm;
 

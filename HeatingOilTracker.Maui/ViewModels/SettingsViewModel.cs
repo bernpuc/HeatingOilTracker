@@ -1,0 +1,258 @@
+﻿using HeatingOilTracker.Core.Interfaces;
+using HeatingOilTracker.Core.Models;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Windows.Input;
+
+namespace HeatingOilTracker.Maui.ViewModels;
+
+public class SettingsViewModel : INotifyPropertyChanged
+{
+    private readonly IDataService _dataService;
+    private readonly IWeatherService _weatherService;
+
+    private decimal _tankCapacity;
+    private string _tankCapacityText = string.Empty;
+    private string _locationSearch = string.Empty;
+    private string _locationDisplay = "Not set";
+    private bool _isSearchingLocation;
+    private bool _isFetchingWeather;
+    private string _weatherStatus = string.Empty;
+    private Core.Models.Location? _selectedSearchResult;
+    private bool _reminderEnabled = true;
+    private string _thresholdGallonsText = "50";
+    private string _thresholdDaysText = string.Empty;
+    private string _dataFilePath = string.Empty;
+
+    // Regional settings
+    private CultureOption _selectedCulture = SupportedCultures.All[0];
+    private TemperatureUnitOption _selectedTemperatureUnit = TemperatureUnits.All[0];
+    private FuelTypeOption _selectedFuelType = FuelTypes.All[0];
+
+    public ObservableCollection<Core.Models.Location> LocationSearchResults { get; } = new();
+    public ObservableCollection<CultureOption> Currencies { get; } = new(SupportedCultures.All);
+    public ObservableCollection<TemperatureUnitOption> TemperatureUnitsCollection { get; } = new(TemperatureUnits.All);
+    public ObservableCollection<FuelTypeOption> FuelTypesCollection { get; } = new(FuelTypes.All);
+
+    public string TankCapacityText { get => _tankCapacityText; set => SetProperty(ref _tankCapacityText, value); }
+    public string LocationSearch { get => _locationSearch; set => SetProperty(ref _locationSearch, value); }
+    public string LocationDisplay { get => _locationDisplay; set => SetProperty(ref _locationDisplay, value); }
+    public bool IsSearchingLocation { get => _isSearchingLocation; set => SetProperty(ref _isSearchingLocation, value); }
+    public bool IsFetchingWeather { get => _isFetchingWeather; set => SetProperty(ref _isFetchingWeather, value); }
+    public string WeatherStatus { get => _weatherStatus; set => SetProperty(ref _weatherStatus, value); }
+    public bool ReminderEnabled { get => _reminderEnabled; set => SetProperty(ref _reminderEnabled, value); }
+    public string ThresholdGallonsText { get => _thresholdGallonsText; set => SetProperty(ref _thresholdGallonsText, value); }
+    public string ThresholdDaysText { get => _thresholdDaysText; set => SetProperty(ref _thresholdDaysText, value); }
+    public string DataFilePath { get => _dataFilePath; set => SetProperty(ref _dataFilePath, value); }
+    public bool HasSearchResults => LocationSearchResults.Count > 0;
+
+    public CultureOption SelectedCulture { get => _selectedCulture; set => SetProperty(ref _selectedCulture, value); }
+    public TemperatureUnitOption SelectedTemperatureUnit { get => _selectedTemperatureUnit; set => SetProperty(ref _selectedTemperatureUnit, value); }
+    public FuelTypeOption SelectedFuelType { get => _selectedFuelType; set => SetProperty(ref _selectedFuelType, value); }
+
+    public Core.Models.Location? SelectedSearchResult
+    {
+        get => _selectedSearchResult;
+        set
+        {
+            SetProperty(ref _selectedSearchResult, value);
+            if (value != null)
+                _ = SetLocationAsync(value);
+        }
+    }
+
+    public string FetchWeatherButtonText => IsFetchingWeather ? "Fetching..." : "Fetch Weather Data";
+    public string SearchButtonText => IsSearchingLocation ? "Searching..." : "Search";
+
+    public ICommand SaveCommand { get; }
+    public ICommand SearchLocationCommand { get; }
+    public ICommand FetchWeatherCommand { get; }
+    public ICommand RefreshCommand { get; }
+
+    public SettingsViewModel(IDataService dataService, IWeatherService weatherService)
+    {
+        _dataService = dataService;
+        _weatherService = weatherService;
+
+        SaveCommand = new Command(async () => await SaveAsync());
+        SearchLocationCommand = new Command(async () => await SearchLocationAsync());
+        FetchWeatherCommand = new Command(async () => await FetchWeatherAsync());
+        RefreshCommand = new Command(async () => await LoadAsync());
+
+        _ = LoadAsync();
+    }
+
+    public async Task LoadAsync()
+    {
+        TankCapacityText = (await _dataService.GetTankCapacityAsync()).ToString("F0");
+        DataFilePath = _dataService.GetDataFilePath();
+
+        var regionalSettings = await _dataService.GetRegionalSettingsAsync();
+        SelectedCulture = SupportedCultures.GetByCode(regionalSettings.CultureCode);
+        SelectedTemperatureUnit = TemperatureUnits.GetByCode(regionalSettings.TemperatureUnit);
+        SelectedFuelType = FuelTypes.GetByCode(regionalSettings.FuelTypeCode);
+
+        var location = await _dataService.GetLocationAsync();
+        LocationDisplay = location.IsSet ? location.DisplayName : "Not set";
+
+        var weather = await _dataService.GetWeatherHistoryAsync();
+        if (weather.Count > 0)
+        {
+            var minDate = weather.Min(w => w.Date);
+            var maxDate = weather.Max(w => w.Date);
+            WeatherStatus = $"{weather.Count} days ({minDate:MMM d, yyyy} – {maxDate:MMM d, yyyy})";
+        }
+        else
+        {
+            WeatherStatus = "No weather data";
+        }
+
+        var reminderSettings = await _dataService.GetReminderSettingsAsync();
+        ReminderEnabled = reminderSettings.IsEnabled;
+        ThresholdGallonsText = reminderSettings.ThresholdGallons.ToString("F0");
+        ThresholdDaysText = reminderSettings.ThresholdDays?.ToString() ?? string.Empty;
+    }
+
+    private async Task SaveAsync()
+    {
+        if (!decimal.TryParse(TankCapacityText, out var capacity) || capacity <= 0)
+        {
+            await Shell.Current.DisplayAlert("Validation", "Tank capacity must be greater than zero.", "OK");
+            return;
+        }
+
+        if (!decimal.TryParse(ThresholdGallonsText, out var thresholdGallons) || thresholdGallons < 0)
+        {
+            await Shell.Current.DisplayAlert("Validation", "Threshold gallons must be zero or greater.", "OK");
+            return;
+        }
+
+        int? thresholdDays = null;
+        if (!string.IsNullOrWhiteSpace(ThresholdDaysText) && int.TryParse(ThresholdDaysText, out var days))
+            thresholdDays = days;
+
+        await _dataService.SetTankCapacityAsync(capacity);
+
+        await _dataService.SetRegionalSettingsAsync(new RegionalSettings
+        {
+            CultureCode = SelectedCulture.Code,
+            TemperatureUnit = SelectedTemperatureUnit.Code,
+            FuelTypeCode = SelectedFuelType.Code
+        });
+
+        await _dataService.SetReminderSettingsAsync(new ReminderSettings
+        {
+            IsEnabled = ReminderEnabled,
+            ThresholdGallons = thresholdGallons,
+            ThresholdDays = thresholdDays
+        });
+
+        await Shell.Current.DisplayAlert("Settings", "Settings saved.", "OK");
+    }
+
+    private async Task SearchLocationAsync()
+    {
+        if (string.IsNullOrWhiteSpace(LocationSearch)) return;
+
+        IsSearchingLocation = true;
+        OnPropertyChanged(nameof(SearchButtonText));
+        LocationSearchResults.Clear();
+
+        try
+        {
+            var results = await _weatherService.SearchLocationsAsync(LocationSearch.Trim());
+            if (results.Count > 0)
+            {
+                foreach (var loc in results)
+                    LocationSearchResults.Add(loc);
+                OnPropertyChanged(nameof(HasSearchResults));
+            }
+            else
+            {
+                await Shell.Current.DisplayAlert("No Results", "No locations found. Try a different search term.", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert("Error", $"Error searching: {ex.Message}", "OK");
+        }
+        finally
+        {
+            IsSearchingLocation = false;
+            OnPropertyChanged(nameof(SearchButtonText));
+        }
+    }
+
+    private async Task SetLocationAsync(Core.Models.Location location)
+    {
+        await _dataService.SetLocationAsync(location);
+        LocationDisplay = location.DisplayName;
+        LocationSearchResults.Clear();
+        OnPropertyChanged(nameof(HasSearchResults));
+        await Shell.Current.DisplayAlert("Location Set", $"Location set to {location.DisplayName}", "OK");
+    }
+
+    private async Task FetchWeatherAsync()
+    {
+        var location = await _dataService.GetLocationAsync();
+        if (!location.IsSet)
+        {
+            await Shell.Current.DisplayAlert("Location Required", "Please set a location first.", "OK");
+            return;
+        }
+
+        var deliveries = await _dataService.GetDeliveriesAsync();
+        if (deliveries.Count == 0)
+        {
+            await Shell.Current.DisplayAlert("No Deliveries", "Add deliveries first to fetch relevant weather data.", "OK");
+            return;
+        }
+
+        IsFetchingWeather = true;
+        OnPropertyChanged(nameof(FetchWeatherButtonText));
+        WeatherStatus = "Fetching weather data...";
+
+        try
+        {
+            var startDate = deliveries.Min(d => d.Date).AddDays(-1);
+            var endDate = DateTime.Today;
+
+            var weatherData = await _weatherService.GetHistoricalWeatherAsync(
+                location.Latitude, location.Longitude, startDate, endDate);
+
+            if (weatherData.Count > 0)
+            {
+                await _dataService.AddWeatherDataAsync(weatherData);
+                WeatherStatus = $"{weatherData.Count} days fetched ({startDate:MMM d, yyyy} – {endDate:MMM d, yyyy})";
+                await Shell.Current.DisplayAlert("Success", $"Fetched {weatherData.Count} days of weather data.", "OK");
+            }
+            else
+            {
+                WeatherStatus = "No data returned from API";
+                await Shell.Current.DisplayAlert("No Data", "No weather data returned. Try again later.", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            WeatherStatus = "Error fetching weather";
+            await Shell.Current.DisplayAlert("Error", $"Error: {ex.Message}", "OK");
+        }
+        finally
+        {
+            IsFetchingWeather = false;
+            OnPropertyChanged(nameof(FetchWeatherButtonText));
+        }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+    protected void OnPropertyChanged([CallerMemberName] string? name = null)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? name = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        field = value;
+        OnPropertyChanged(name);
+        return true;
+    }
+}

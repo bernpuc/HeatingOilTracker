@@ -1,4 +1,4 @@
-using HeatingOilTracker.Models;
+using HeatingOilTracker.Core.Models;
 
 namespace HeatingOilTracker.Tests.Fixtures;
 

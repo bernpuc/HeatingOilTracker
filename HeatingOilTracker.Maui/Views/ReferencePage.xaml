@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="HeatingOilTracker.Maui.Views.ReferencePage"
+             Title="Reference">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="0" MaximumWidthRequest="700">
+
+            <!-- Header -->
+            <Label Text="Reference Guide" FontSize="24" FontAttributes="Bold"
+                   TextColor="#1e293b" Margin="0,0,0,4"/>
+            <Label Text="How calculations work in Heating Oil Tracker"
+                   FontSize="14" TextColor="#64748b" Margin="0,0,0,16"/>
+
+            <!-- Tank Estimation -->
+            <Label Text="Tank Level Estimation" Style="{StaticResource RefSectionTitle}"/>
+            <Label Style="{StaticResource RefBody}"
+                   Text="The app estimates your current tank level by tracking how much oil has been used since your last delivery. The preferred method uses K-Factor with weather data for accuracy; burn rate is used as a fallback."/>
+
+            <Label Text="Primary Method: K-Factor (Weather-Adjusted)" Style="{StaticResource RefSubTitle}"/>
+            <Label Style="{StaticResource RefBody}"
+                   Text="When weather data is available, consumption is calculated using your K-Factor and accumulated Heating Degree Days (HDD). This automatically adjusts for temperature changes — a cold snap will show higher usage, a mild spell will show less."/>
+            <Border Style="{StaticResource RefFormula}">
+                <Label Style="{StaticResource RefFormulaText}" Text="Gallons Used = HDD since last fill ÷ K-Factor"/>
+            </Border>
+            <Label Style="{StaticResource RefBody}"
+                   Text="This is more accurate than burn rate because it accounts for actual weather conditions rather than assuming constant daily consumption."/>
+
+            <Label Text="Fallback Method: Average Burn Rate" Style="{StaticResource RefSubTitle}"/>
+            <Label Style="{StaticResource RefBody}"
+                   Text="When weather data isn't available, a simple daily average is used based on historical consumption. This is less accurate during temperature swings but works when no weather data has been fetched."/>
+            <Border Style="{StaticResource RefFormula}">
+                <Label Style="{StaticResource RefFormulaText}" Text="Gallons Used = Days since last fill × Avg burn rate (gal/day)"/>
+            </Border>
+
+            <!-- HDD -->
+            <Label Text="Heating Degree Days (HDD)" Style="{StaticResource RefSectionTitle}"/>
+            <Label Style="{StaticResource RefBody}"
+                   Text="HDD measures how cold a day was relative to a baseline temperature (65°F in the US). Colder days have higher HDD values, indicating more heating is needed. This metric normalizes fuel consumption across different weather conditions."/>
+            <Border Style="{StaticResource RefFormula}">
+                <VerticalStackLayout Spacing="4">
+                    <Label Style="{StaticResource RefFormulaText}" Text="Average Temp = (High + Low) ÷ 2"/>
+                    <Label Style="{StaticResource RefFormulaText}" Text="HDD = max(0, 65 − Average Temp)"/>
+                </VerticalStackLayout>
+            </Border>
+            <Label Style="{StaticResource RefBody}"
+                   Text="Example: If the high is 40°F and the low is 20°F, the average is 30°F, giving an HDD of 35. A mild day with an average of 60°F would have an HDD of only 5."/>
+
+            <!-- K-Factor -->
+            <Label Text="K-Factor" Style="{StaticResource RefSectionTitle}"/>
+            <Label Style="{StaticResource RefBody}"
+                   Text="The K-Factor is the industry standard measure of heating efficiency — how many Heating Degree Days it takes to burn one gallon of oil. A higher K-Factor means better efficiency (more degree days per gallon)."/>
+            <Border Style="{StaticResource RefFormula}">
+                <Label Style="{StaticResource RefFormulaText}" Text="K-Factor = Total HDD ÷ Gallons Used"/>
+            </Border>
+            <Label Style="{StaticResource RefBody}"
+                   Text="Typical residential K-Factors range from 4 to 8 HDD/gallon depending on home size, insulation quality, and heating system efficiency. Smaller, well-insulated homes tend toward 6–8, while larger or older homes may see 3–5."/>
+
+            <!-- Burn Rate -->
+            <Label Text="Burn Rate" Style="{StaticResource RefSectionTitle}"/>
+            <Label Style="{StaticResource RefBody}"
+                   Text="The burn rate is the average gallons consumed per day, calculated from your delivery history. This provides a simple estimate when weather data isn't available."/>
+            <Border Style="{StaticResource RefFormula}">
+                <Label Style="{StaticResource RefFormulaText}" Text="Burn Rate = Total Gallons ÷ Total Days (between deliveries)"/>
+            </Border>
+
+            <!-- Seasonal Breakdown -->
+            <Label Text="Seasonal Breakdown" Style="{StaticResource RefSectionTitle}"/>
+            <Label Style="{StaticResource RefBody}"
+                   Text="The app divides the year into two seasons for analysis:"/>
+            <Label Style="{StaticResource RefBody}" Margin="16,0,0,4">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="Heating Season: " FontAttributes="Bold" TextColor="#334155"/>
+                        <Span Text="October through March — when most heating occurs" TextColor="#475569"/>
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+            <Label Style="{StaticResource RefBody}" Margin="16,0,0,8">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="Off-Season: " FontAttributes="Bold" TextColor="#334155"/>
+                        <Span Text="April through September — minimal heating, typically just hot water" TextColor="#475569"/>
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+            <Label Style="{StaticResource RefBody}"
+                   Text="This breakdown helps identify consumption patterns and compare heating efficiency across years."/>
+
+            <!-- Carbon Footprint -->
+            <Label Text="Carbon Footprint" Style="{StaticResource RefSectionTitle}"/>
+            <Label Style="{StaticResource RefBody}"
+                   Text="Burning heating oil releases carbon dioxide (CO₂), a greenhouse gas. The app calculates your carbon footprint using the U.S. Energy Information Administration (EIA) emission factor."/>
+            <Border Style="{StaticResource RefFormula}">
+                <VerticalStackLayout Spacing="4">
+                    <Label Style="{StaticResource RefFormulaText}" Text="CO₂ (lbs) = Gallons × 22.38 lbs/gallon"/>
+                    <Label Style="{StaticResource RefFormulaText}" Text="CO₂ (metric tons) = CO₂ (lbs) × 0.000453592"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Text="CO₂ per HDD" Style="{StaticResource RefSubTitle}"/>
+            <Label Style="{StaticResource RefBody}"
+                   Text="This metric normalizes emissions by weather, allowing fair comparison across years with different temperatures. A colder year will have more HDD, so comparing raw emissions would be misleading."/>
+            <Border Style="{StaticResource RefFormula}">
+                <Label Style="{StaticResource RefFormulaText}" Text="CO₂/HDD = Total CO₂ (lbs) ÷ Total HDD"/>
+            </Border>
+
+            <!-- Carbon Offsets -->
+            <Label Text="Carbon Offset Estimates" Style="{StaticResource RefSectionTitle}"/>
+            <Label Style="{StaticResource RefBody}"
+                   Text="Carbon offsets fund projects that reduce or remove CO₂ elsewhere — such as reforestation, renewable energy, or methane capture. Prices vary widely based on project type and verification standard."/>
+            <Border Style="{StaticResource RefFormula}">
+                <Label Style="{StaticResource RefFormulaText}" Text="Offset Cost = CO₂ (metric tons) × Price per ton ($15–$50)"/>
+            </Border>
+            <Label Style="{StaticResource RefBody}"
+                   Text="The app shows a range: $15/ton represents basic offsets (e.g., forestry credits), while $50/ton represents premium verified offsets (e.g., direct air capture)."/>
+            <Label FontSize="13" TextColor="#64748b" FontAttributes="Italic" Margin="0,0,0,8"
+                   Text="Note: Offsets are sold based on lifetime CO₂ absorption, not annual. To offset ongoing annual emissions, you would need to purchase offsets each year."/>
+
+            <!-- Cost Metrics -->
+            <Label Text="Cost Metrics" Style="{StaticResource RefSectionTitle}"/>
+
+            <Label Text="Cost per HDD" Style="{StaticResource RefSubTitle}"/>
+            <Label Style="{StaticResource RefBody}"
+                   Text="Measures heating cost normalized by weather. Useful for comparing years with different temperatures."/>
+            <Border Style="{StaticResource RefFormula}">
+                <Label Style="{StaticResource RefFormulaText}" Text="$/HDD = Total Cost ÷ Total HDD"/>
+            </Border>
+
+            <Label Text="Average Price per Gallon" Style="{StaticResource RefSubTitle}"/>
+            <Label Style="{StaticResource RefBody}"
+                   Text="The weighted average price you paid for oil during a period."/>
+            <Border Style="{StaticResource RefFormula}">
+                <Label Style="{StaticResource RefFormulaText}" Text="Avg $/gal = Total Cost ÷ Total Gallons"/>
+            </Border>
+
+            <!-- Weather Data -->
+            <Label Text="Weather Data" Style="{StaticResource RefSectionTitle}"/>
+            <Label Style="{StaticResource RefBody}"
+                   Text="Temperature data is fetched from the Open-Meteo API, a free weather service. The app uses your configured ZIP code to determine location and retrieves daily high/low temperatures."/>
+            <Label Style="{StaticResource RefBody}"
+                   Text="When a location is configured, the app automatically fetches the latest weather data on startup. This ensures tank estimates using K-Factor stay accurate without manual intervention. You can also manually fetch weather data from Settings if needed."/>
+
+            <!-- Further Reading -->
+            <Label Text="Further Reading" Style="{StaticResource RefSectionTitle}"/>
+            <Label Style="{StaticResource RefBody}" Text="Learn more about the concepts used in this app:"/>
+
+            <VerticalStackLayout Spacing="8" Margin="0,8,0,0">
+                <Label>
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Heating Degree Days: " FontAttributes="Bold" TextColor="#334155" FontSize="13"/>
+                            <Span Text="eia.gov — Degree Days" TextColor="#2563eb" FontSize="13"
+                                  TextDecorations="Underline">
+                                <Span.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenLinkCommand}"
+                                                          CommandParameter="https://www.eia.gov/energyexplained/units-and-calculators/degree-days.php"/>
+                                </Span.GestureRecognizers>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label>
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="CO₂ Emission Factors: " FontAttributes="Bold" TextColor="#334155" FontSize="13"/>
+                            <Span Text="eia.gov — CO₂ Vol &amp; Mass" TextColor="#2563eb" FontSize="13"
+                                  TextDecorations="Underline">
+                                <Span.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenLinkCommand}"
+                                                          CommandParameter="https://www.eia.gov/environment/emissions/co2_vol_mass.php"/>
+                                </Span.GestureRecognizers>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label>
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Carbon Offsets Guide: " FontAttributes="Bold" TextColor="#334155" FontSize="13"/>
+                            <Span Text="offsetguide.org" TextColor="#2563eb" FontSize="13"
+                                  TextDecorations="Underline">
+                                <Span.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenLinkCommand}"
+                                                          CommandParameter="https://offsetguide.org/what-are-carbon-credits/"/>
+                                </Span.GestureRecognizers>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label>
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Home Heating Efficiency: " FontAttributes="Bold" TextColor="#334155" FontSize="13"/>
+                            <Span Text="energystar.gov" TextColor="#2563eb" FontSize="13"
+                                  TextDecorations="Underline">
+                                <Span.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenLinkCommand}"
+                                                          CommandParameter="https://www.energystar.gov/saveathome/heating-cooling"/>
+                                </Span.GestureRecognizers>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label>
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Weather Data Source: " FontAttributes="Bold" TextColor="#334155" FontSize="13"/>
+                            <Span Text="open-meteo.com" TextColor="#2563eb" FontSize="13"
+                                  TextDecorations="Underline">
+                                <Span.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenLinkCommand}"
+                                                          CommandParameter="https://open-meteo.com"/>
+                                </Span.GestureRecognizers>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+            </VerticalStackLayout>
+
+            <!-- Version note -->
+            <Border BackgroundColor="#f8fafc" Stroke="#e2e8f0" StrokeThickness="1"
+                    Padding="15" Margin="0,30,0,20">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="6"/>
+                </Border.StrokeShape>
+                <Label FontSize="13" TextColor="#64748b">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Heating Oil Tracker v1.4" FontAttributes="Bold"/>
+                            <Span Text="&#10;Calculations use standard industry formulas and U.S. EIA emission factors. Actual consumption may vary based on equipment efficiency, home characteristics, and usage patterns."/>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

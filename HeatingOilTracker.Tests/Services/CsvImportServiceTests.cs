@@ -1,6 +1,6 @@
 using FluentAssertions;
-using HeatingOilTracker.Models;
-using HeatingOilTracker.Services;
+using HeatingOilTracker.Core.Models;
+using HeatingOilTracker.Core.Services;
 using Xunit;
 
 namespace HeatingOilTracker.Tests.Services;

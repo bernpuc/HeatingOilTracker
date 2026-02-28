@@ -1,12 +1,7 @@
+using HeatingOilTracker.Core.Interfaces;
+using HeatingOilTracker.Core.Models;
 using HeatingOilTracker.Events;
-using HeatingOilTracker.Models;
-using HeatingOilTracker.Services;
-using Prism.Commands;
-using Prism.Events;
-using Prism.Mvvm;
-using Prism.Navigation.Regions;
 using System.Collections.ObjectModel;
-using System.Windows;
 
 namespace HeatingOilTracker.ViewModels;
 

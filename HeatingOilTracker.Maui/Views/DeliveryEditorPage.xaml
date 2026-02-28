@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="HeatingOilTracker.Maui.Views.DeliveryEditorPage"
+             Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="20">
+
+            <!-- Date -->
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Date" FontAttributes="Bold"/>
+                <DatePicker Date="{Binding Date, Mode=TwoWay}"
+                            Format="MM/dd/yyyy"/>
+            </VerticalStackLayout>
+
+            <!-- Gallons -->
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Gallons" FontAttributes="Bold"/>
+                <Entry Text="{Binding GallonsText, Mode=TwoWay}"
+                       Placeholder="e.g. 150.0"
+                       Keyboard="Numeric"/>
+            </VerticalStackLayout>
+
+            <!-- Price Per Gallon -->
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Price Per Gallon ($)" FontAttributes="Bold"/>
+                <Entry Text="{Binding PricePerGallonText, Mode=TwoWay}"
+                       Placeholder="e.g. 3.899"
+                       Keyboard="Numeric"/>
+            </VerticalStackLayout>
+
+            <!-- Total Cost -->
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Total Cost" FontAttributes="Bold"/>
+                <Label Text="{Binding TotalCostDisplay}"
+                       FontSize="24" FontAttributes="Bold" TextColor="#16a34a"/>
+            </VerticalStackLayout>
+
+            <!-- Filled to Capacity -->
+            <VerticalStackLayout Spacing="6">
+                <HorizontalStackLayout Spacing="10">
+                    <CheckBox IsChecked="{Binding FilledToCapacity, Mode=TwoWay}"/>
+                    <Label Text="Tank was filled to capacity"
+                           FontAttributes="Bold" VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+                <Label Text="Check if the tank was topped off. Uncheck if you ordered a specific amount."
+                       FontSize="12" TextColor="#94a3b8"/>
+            </VerticalStackLayout>
+
+            <!-- Notes -->
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Notes" FontAttributes="Bold"/>
+                <Editor Text="{Binding Notes, Mode=TwoWay}"
+                        Placeholder="Optional notes..."
+                        HeightRequest="80"
+                        AutoSize="Disabled"/>
+            </VerticalStackLayout>
+
+            <!-- Buttons -->
+            <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
+                <Button Text="Cancel"
+                        Command="{Binding CancelCommand}"
+                        BackgroundColor="#64748b" TextColor="White" CornerRadius="6"/>
+                <Button Text="Save"
+                        Command="{Binding SaveCommand}"
+                        BackgroundColor="#2563eb" TextColor="White" CornerRadius="6"/>
+            </HorizontalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

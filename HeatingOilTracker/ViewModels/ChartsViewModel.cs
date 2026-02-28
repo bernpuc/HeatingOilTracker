@@ -1,12 +1,10 @@
-using HeatingOilTracker.Services;
+using HeatingOilTracker.Core.Interfaces;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.Painting.Effects;
-using Prism.Mvvm;
-using Prism.Navigation.Regions;
 using SkiaSharp;
 using System.Collections.ObjectModel;
 

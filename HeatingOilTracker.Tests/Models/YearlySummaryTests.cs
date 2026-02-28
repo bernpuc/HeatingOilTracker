@@ -1,5 +1,5 @@
 using FluentAssertions;
-using HeatingOilTracker.Models;
+using HeatingOilTracker.Core.Models;
 using Xunit;
 
 namespace HeatingOilTracker.Tests.Models;

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
+             x:Class="HeatingOilTracker.Maui.Views.ChartsPage"
+             Title="Charts">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16">
+
+            <!-- Empty State -->
+            <Label Text="No delivery data available. Add deliveries to see charts."
+                   FontSize="16" TextColor="#94a3b8"
+                   HorizontalOptions="Center" Margin="0,40"
+                   IsVisible="{Binding HasData, Converter={StaticResource InverseBoolConverter}}"/>
+
+            <VerticalStackLayout IsVisible="{Binding HasData}" Spacing="16">
+
+                <!-- Delivery Comparison Chart -->
+                <Border IsVisible="{Binding HasDeliveryComparisonData}"
+                        BackgroundColor="#f8fafc" Stroke="#e2e8f0" StrokeThickness="1" Padding="16">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8"/>
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Actual Delivered vs Estimated Use"
+                               FontSize="15" FontAttributes="Bold" TextColor="#334155"/>
+                        <HorizontalStackLayout Spacing="12">
+                            <HorizontalStackLayout Spacing="4">
+                                <BoxView BackgroundColor="#2563eb" WidthRequest="12" HeightRequest="12" CornerRadius="2"/>
+                                <Label Text="Actual" FontSize="11" TextColor="#64748b"/>
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="4">
+                                <BoxView BackgroundColor="#f97316" WidthRequest="12" HeightRequest="12" CornerRadius="2"/>
+                                <Label Text="Est. (HDD)" FontSize="11" TextColor="#64748b"/>
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="4">
+                                <BoxView BackgroundColor="#10b981" WidthRequest="12" HeightRequest="12" CornerRadius="2"/>
+                                <Label Text="Est. (Burn Rate)" FontSize="11" TextColor="#64748b"/>
+                            </HorizontalStackLayout>
+                        </HorizontalStackLayout>
+                        <lvc:CartesianChart Series="{Binding DeliveryComparisonSeries}"
+                                            XAxes="{Binding DeliveryComparisonXAxes}"
+                                            YAxes="{Binding DeliveryComparisonYAxes}"
+                                            HeightRequest="250"
+                                            ZoomMode="X"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Burn Rate Chart -->
+                <Border BackgroundColor="#f8fafc" Stroke="#e2e8f0" StrokeThickness="1" Padding="16">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8"/>
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Burn Rate (Gallons/Day)"
+                               FontSize="15" FontAttributes="Bold" TextColor="#334155"/>
+                        <lvc:CartesianChart Series="{Binding BurnRateSeries}"
+                                            XAxes="{Binding BurnRateXAxes}"
+                                            YAxes="{Binding BurnRateYAxes}"
+                                            HeightRequest="250"
+                                            ZoomMode="X"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Price Chart -->
+                <Border BackgroundColor="#f8fafc" Stroke="#e2e8f0" StrokeThickness="1" Padding="16">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8"/>
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Price per Gallon"
+                               FontSize="15" FontAttributes="Bold" TextColor="#334155"/>
+                        <lvc:CartesianChart Series="{Binding PriceSeries}"
+                                            XAxes="{Binding PriceXAxes}"
+                                            YAxes="{Binding PriceYAxes}"
+                                            HeightRequest="250"
+                                            ZoomMode="X"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- K-Factor Chart -->
+                <Border IsVisible="{Binding HasKFactorData}"
+                        BackgroundColor="#f8fafc" Stroke="#e2e8f0" StrokeThickness="1" Padding="16">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8"/>
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="K-Factor (Gallons per Heating Degree Day)"
+                               FontSize="15" FontAttributes="Bold" TextColor="#334155"/>
+                        <lvc:CartesianChart Series="{Binding KFactorSeries}"
+                                            XAxes="{Binding KFactorXAxes}"
+                                            YAxes="{Binding KFactorYAxes}"
+                                            HeightRequest="250"
+                                            ZoomMode="X"/>
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

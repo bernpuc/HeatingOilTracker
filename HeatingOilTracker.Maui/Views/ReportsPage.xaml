@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="HeatingOilTracker.Maui.Views.ReportsPage"
+             Title="Reports">
+
+    <RefreshView Command="{Binding RefreshCommand}" IsRefreshing="False">
+        <ScrollView>
+            <VerticalStackLayout Padding="16" Spacing="16">
+
+                <!-- Year Picker -->
+                <HorizontalStackLayout Spacing="12" IsVisible="{Binding HasData}">
+                    <Label Text="Year:" VerticalOptions="Center" TextColor="#64748b"/>
+                    <Picker ItemsSource="{Binding AvailableYears}"
+                            SelectedItem="{Binding SelectedYear}"
+                            WidthRequest="120"/>
+                </HorizontalStackLayout>
+
+                <!-- Empty State -->
+                <Label Text="No delivery data available. Add deliveries to see reports."
+                       FontSize="16" TextColor="#94a3b8"
+                       HorizontalOptions="Center" Margin="0,40"
+                       IsVisible="{Binding HasData, Converter={StaticResource InverseBoolConverter}}"/>
+
+                <!-- Content -->
+                <VerticalStackLayout IsVisible="{Binding HasData}" Spacing="16">
+
+                    <!-- Row 1: Cost / Gallons / Price Cards -->
+                    <Grid ColumnDefinitions="*,8,*" RowDefinitions="Auto,8,Auto">
+
+                        <!-- Total Cost -->
+                        <Border Grid.Column="0" Grid.Row="0" BackgroundColor="#dbeafe"
+                                Stroke="#2563eb" StrokeThickness="1" Padding="16">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8"/>
+                            </Border.StrokeShape>
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="TOTAL COST" FontSize="11" FontAttributes="Bold" TextColor="#1e40af"/>
+                                <Label Text="{Binding TotalCost}" FontSize="24" FontAttributes="Bold" TextColor="#1e40af"/>
+                                <Label Text="{Binding DeliveryCount, StringFormat='{0} deliveries'}" FontSize="12" TextColor="#3b82f6"/>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <!-- Total Gallons -->
+                        <Border Grid.Column="2" Grid.Row="0" BackgroundColor="#dcfce7"
+                                Stroke="#16a34a" StrokeThickness="1" Padding="16">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8"/>
+                            </Border.StrokeShape>
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="TOTAL GALLONS" FontSize="11" FontAttributes="Bold" TextColor="#166534"/>
+                                <Label Text="{Binding TotalGallons, StringFormat='{0} gal'}" FontSize="24" FontAttributes="Bold" TextColor="#166534"/>
+                                <Label Text="{Binding TotalHDD, StringFormat='{0} HDD'}" FontSize="12" TextColor="#22c55e"/>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <!-- Avg Price -->
+                        <Border Grid.Column="0" Grid.Row="2" BackgroundColor="#fef3c7"
+                                Stroke="#d97706" StrokeThickness="1" Padding="16">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8"/>
+                            </Border.StrokeShape>
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="AVG PRICE/GAL" FontSize="11" FontAttributes="Bold" TextColor="#92400e"/>
+                                <Label Text="{Binding AvgPricePerGallon, StringFormat='${0}'}" FontSize="24" FontAttributes="Bold" TextColor="#92400e"/>
+                                <Label Text="{Binding AvgKFactor, StringFormat='K-Factor: {0}'}" FontSize="12" TextColor="#f59e0b"/>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <!-- Carbon Footprint -->
+                        <Border Grid.Column="2" Grid.Row="2" BackgroundColor="#fce7f3"
+                                Stroke="#db2777" StrokeThickness="1" Padding="16">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8"/>
+                            </Border.StrokeShape>
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="CARBON FOOTPRINT" FontSize="11" FontAttributes="Bold" TextColor="#9d174d"/>
+                                <Label Text="{Binding TotalCO2Lbs, StringFormat='{0} lbs'}" FontSize="20" FontAttributes="Bold" TextColor="#9d174d"/>
+                                <Label Text="{Binding TotalCO2MetricTons, StringFormat='{0} metric tons'}" FontSize="12" TextColor="#ec4899"/>
+                            </VerticalStackLayout>
+                        </Border>
+                    </Grid>
+
+                    <!-- CO2 / Offset Cards -->
+                    <Grid ColumnDefinitions="*,8,*">
+                        <Border Grid.Column="0" BackgroundColor="#ede9fe"
+                                Stroke="#7c3aed" StrokeThickness="1" Padding="16">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8"/>
+                            </Border.StrokeShape>
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="CO₂ PER HDD" FontSize="11" FontAttributes="Bold" TextColor="#5b21b6"/>
+                                <Label Text="{Binding CO2LbsPerHDD, StringFormat='{0} lbs'}" FontSize="22" FontAttributes="Bold" TextColor="#5b21b6"/>
+                                <Label Text="Weather-normalized" FontSize="11" TextColor="#8b5cf6"/>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Border Grid.Column="2" BackgroundColor="#ecfdf5"
+                                Stroke="#059669" StrokeThickness="1" Padding="16">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8"/>
+                            </Border.StrokeShape>
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="OFFSET ESTIMATE" FontSize="11" FontAttributes="Bold" TextColor="#065f46"/>
+                                <Label Text="{Binding OffsetCostRange}" FontSize="18" FontAttributes="Bold" TextColor="#065f46"/>
+                                <Label Text="$15–$50/ton offset prices" FontSize="11" TextColor="#10b981"/>
+                            </VerticalStackLayout>
+                        </Border>
+                    </Grid>
+
+                    <!-- Seasonal Breakdown -->
+                    <Border BackgroundColor="#f8fafc" Stroke="#e2e8f0" StrokeThickness="1" Padding="16">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="8"/>
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="SEASONAL BREAKDOWN" FontSize="11" FontAttributes="Bold" TextColor="#64748b"/>
+
+                            <Grid ColumnDefinitions="*,8,*">
+                                <!-- Heating Season -->
+                                <Border Grid.Column="0" BackgroundColor="White"
+                                        Stroke="#e2e8f0" StrokeThickness="1" Padding="12">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="6"/>
+                                    </Border.StrokeShape>
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="Heating (Oct–Mar)" FontAttributes="Bold" TextColor="#1e293b"/>
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Label Text="Cost:" TextColor="#64748b"/>
+                                            <Label Grid.Column="1" Text="{Binding CurrentBreakdown.HeatingSeasonCost, StringFormat='{0:C2}', FallbackValue='--'}" FontAttributes="Bold"/>
+                                        </Grid>
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Label Text="Gallons:" TextColor="#64748b"/>
+                                            <Label Grid.Column="1" Text="{Binding CurrentBreakdown.HeatingSeasonGallons, StringFormat='{0:F1} gal', FallbackValue='--'}" FontAttributes="Bold"/>
+                                        </Grid>
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Label Text="% Cost:" TextColor="#64748b"/>
+                                            <Label Grid.Column="1" Text="{Binding HeatingSeasonCostPercent}" FontAttributes="Bold" TextColor="#dc2626"/>
+                                        </Grid>
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Label Text="CO₂:" TextColor="#64748b"/>
+                                            <Label Grid.Column="1" Text="{Binding CurrentBreakdown.HeatingSeasonCO2Lbs, StringFormat='{0:N0} lbs', FallbackValue='--'}" FontAttributes="Bold"/>
+                                        </Grid>
+                                    </VerticalStackLayout>
+                                </Border>
+
+                                <!-- Off Season -->
+                                <Border Grid.Column="2" BackgroundColor="White"
+                                        Stroke="#e2e8f0" StrokeThickness="1" Padding="12">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="6"/>
+                                    </Border.StrokeShape>
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="Off-Season (Apr–Sep)" FontAttributes="Bold" TextColor="#1e293b"/>
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Label Text="Cost:" TextColor="#64748b"/>
+                                            <Label Grid.Column="1" Text="{Binding CurrentBreakdown.OffSeasonCost, StringFormat='{0:C2}', FallbackValue='--'}" FontAttributes="Bold"/>
+                                        </Grid>
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Label Text="Gallons:" TextColor="#64748b"/>
+                                            <Label Grid.Column="1" Text="{Binding CurrentBreakdown.OffSeasonGallons, StringFormat='{0:F1} gal', FallbackValue='--'}" FontAttributes="Bold"/>
+                                        </Grid>
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Label Text="% Cost:" TextColor="#64748b"/>
+                                            <Label Grid.Column="1" Text="{Binding OffSeasonCostPercent}" FontAttributes="Bold" TextColor="#16a34a"/>
+                                        </Grid>
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Label Text="CO₂:" TextColor="#64748b"/>
+                                            <Label Grid.Column="1" Text="{Binding CurrentBreakdown.OffSeasonCO2Lbs, StringFormat='{0:N0} lbs', FallbackValue='--'}" FontAttributes="Bold"/>
+                                        </Grid>
+                                    </VerticalStackLayout>
+                                </Border>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Year over Year Table -->
+                    <Border BackgroundColor="#f8fafc" Stroke="#e2e8f0" StrokeThickness="1" Padding="16">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="8"/>
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="YEAR-OVER-YEAR" FontSize="11" FontAttributes="Bold" TextColor="#64748b"/>
+
+                            <!-- Header -->
+                            <Grid ColumnDefinitions="50,60,70,80,70" BackgroundColor="#f1f5f9" Padding="4">
+                                <Label Grid.Column="0" Text="Year" FontSize="11" FontAttributes="Bold" TextColor="#64748b"/>
+                                <Label Grid.Column="1" Text="Del." FontSize="11" FontAttributes="Bold" TextColor="#64748b" HorizontalOptions="End"/>
+                                <Label Grid.Column="2" Text="Gallons" FontSize="11" FontAttributes="Bold" TextColor="#64748b" HorizontalOptions="End"/>
+                                <Label Grid.Column="3" Text="Cost" FontSize="11" FontAttributes="Bold" TextColor="#64748b" HorizontalOptions="End"/>
+                                <Label Grid.Column="4" Text="$/Gal" FontSize="11" FontAttributes="Bold" TextColor="#64748b" HorizontalOptions="End"/>
+                            </Grid>
+
+                            <CollectionView ItemsSource="{Binding AllSummaries}">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnDefinitions="50,60,70,80,70" Padding="4,6">
+                                            <Label Grid.Column="0" Text="{Binding Year}" FontAttributes="Bold" FontSize="13"/>
+                                            <Label Grid.Column="1" Text="{Binding DeliveryCount}" FontSize="13" HorizontalOptions="End"/>
+                                            <Label Grid.Column="2" Text="{Binding TotalGallons, StringFormat='{0:F0}'}" FontSize="13" HorizontalOptions="End"/>
+                                            <Label Grid.Column="3" Text="{Binding TotalCost, StringFormat='{0:C0}'}" FontSize="13" HorizontalOptions="End" TextColor="#16a34a"/>
+                                            <Label Grid.Column="4" Text="{Binding AvgPricePerGallon, StringFormat='{0:F3}'}" FontSize="13" HorizontalOptions="End"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+                    </Border>
+
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+</ContentPage>

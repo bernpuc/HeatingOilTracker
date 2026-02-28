@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="HeatingOilTracker.Maui.Views.DeliveriesPage"
+             Title="Deliveries">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Padding="16" RowSpacing="12">
+
+        <!-- Toolbar -->
+        <HorizontalStackLayout Grid.Row="0" Spacing="8">
+            <Button Text="+ Add" Command="{Binding AddCommand}"
+                    BackgroundColor="#2563eb" TextColor="White" CornerRadius="6"/>
+            <Button Text="Edit" Command="{Binding EditCommand}"
+                    IsEnabled="{Binding HasSelection}"
+                    BackgroundColor="#64748b" TextColor="White" CornerRadius="6"/>
+            <Button Text="Delete" Command="{Binding DeleteCommand}"
+                    IsEnabled="{Binding HasSelection}"
+                    BackgroundColor="#dc2626" TextColor="White" CornerRadius="6"/>
+            <Button Text="Import" Command="{Binding ImportCommand}"
+                    BackgroundColor="#64748b" TextColor="White" CornerRadius="6"/>
+            <Button Text="Export" Command="{Binding ExportCommand}"
+                    IsEnabled="{Binding HasDeliveries}"
+                    BackgroundColor="#64748b" TextColor="White" CornerRadius="6"/>
+        </HorizontalStackLayout>
+
+        <!-- Column Headers -->
+        <Grid Grid.Row="1" ColumnDefinitions="110,70,65,90,*"
+              IsVisible="{Binding HasDeliveries}"
+              Padding="10,6" BackgroundColor="#f1f5f9">
+            <Label Grid.Column="0" Text="Date" FontSize="11" FontAttributes="Bold" TextColor="#64748b"/>
+            <Label Grid.Column="1" Text="Gallons" FontSize="11" FontAttributes="Bold" TextColor="#64748b" HorizontalOptions="End"/>
+            <Label Grid.Column="2" Text="$/Gal" FontSize="11" FontAttributes="Bold" TextColor="#64748b" HorizontalOptions="End"/>
+            <Label Grid.Column="3" Text="Total" FontSize="11" FontAttributes="Bold" TextColor="#64748b" HorizontalOptions="End"/>
+            <Label Grid.Column="4" Text="Notes" FontSize="11" FontAttributes="Bold" TextColor="#64748b"/>
+        </Grid>
+
+        <!-- Empty State -->
+        <Label Grid.Row="2"
+               Text="No deliveries yet. Tap '+ Add' to record your first delivery."
+               FontSize="16" TextColor="#94a3b8"
+               HorizontalOptions="Center" VerticalOptions="Center"
+               IsVisible="{Binding HasDeliveries, Converter={StaticResource InverseBoolConverter}}"/>
+
+        <!-- Deliveries List -->
+        <RefreshView Grid.Row="2" Command="{Binding RefreshCommand}" IsRefreshing="False"
+                     IsVisible="{Binding HasDeliveries}">
+            <CollectionView ItemsSource="{Binding Deliveries}"
+                            SelectionMode="Single"
+                            SelectedItem="{Binding SelectedDelivery}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnDefinitions="110,70,65,90,*"
+                              Padding="10,10"
+                              RowSpacing="0">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectDeliveryCommand}"
+                                    CommandParameter="{Binding .}"/>
+                            </Grid.GestureRecognizers>
+                            <Label Grid.Column="0" Text="{Binding Date, StringFormat='{0:MM/dd/yyyy}'}"
+                                   VerticalOptions="Center" FontSize="13"/>
+                            <Label Grid.Column="1" Text="{Binding Gallons, StringFormat='{0:F1}'}"
+                                   HorizontalOptions="End" VerticalOptions="Center" FontSize="13"/>
+                            <Label Grid.Column="2" Text="{Binding PricePerGallon, StringFormat='{0:F3}'}"
+                                   HorizontalOptions="End" VerticalOptions="Center" FontSize="13"/>
+                            <Label Grid.Column="3" Text="{Binding TotalCost, StringFormat='{0:C2}'}"
+                                   HorizontalOptions="End" VerticalOptions="Center" FontSize="13" TextColor="#16a34a"/>
+                            <Label Grid.Column="4" Text="{Binding Notes}"
+                                   VerticalOptions="Center" FontSize="13" TextColor="#64748b"
+                                   LineBreakMode="TailTruncation" Margin="8,0,0,0"/>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+
+        <!-- Summary Footer -->
+        <Border Grid.Row="3" BackgroundColor="#f8fafc" Stroke="#e2e8f0"
+                StrokeThickness="1" Padding="12,8">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="6"/>
+            </Border.StrokeShape>
+            <Grid ColumnDefinitions="*,*">
+                <VerticalStackLayout Grid.Column="0" Spacing="2">
+                    <Label Text="{Binding TotalDeliveriesText}" FontAttributes="Bold" FontSize="12"/>
+                    <Label Text="{Binding AveragePriceText}" FontSize="12" TextColor="#64748b"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="2">
+                    <Label Text="{Binding AverageBurnRateText}" FontSize="12" TextColor="#64748b"/>
+                    <Label Text="{Binding AverageKFactorText}" FontSize="12" TextColor="#64748b"/>
+                </VerticalStackLayout>
+            </Grid>
+        </Border>
+
+    </Grid>
+</ContentPage>

@@ -1,11 +1,9 @@
 using HeatingOilTracker.Converters;
+using HeatingOilTracker.Core.Interfaces;
+using HeatingOilTracker.Core.Services;
 using HeatingOilTracker.Events;
-using HeatingOilTracker.Services;
 using HeatingOilTracker.ViewModels;
 using HeatingOilTracker.Views;
-using Prism.Events;
-using Prism.Ioc;
-using Prism.Navigation.Regions;
 using System.Windows;
 using System.Windows.Threading;
 

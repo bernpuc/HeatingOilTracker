@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="HeatingOilTracker.Maui.Views.SettingsPage"
+             Title="Settings">
+
+    <RefreshView Command="{Binding RefreshCommand}" IsRefreshing="False">
+        <ScrollView>
+            <VerticalStackLayout Padding="20" Spacing="0">
+
+                <!-- Tank Capacity -->
+                <VerticalStackLayout Spacing="6" Margin="0,0,0,24">
+                    <Label Text="Tank Capacity (Gallons)" FontAttributes="Bold"/>
+                    <Entry Text="{Binding TankCapacityText, Mode=TwoWay}"
+                           Keyboard="Numeric" WidthRequest="200"
+                           HorizontalOptions="Start"/>
+                </VerticalStackLayout>
+
+                <BoxView HeightRequest="1" BackgroundColor="#e2e8f0" Margin="0,0,0,24"/>
+
+                <!-- Location -->
+                <VerticalStackLayout Spacing="10" Margin="0,0,0,24">
+                    <Label Text="Location" FontSize="16" FontAttributes="Bold" TextColor="#334155"/>
+
+                    <Label Text="Current Location" FontAttributes="Bold"/>
+                    <Label Text="{Binding LocationDisplay}" TextColor="#64748b"/>
+
+                    <Label Text="Search City/Town" FontAttributes="Bold" Margin="0,8,0,0"/>
+                    <HorizontalStackLayout Spacing="10">
+                        <Entry Text="{Binding LocationSearch, Mode=TwoWay}"
+                               Placeholder="e.g. Naugatuck, CT"
+                               WidthRequest="220"/>
+                        <Button Text="{Binding SearchButtonText}"
+                                Command="{Binding SearchLocationCommand}"
+                                BackgroundColor="#64748b" TextColor="White" CornerRadius="6"/>
+                    </HorizontalStackLayout>
+
+                    <!-- Search Results -->
+                    <CollectionView ItemsSource="{Binding LocationSearchResults}"
+                                    SelectionMode="Single"
+                                    SelectedItem="{Binding SelectedSearchResult}"
+                                    IsVisible="{Binding HasSearchResults}"
+                                    MaximumHeightRequest="180">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Label Text="{Binding DisplayName}"
+                                       Padding="12,10"
+                                       BackgroundColor="White"/>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Label Text="Search for your city then tap a result to set your location."
+                           FontSize="11" TextColor="#94a3b8"/>
+                </VerticalStackLayout>
+
+                <BoxView HeightRequest="1" BackgroundColor="#e2e8f0" Margin="0,0,0,24"/>
+
+                <!-- Regional Settings -->
+                <VerticalStackLayout Spacing="10" Margin="0,0,0,24">
+                    <Label Text="Regional Settings" FontSize="16" FontAttributes="Bold" TextColor="#334155"/>
+
+                    <Label Text="Display Currency" FontAttributes="Bold"/>
+                    <Picker ItemsSource="{Binding Currencies}"
+                            SelectedItem="{Binding SelectedCulture}"
+                            ItemDisplayBinding="{Binding DisplayName}"/>
+
+                    <Label Text="Temperature Unit" FontAttributes="Bold" Margin="0,8,0,0"/>
+                    <Picker ItemsSource="{Binding TemperatureUnitsCollection}"
+                            SelectedItem="{Binding SelectedTemperatureUnit}"
+                            ItemDisplayBinding="{Binding DisplayName}"/>
+
+                    <Label Text="Fuel Type" FontAttributes="Bold" Margin="0,8,0,0"/>
+                    <Picker ItemsSource="{Binding FuelTypesCollection}"
+                            SelectedItem="{Binding SelectedFuelType}"
+                            ItemDisplayBinding="{Binding DisplayName}"/>
+
+                    <Label Text="Fuel type affects CO2 emission calculations in reports."
+                           FontSize="11" TextColor="#94a3b8"/>
+                </VerticalStackLayout>
+
+                <BoxView HeightRequest="1" BackgroundColor="#e2e8f0" Margin="0,0,0,24"/>
+
+                <!-- Weather Data -->
+                <VerticalStackLayout Spacing="10" Margin="0,0,0,24">
+                    <Label Text="Weather Data" FontSize="16" FontAttributes="Bold" TextColor="#334155"/>
+                    <Label Text="{Binding WeatherStatus}" TextColor="#64748b"/>
+                    <Button Text="{Binding FetchWeatherButtonText}"
+                            Command="{Binding FetchWeatherCommand}"
+                            BackgroundColor="#64748b" TextColor="White"
+                            CornerRadius="6" HorizontalOptions="Start"/>
+                    <Label Text="Fetches historical temperature data from Open-Meteo to calculate heating degree days."
+                           FontSize="11" TextColor="#94a3b8"/>
+                </VerticalStackLayout>
+
+                <BoxView HeightRequest="1" BackgroundColor="#e2e8f0" Margin="0,0,0,24"/>
+
+                <!-- Delivery Reminders -->
+                <VerticalStackLayout Spacing="10" Margin="0,0,0,24">
+                    <Label Text="Delivery Reminders" FontSize="16" FontAttributes="Bold" TextColor="#334155"/>
+
+                    <HorizontalStackLayout Spacing="10">
+                        <CheckBox IsChecked="{Binding ReminderEnabled, Mode=TwoWay}"/>
+                        <Label Text="Enable low-tank reminders" VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+
+                    <Label Text="Alert when tank falls below (gallons):" FontAttributes="Bold"/>
+                    <Entry Text="{Binding ThresholdGallonsText, Mode=TwoWay}"
+                           Keyboard="Numeric" WidthRequest="120" HorizontalOptions="Start"/>
+
+                    <Label Text="Or when days remaining falls below (optional):" FontAttributes="Bold"/>
+                    <Entry Text="{Binding ThresholdDaysText, Mode=TwoWay}"
+                           Placeholder="e.g. 14"
+                           Keyboard="Numeric" WidthRequest="120" HorizontalOptions="Start"/>
+
+                    <Label Text="Alerts appear on the Dashboard when estimated tank level drops below the threshold."
+                           FontSize="11" TextColor="#94a3b8"/>
+                </VerticalStackLayout>
+
+                <BoxView HeightRequest="1" BackgroundColor="#e2e8f0" Margin="0,0,0,24"/>
+
+                <!-- Data File Location -->
+                <VerticalStackLayout Spacing="6" Margin="0,0,0,24">
+                    <Label Text="Data File Location" FontAttributes="Bold"/>
+                    <Label Text="{Binding DataFilePath}" FontSize="11"
+                           TextColor="#64748b" LineBreakMode="CharacterWrap"/>
+                </VerticalStackLayout>
+
+                <!-- Save Button -->
+                <Button Text="Save Settings"
+                        Command="{Binding SaveCommand}"
+                        BackgroundColor="#2563eb" TextColor="White"
+                        CornerRadius="6" HorizontalOptions="Start"
+                        Margin="0,0,0,40"/>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+</ContentPage>

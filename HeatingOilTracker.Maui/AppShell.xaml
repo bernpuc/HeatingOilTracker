@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:views="clr-namespace:HeatingOilTracker.Maui.Views"
+       x:Class="HeatingOilTracker.Maui.AppShell"
+       FlyoutBehavior="Flyout"
+       FlyoutBackgroundColor="#1e293b">
+
+    <Shell.FlyoutHeader>
+        <Grid HeightRequest="80" BackgroundColor="#0f172a">
+            <Label Text="🛢 Oil Tracker"
+                   TextColor="White"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"/>
+        </Grid>
+    </Shell.FlyoutHeader>
+
+    <Shell.ItemTemplate>
+        <DataTemplate>
+            <Grid HeightRequest="52" BackgroundColor="Transparent" Padding="12,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="36"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0"
+                       Text="{Binding FlyoutIcon}"
+                       FontSize="18"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Center"/>
+                <Label Grid.Column="1"
+                       Text="{Binding Title}"
+                       TextColor="#cbd5e1"
+                       FontSize="14"
+                       VerticalOptions="Center"/>
+            </Grid>
+        </DataTemplate>
+    </Shell.ItemTemplate>
+
+    <FlyoutItem Title="Dashboard" FlyoutIcon="🏠">
+        <ShellContent ContentTemplate="{DataTemplate views:DashboardPage}"/>
+    </FlyoutItem>
+
+    <FlyoutItem Title="Deliveries" FlyoutIcon="🚛">
+        <ShellContent ContentTemplate="{DataTemplate views:DeliveriesPage}"/>
+    </FlyoutItem>
+
+    <FlyoutItem Title="Charts" FlyoutIcon="📈">
+        <ShellContent ContentTemplate="{DataTemplate views:ChartsPage}"/>
+    </FlyoutItem>
+
+    <FlyoutItem Title="Weather" FlyoutIcon="🌡">
+        <ShellContent ContentTemplate="{DataTemplate views:WeatherPage}"/>
+    </FlyoutItem>
+
+    <FlyoutItem Title="Reports" FlyoutIcon="📄">
+        <ShellContent ContentTemplate="{DataTemplate views:ReportsPage}"/>
+    </FlyoutItem>
+
+    <FlyoutItem Title="Settings" FlyoutIcon="⚙">
+        <ShellContent ContentTemplate="{DataTemplate views:SettingsPage}"/>
+    </FlyoutItem>
+
+    <FlyoutItem Title="Reference" FlyoutIcon="📖">
+        <ShellContent ContentTemplate="{DataTemplate views:ReferencePage}"/>
+    </FlyoutItem>
+
+</Shell>

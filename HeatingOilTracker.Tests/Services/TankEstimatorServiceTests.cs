@@ -1,6 +1,7 @@
 using FluentAssertions;
-using HeatingOilTracker.Models;
-using HeatingOilTracker.Services;
+using HeatingOilTracker.Core.Interfaces;
+using HeatingOilTracker.Core.Models;
+using HeatingOilTracker.Core.Services;
 using HeatingOilTracker.Tests.Fixtures;
 using Moq;
 using Xunit;
