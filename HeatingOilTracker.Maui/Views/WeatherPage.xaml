@@ -5,92 +5,95 @@
              x:Class="HeatingOilTracker.Maui.Views.WeatherPage"
              Title="Weather">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="16">
+    <RefreshView Command="{Binding RefreshCommand}" IsRefreshing="{Binding IsRefreshing}">
+        <ScrollView VerticalScrollBarVisibility="Never">
+            <VerticalStackLayout Padding="16" Spacing="16">
 
-            <!-- Empty State -->
-            <Label Text="No weather data available. Configure your location in Settings."
+                <!-- Empty State -->
+                <Label Text="No weather data available. Configure your location in Settings."
                    FontSize="16" TextColor="#94a3b8"
                    HorizontalOptions="Center" Margin="0,40"
                    IsVisible="{Binding HasData, Converter={StaticResource InverseBoolConverter}}"/>
 
-            <!-- Main Content -->
-            <VerticalStackLayout IsVisible="{Binding HasData}" Spacing="16">
+                <!-- Main Content -->
+                <VerticalStackLayout IsVisible="{Binding HasData}" Spacing="16">
 
-                <!-- Range Selector -->
-                <Border BackgroundColor="#f8fafc" Stroke="#e2e8f0" StrokeThickness="1" Padding="12">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="8"/>
-                    </Border.StrokeShape>
-                    <VerticalStackLayout Spacing="8">
-                        <Label Text="Date Range" FontSize="13" FontAttributes="Bold" TextColor="#334155"/>
-                        <HorizontalStackLayout Spacing="8">
-                            <Button Text="1W" Command="{Binding Select1WCommand}"
+                    <!-- Range Selector -->
+                    <Border BackgroundColor="#f8fafc" Stroke="#e2e8f0" StrokeThickness="1" Padding="12">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="8"/>
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Date Range" FontSize="13" FontAttributes="Bold" TextColor="#334155"/>
+                            <HorizontalStackLayout Spacing="8">
+                                <Button Text="1W" Command="{Binding Select1WCommand}"
                                     BackgroundColor="{Binding SelectedRange, Converter={StaticResource RangeToColorConverter}, ConverterParameter='1W'}"
                                     TextColor="White" FontSize="13"
                                     Padding="16,8" CornerRadius="6"/>
-                            <Button Text="1M" Command="{Binding Select1MCommand}"
+                                <Button Text="1M" Command="{Binding Select1MCommand}"
                                     BackgroundColor="{Binding SelectedRange, Converter={StaticResource RangeToColorConverter}, ConverterParameter='1M'}"
                                     TextColor="White" FontSize="13"
                                     Padding="16,8" CornerRadius="6"/>
-                            <Button Text="3M" Command="{Binding Select3MCommand}"
+                                <Button Text="3M" Command="{Binding Select3MCommand}"
                                     BackgroundColor="{Binding SelectedRange, Converter={StaticResource RangeToColorConverter}, ConverterParameter='3M'}"
                                     TextColor="White" FontSize="13"
                                     Padding="16,8" CornerRadius="6"/>
-                            <Button Text="1Y" Command="{Binding Select1YCommand}"
+                                <Button Text="1Y" Command="{Binding Select1YCommand}"
                                     BackgroundColor="{Binding SelectedRange, Converter={StaticResource RangeToColorConverter}, ConverterParameter='1Y'}"
                                     TextColor="White" FontSize="13"
                                     Padding="16,8" CornerRadius="6"/>
-                            <Button Text="All" Command="{Binding SelectAllCommand}"
+                                <Button Text="All" Command="{Binding SelectAllCommand}"
                                     BackgroundColor="{Binding SelectedRange, Converter={StaticResource RangeToColorConverter}, ConverterParameter='All'}"
                                     TextColor="White" FontSize="13"
                                     Padding="16,8" CornerRadius="6"/>
-                        </HorizontalStackLayout>
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Info Labels -->
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="{Binding DataPointsInfo}" FontSize="12" TextColor="#64748b"/>
+                        <Label Text="{Binding AggregationInfo}" FontSize="12" TextColor="#94a3b8" FontAttributes="Italic"/>
                     </VerticalStackLayout>
-                </Border>
 
-                <!-- Info Labels -->
-                <VerticalStackLayout Spacing="2">
-                    <Label Text="{Binding DataPointsInfo}" FontSize="12" TextColor="#64748b"/>
-                    <Label Text="{Binding AggregationInfo}" FontSize="12" TextColor="#94a3b8" FontAttributes="Italic"/>
-                </VerticalStackLayout>
-
-                <!-- Temperature Chart -->
-                <Border BackgroundColor="#f8fafc" Stroke="#e2e8f0" StrokeThickness="1" Padding="16">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="8"/>
-                    </Border.StrokeShape>
-                    <VerticalStackLayout Spacing="10">
-                        <Label Text="Temperature History"
+                    <!-- Temperature Chart -->
+                    <Border BackgroundColor="#f8fafc" Stroke="#e2e8f0" StrokeThickness="1" Padding="16">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="8"/>
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="Temperature History"
                                FontSize="15" FontAttributes="Bold" TextColor="#334155"/>
-                        <!-- Legend -->
-                        <HorizontalStackLayout Spacing="12">
-                            <HorizontalStackLayout Spacing="4">
-                                <BoxView BackgroundColor="#ef4444" WidthRequest="12" HeightRequest="12" CornerRadius="2"/>
-                                <Label Text="High" FontSize="11" TextColor="#64748b"/>
+                            <!-- Legend -->
+                            <HorizontalStackLayout Spacing="12">
+                                <HorizontalStackLayout Spacing="4">
+                                    <BoxView BackgroundColor="#ef4444" WidthRequest="12" HeightRequest="12" CornerRadius="2"/>
+                                    <Label Text="High" FontSize="11" TextColor="#64748b"/>
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Spacing="4">
+                                    <BoxView BackgroundColor="#3b82f6" WidthRequest="12" HeightRequest="12" CornerRadius="2"/>
+                                    <Label Text="Average" FontSize="11" TextColor="#64748b"/>
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Spacing="4">
+                                    <BoxView BackgroundColor="#22c55e" WidthRequest="12" HeightRequest="12" CornerRadius="2"/>
+                                    <Label Text="Low" FontSize="11" TextColor="#64748b"/>
+                                </HorizontalStackLayout>
                             </HorizontalStackLayout>
-                            <HorizontalStackLayout Spacing="4">
-                                <BoxView BackgroundColor="#3b82f6" WidthRequest="12" HeightRequest="12" CornerRadius="2"/>
-                                <Label Text="Average" FontSize="11" TextColor="#64748b"/>
-                            </HorizontalStackLayout>
-                            <HorizontalStackLayout Spacing="4">
-                                <BoxView BackgroundColor="#22c55e" WidthRequest="12" HeightRequest="12" CornerRadius="2"/>
-                                <Label Text="Low" FontSize="11" TextColor="#64748b"/>
-                            </HorizontalStackLayout>
-                        </HorizontalStackLayout>
-                        <lvc:CartesianChart Series="{Binding TemperatureSeries}"
+                            <lvc:CartesianChart Series="{Binding TemperatureSeries}"
                                             XAxes="{Binding TemperatureXAxes}"
                                             YAxes="{Binding TemperatureYAxes}"
                                             HeightRequest="280"
-                                            ZoomMode="X"/>
-                    </VerticalStackLayout>
-                </Border>
+                                            ZoomMode="X"
+                                                TooltipPosition="Top"/>
+                        </VerticalStackLayout>
+                    </Border>
 
-                <!-- Footer -->
-                <Label Text="Tip: Pinch to zoom, drag to pan. Data from Open-Meteo API."
+                    <!-- Footer -->
+                    <Label Text="Tip: Pinch to zoom, drag to pan. Data from Open-Meteo API."
                        FontSize="11" TextColor="#94a3b8" HorizontalOptions="Center"/>
 
+                </VerticalStackLayout>
             </VerticalStackLayout>
-        </VerticalStackLayout>
-    </ScrollView>
+        </ScrollView>
+    </RefreshView>
 </ContentPage>

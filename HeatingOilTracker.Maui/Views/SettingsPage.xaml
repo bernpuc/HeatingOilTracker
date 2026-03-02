@@ -4,8 +4,7 @@
              x:Class="HeatingOilTracker.Maui.Views.SettingsPage"
              Title="Settings">
 
-    <RefreshView Command="{Binding RefreshCommand}" IsRefreshing="False">
-        <ScrollView>
+        <ScrollView VerticalScrollBarVisibility="Never">
             <VerticalStackLayout Padding="20" Spacing="0">
 
                 <!-- Tank Capacity -->
@@ -135,5 +134,4 @@
 
             </VerticalStackLayout>
         </ScrollView>
-    </RefreshView>
 </ContentPage>

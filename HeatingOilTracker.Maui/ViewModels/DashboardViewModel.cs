@@ -26,6 +26,7 @@ public class DashboardViewModel : INotifyPropertyChanged
     private string _alertMessage = string.Empty;
     private string _predictedRefillDateText = "--";
     private ObservableCollection<OilDelivery> _recentDeliveries = new();
+    private bool _isRefreshing;
 
     public decimal EstimatedGallons { get => _estimatedGallons; set => SetProperty(ref _estimatedGallons, value); }
     public decimal TankCapacity { get => _tankCapacity; set => SetProperty(ref _tankCapacity, value); }
@@ -47,14 +48,19 @@ public class DashboardViewModel : INotifyPropertyChanged
     public string DaysRemainingDisplay => DaysRemaining.HasValue ? $"~{DaysRemaining.Value} days" : "--";
     public string LastDeliveryDateDisplay => LastDeliveryDate.HasValue ? LastDeliveryDate.Value.ToString("MMM d, yyyy") : "--";
     public double TankFillHeight => (double)PercentFull / 100.0 * 120.0;
+    public bool IsRefreshing { get => _isRefreshing; set => SetProperty(ref _isRefreshing, value); }
 
-    public ICommand RefreshCommand { get; }
+    public ICommand RefreshCommand => new Command(async () =>
+    {
+        IsRefreshing = true;
+        await LoadDashboardAsync();  // or whatever the page's load method is
+        IsRefreshing = false;
+    });
 
     public DashboardViewModel(IDataService dataService, ITankEstimatorService tankEstimatorService)
     {
         _dataService = dataService;
         _tankEstimatorService = tankEstimatorService;
-        RefreshCommand = new Command(async () => await LoadDashboardAsync());
         _ = LoadDashboardAsync();
     }
 

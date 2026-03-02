@@ -34,6 +34,7 @@ public class WeatherViewModel : INotifyPropertyChanged
     private ObservableCollection<ISeries> _temperatureSeries = new();
     private Axis[] _temperatureXAxes = [];
     private Axis[] _temperatureYAxes = [];
+    private bool _isRefreshing;
 
     public bool HasData { get => _hasData; set => SetProperty(ref _hasData, value); }
     public string SelectedRange { get => _selectedRange; set => SetProperty(ref _selectedRange, value); }
@@ -50,6 +51,18 @@ public class WeatherViewModel : INotifyPropertyChanged
     public ICommand Select3MCommand { get; }
     public ICommand Select1YCommand { get; }
     public ICommand SelectAllCommand { get; }
+    public bool IsRefreshing
+    {
+        get => _isRefreshing;
+        set => SetProperty(ref _isRefreshing, value);
+    }
+
+    public ICommand RefreshCommand => new Command(async () =>
+    {
+        IsRefreshing = true;
+        await LoadWeatherAsync();  // or whatever the page's load method is
+        IsRefreshing = false;
+    });
 
     public WeatherViewModel(IDataService dataService)
     {
@@ -70,21 +83,23 @@ public class WeatherViewModel : INotifyPropertyChanged
         [
             new DateTimeAxis(TimeSpan.FromDays(1), date => date.ToString("MMM d"))
             {
-                Name = "Date",
-                NamePaint = new SolidColorPaint(SKColors.Gray),
+                //Name = "Date",
+                //NamePaint = new SolidColorPaint(SKColors.Gray),
                 LabelsPaint = new SolidColorPaint(SKColors.Gray),
                 CrosshairPaint = CrosshairPaint,
-                CrosshairSnapEnabled = true
+                CrosshairSnapEnabled = true,
+                TextSize=10
             }
         ];
         TemperatureYAxes =
         [
             new Axis
             {
-                Name = "Temperature (°F)",
-                NamePaint = new SolidColorPaint(SKColors.Gray),
+                //Name = "Temperature (°F)",
+                //NamePaint = new SolidColorPaint(SKColors.Gray),
                 LabelsPaint = new SolidColorPaint(SKColors.Gray),
-                Labeler = value => $"{value:F0}°"
+                Labeler = value => $"{value:F0}°",
+                TextSize=10
             }
         ];
     }
@@ -103,10 +118,11 @@ public class WeatherViewModel : INotifyPropertyChanged
             [
                 new Axis
                 {
-                    Name = $"Temperature ({TemperatureUnitLabel})",
-                    NamePaint = new SolidColorPaint(SKColors.Gray),
+                    //Name = $"Temperature ({TemperatureUnitLabel})",
+                    //NamePaint = new SolidColorPaint(SKColors.Gray),
                     LabelsPaint = new SolidColorPaint(SKColors.Gray),
-                    Labeler = value => $"{value:F0}°"
+                    Labeler = value => $"{value:F0}°",
+                    TextSize=10
                 }
             ];
             ApplyPresetRange(_selectedRange);
@@ -161,11 +177,12 @@ public class WeatherViewModel : INotifyPropertyChanged
         [
             new DateTimeAxis(GetAxisUnit(aggregationType), date => date.ToString(xAxisFormat))
             {
-                Name = "Date",
-                NamePaint = new SolidColorPaint(SKColors.Gray),
+                //Name = "Date",
+                //NamePaint = new SolidColorPaint(SKColors.Gray),
                 LabelsPaint = new SolidColorPaint(SKColors.Gray),
                 CrosshairPaint = CrosshairPaint,
-                CrosshairSnapEnabled = true
+                CrosshairSnapEnabled = true,
+                TextSize=10
             }
         ];
 

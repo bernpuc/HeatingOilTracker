@@ -17,6 +17,7 @@ public class ReportsViewModel : INotifyPropertyChanged
     private SeasonalBreakdown? _currentBreakdown;
     private ObservableCollection<YearlySummary> _allSummaries = new();
     private bool _hasData;
+    private bool _isRefreshing;
 
     public ObservableCollection<int> AvailableYears { get => _availableYears; set => SetProperty(ref _availableYears, value); }
     public ObservableCollection<YearlySummary> AllSummaries { get => _allSummaries; set => SetProperty(ref _allSummaries, value); }
@@ -81,13 +82,17 @@ public class ReportsViewModel : INotifyPropertyChanged
     public string OffSeasonCostPercent => CurrentBreakdown != null ? $"{CurrentBreakdown.OffSeasonCostPercent:F0}%" : "--";
     public string HeatingSeasonCO2Percent => CurrentBreakdown != null ? $"{CurrentBreakdown.HeatingSeasonCO2Percent:F0}%" : "--";
     public string OffSeasonCO2Percent => CurrentBreakdown != null ? $"{CurrentBreakdown.OffSeasonCO2Percent:F0}%" : "--";
-
-    public ICommand RefreshCommand { get; }
+    public bool IsRefreshing { get => _isRefreshing; set => SetProperty(ref _isRefreshing, value); }
+    public ICommand RefreshCommand => new Command(async () =>
+    {
+        IsRefreshing = true;
+        await LoadReportsAsync();  // or whatever the page's load method is
+        IsRefreshing = false;
+    });
 
     public ReportsViewModel(IReportService reportService)
     {
         _reportService = reportService;
-        RefreshCommand = new Command(async () => await LoadReportsAsync());
         _ = LoadReportsAsync();
     }
 

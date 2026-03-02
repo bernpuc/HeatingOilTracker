@@ -24,6 +24,13 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
 
+#if ANDROID
+        builder.ConfigureMauiHandlers(handlers =>
+        {
+            handlers.AddHandler<ScrollView, CustomScrollViewHandler>();
+        });
+#endif
+
         // Register services
         builder.Services.AddSingleton<IDataService>(
             new DataService(FileSystem.AppDataDirectory));

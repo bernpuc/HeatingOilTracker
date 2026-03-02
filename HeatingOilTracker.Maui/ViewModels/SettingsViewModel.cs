@@ -68,7 +68,6 @@ public class SettingsViewModel : INotifyPropertyChanged
     public ICommand SaveCommand { get; }
     public ICommand SearchLocationCommand { get; }
     public ICommand FetchWeatherCommand { get; }
-    public ICommand RefreshCommand { get; }
 
     public SettingsViewModel(IDataService dataService, IWeatherService weatherService)
     {
@@ -78,7 +77,6 @@ public class SettingsViewModel : INotifyPropertyChanged
         SaveCommand = new Command(async () => await SaveAsync());
         SearchLocationCommand = new Command(async () => await SearchLocationAsync());
         FetchWeatherCommand = new Command(async () => await FetchWeatherAsync());
-        RefreshCommand = new Command(async () => await LoadAsync());
 
         _ = LoadAsync();
     }

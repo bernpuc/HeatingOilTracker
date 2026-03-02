@@ -4,9 +4,8 @@
              x:Class="HeatingOilTracker.Maui.Views.DashboardPage"
              Title="Dashboard">
 
-    <RefreshView Command="{Binding RefreshCommand}"
-                 IsRefreshing="False">
-        <ScrollView>
+    <RefreshView Command="{Binding RefreshCommand}" IsRefreshing="{Binding IsRefreshing}">
+        <ScrollView VerticalScrollBarVisibility="Never">
             <VerticalStackLayout Padding="16" Spacing="16">
 
                 <!-- Alert Banner -->
