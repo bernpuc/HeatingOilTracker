@@ -14,6 +14,8 @@ public class OilDelivery
     /// If false, tank level after delivery = previous estimate + gallons delivered.
     /// Defaults to true for backwards compatibility.
     /// </summary>
+    public decimal TotalCost => Gallons * PricePerGallon;
+
     public bool FilledToCapacity { get; set; } = true;
     public DateTime ModifiedAt { get; set; } = DateTime.UtcNow;
     public bool IsDeleted { get; set; } = false;

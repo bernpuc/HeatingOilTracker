@@ -194,15 +194,9 @@
                                                        Text="{Binding Gallons, StringFormat='{0:F1} gallons'}"
                                                        TextColor="#64748b" VerticalOptions="Center"/>
                                                 <Label Grid.Column="2"
+                                                       Text="{Binding TotalCost, StringFormat='${0:F2}'}"
                                                        TextColor="#16a34a" FontAttributes="Bold"
-                                                       VerticalOptions="Center">
-                                                    <Label.Text>
-                                                        <MultiBinding StringFormat="${0:F2}">
-                                                            <Binding Path="Gallons"/>
-                                                            <Binding Path="PricePerGallon"/>
-                                                        </MultiBinding>
-                                                    </Label.Text>
-                                                </Label>
+                                                       VerticalOptions="Center"/>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
