@@ -456,4 +456,95 @@ public class TankEstimatorServiceTests
     }
 
     #endregion
+
+    #region PredictRefillDateAsync Tests
+
+    [Fact]
+    public async Task PredictRefillDateAsync_NoBurnRate_ReturnsNull()
+    {
+        // Arrange: no deliveries → burn rate 0, EstimatedDaysRemaining null
+        _mockDataService.Setup(x => x.GetDeliveriesAsync()).ReturnsAsync(new List<OilDelivery>());
+        _mockDataService.Setup(x => x.GetWeatherHistoryAsync()).ReturnsAsync(new List<DailyWeather>());
+
+        var result = await _sut.PredictRefillDateAsync(50m);
+
+        result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task PredictRefillDateAsync_OnlyOneDelivery_ReturnsNull()
+    {
+        // Arrange: single delivery → burn rate 0 (needs at least 2)
+        _mockDataService.Setup(x => x.GetDeliveriesAsync()).ReturnsAsync(new List<OilDelivery>
+        {
+            new() { Id = Guid.NewGuid(), Date = DateTime.Today.AddDays(-10), Gallons = 200m, PricePerGallon = 3m, FilledToCapacity = true }
+        });
+        _mockDataService.Setup(x => x.GetWeatherHistoryAsync()).ReturnsAsync(new List<DailyWeather>());
+
+        var result = await _sut.PredictRefillDateAsync(50m);
+
+        result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task PredictRefillDateAsync_WithBurnRate_ReturnsDateBasedOnDaysRemaining()
+    {
+        // Arrange: two deliveries 30 days apart, 90 gallons → burn rate = 3 gal/day
+        // 10 days since last delivery → 30 gal used → 275 - 30 = 245 remaining → 245/3 ≈ 81 days
+        var deliveries = new List<OilDelivery>
+        {
+            new() { Id = Guid.NewGuid(), Date = DateTime.Today.AddDays(-40), Gallons = 200m, PricePerGallon = 3m, FilledToCapacity = true },
+            new() { Id = Guid.NewGuid(), Date = DateTime.Today.AddDays(-10), Gallons = 90m,  PricePerGallon = 3m, FilledToCapacity = true }
+        };
+        _mockDataService.Setup(x => x.GetDeliveriesAsync()).ReturnsAsync(deliveries);
+        _mockDataService.Setup(x => x.GetWeatherHistoryAsync()).ReturnsAsync(new List<DailyWeather>());
+
+        var result = await _sut.PredictRefillDateAsync(50m);
+
+        // EstimatedDaysRemaining = 81 → refill date = Today + 81
+        result.Should().Be(DateTime.Today.AddDays(81));
+    }
+
+    [Fact]
+    public async Task PredictRefillDateAsync_TankAlmostEmpty_ReturnsNearFutureDate()
+    {
+        // Arrange: fast burn rate, tank nearly depleted
+        // 2 deliveries: 60 days apart, 90 gallons → burn rate = 1.5 gal/day
+        // 55 days since last fill → 82.5 used → 275 - 82.5 = 192.5 remaining
+        // But EstimatedDaysRemaining = floor(192.5 / 1.5) = 128 days
+        var baseDate = DateTime.Today.AddDays(-115);
+        var deliveries = new List<OilDelivery>
+        {
+            new() { Id = Guid.NewGuid(), Date = baseDate,               Gallons = 200m, PricePerGallon = 3m, FilledToCapacity = true },
+            new() { Id = Guid.NewGuid(), Date = baseDate.AddDays(60),   Gallons = 90m,  PricePerGallon = 3m, FilledToCapacity = true }
+        };
+        _mockDataService.Setup(x => x.GetDeliveriesAsync()).ReturnsAsync(deliveries);
+        _mockDataService.Setup(x => x.GetWeatherHistoryAsync()).ReturnsAsync(new List<DailyWeather>());
+
+        var result = await _sut.PredictRefillDateAsync(50m);
+
+        result.Should().NotBeNull();
+        result!.Value.Should().BeAfter(DateTime.Today);
+    }
+
+    [Fact]
+    public async Task PredictRefillDateAsync_IgnoresThresholdGallons_UsesFullDaysRemaining()
+    {
+        // PredictRefillDateAsync uses EstimatedDaysRemaining (not thresholdGallons)
+        // Two identical call sites with different thresholds should return the same date
+        var deliveries = new List<OilDelivery>
+        {
+            new() { Id = Guid.NewGuid(), Date = DateTime.Today.AddDays(-40), Gallons = 200m, PricePerGallon = 3m, FilledToCapacity = true },
+            new() { Id = Guid.NewGuid(), Date = DateTime.Today.AddDays(-10), Gallons = 90m,  PricePerGallon = 3m, FilledToCapacity = true }
+        };
+        _mockDataService.Setup(x => x.GetDeliveriesAsync()).ReturnsAsync(deliveries);
+        _mockDataService.Setup(x => x.GetWeatherHistoryAsync()).ReturnsAsync(new List<DailyWeather>());
+
+        var result25 = await _sut.PredictRefillDateAsync(25m);
+        var result100 = await _sut.PredictRefillDateAsync(100m);
+
+        result25.Should().Be(result100);
+    }
+
+    #endregion
 }

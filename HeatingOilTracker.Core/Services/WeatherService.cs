@@ -15,6 +15,11 @@ public class WeatherService : IWeatherService
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "HeatingOilTracker/1.0");
     }
 
+    public WeatherService(HttpClient httpClient)
+    {
+        _httpClient = httpClient;
+    }
+
     public async Task<List<DailyWeather>> GetHistoricalWeatherAsync(
         decimal latitude, decimal longitude, DateTime startDate, DateTime endDate)
     {
