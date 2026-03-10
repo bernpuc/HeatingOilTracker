@@ -69,6 +69,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Secrets.template.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <MauiXaml Update="Views\ChartsPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
