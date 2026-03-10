@@ -222,6 +222,42 @@ public class TankEstimatorServiceTests
     }
 
     [Fact]
+    public async Task GetAverageKFactorAsync_OldDataWithHighKFactor_RecentPeriodsWeightedMore()
+    {
+        // Arrange: 13 deliveries → 12 periods.
+        // Oldest 2 periods have K=8 (outlier/old data), recent 10 have K=4.
+        // The recency window takes only the 10 most recent qualifying periods,
+        // so the 2 outliers are dropped and the result should be exactly 4.0.
+        var baseDate = new DateTime(2014, 1, 1);
+        var deliveries = new List<OilDelivery>();
+        for (int i = 0; i <= 12; i++)
+            deliveries.Add(new() { Id = Guid.NewGuid(), Date = baseDate.AddDays(i * 30), Gallons = 100m, PricePerGallon = 3.50m });
+
+        var weatherData = TestData.CreateWeatherData(baseDate, 400, 25m);
+        _mockDataService.Setup(x => x.GetDeliveriesAsync()).ReturnsAsync(deliveries);
+        _mockDataService.Setup(x => x.GetWeatherHistoryAsync()).ReturnsAsync(weatherData);
+
+        // Oldest 2 periods (start dates in the first 60 days): high outlier HDD
+        _mockWeatherService.Setup(x => x.CalculateHDD(weatherData,
+            It.Is<DateTime>(d => d <= baseDate.AddDays(31)),
+            It.IsAny<DateTime>(), It.IsAny<decimal>())).Returns(800m);
+        _mockWeatherService.Setup(x => x.CalculateKFactor(100m, 800m)).Returns(8.0m);
+
+        // Recent 10 periods (start dates after day 60): normal HDD
+        _mockWeatherService.Setup(x => x.CalculateHDD(weatherData,
+            It.Is<DateTime>(d => d > baseDate.AddDays(31)),
+            It.IsAny<DateTime>(), It.IsAny<decimal>())).Returns(400m);
+        _mockWeatherService.Setup(x => x.CalculateKFactor(100m, 400m)).Returns(4.0m);
+
+        // Act
+        var result = await _sut.GetAverageKFactorAsync();
+
+        // Assert: the 2 outlier periods fall outside the 10-period recency window
+        // and are ignored; the weighted average of 10 periods all at K=4.0 is 4.0.
+        result.Should().Be(4.0m);
+    }
+
+    [Fact]
     public async Task GetAverageKFactorAsync_MixedHDDPeriods_OnlyUsesValidPeriods()
     {
         // Arrange: Mix of winter and summer deliveries

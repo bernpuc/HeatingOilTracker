@@ -245,7 +245,7 @@ public class TankEstimatorService : ITankEstimatorService
         // Sort by date ascending
         var sortedDeliveries = deliveries.OrderBy(d => d.Date).ToList();
 
-        var kFactors = new List<decimal>();
+        var kFactorPeriods = new List<(decimal KFactor, DateTime Date)>();
         for (int i = 1; i < sortedDeliveries.Count; i++)
         {
             var prev = sortedDeliveries[i - 1];
@@ -261,14 +261,30 @@ public class TankEstimatorService : ITankEstimatorService
                 var kFactor = _weatherService.CalculateKFactor(curr.Gallons, hdd);
                 if (kFactor > 0)
                 {
-                    kFactors.Add(kFactor);
+                    kFactorPeriods.Add((kFactor, curr.Date));
                 }
             }
         }
 
-        if (kFactors.Count == 0)
+        if (kFactorPeriods.Count == 0)
             return null;
 
-        return kFactors.Average();
+        // Use the same recency-weighted approach as burn rate:
+        // take the 10 most recent qualifying periods and apply exponential decay weights.
+        // This prevents old data (different home efficiency, partial fills, outliers) from
+        // inflating the K-factor average and causing the tank estimate to read too high.
+        var recentPeriods = kFactorPeriods.OrderByDescending(x => x.Date).Take(10).ToList();
+        var weights = new[] { 1.0m, 0.9m, 0.8m, 0.7m, 0.6m, 0.5m, 0.4m, 0.3m, 0.2m, 0.1m };
+
+        var weightedSum = 0m;
+        var weightSum = 0m;
+        for (int i = 0; i < recentPeriods.Count; i++)
+        {
+            var weight = weights[i];
+            weightedSum += recentPeriods[i].KFactor * weight;
+            weightSum += weight;
+        }
+
+        return weightSum > 0 ? weightedSum / weightSum : null;
     }
 }
