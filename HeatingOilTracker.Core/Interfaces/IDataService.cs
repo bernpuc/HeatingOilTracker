@@ -23,4 +23,5 @@ public interface IDataService
     Task<RegionalSettings> GetRegionalSettingsAsync();
     Task SetRegionalSettingsAsync(RegionalSettings settings);
     string GetDataFilePath();
+    void InvalidateCache();
 }

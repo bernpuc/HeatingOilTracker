@@ -37,95 +37,137 @@
                 <!-- Main Content -->
                 <VerticalStackLayout IsVisible="{Binding HasData}" Spacing="16">
 
-                    <!-- Tank Level Card -->
-                    <Border BackgroundColor="#f8fafc" Stroke="#e2e8f0" StrokeThickness="1" Padding="20">
-                        <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="8"/>
-                        </Border.StrokeShape>
-                        <VerticalStackLayout Spacing="8">
-                            <Label Text="TANK LEVEL" FontSize="11" FontAttributes="Bold" TextColor="#64748b"/>
+                    <!-- Desktop: Tank Level + Quick Stats side by side -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="16"
+                          IsVisible="{OnIdiom Desktop=True, Default=False}">
+                        <Border BackgroundColor="#f8fafc" Stroke="#e2e8f0" StrokeThickness="1" Padding="20">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="TANK LEVEL" FontSize="11" FontAttributes="Bold" TextColor="#64748b"/>
+                                <Grid HeightRequest="120" WidthRequest="60" HorizontalOptions="Center">
+                                    <BoxView BackgroundColor="#e2e8f0" CornerRadius="6"/>
+                                    <BoxView BackgroundColor="#2563eb" CornerRadius="6"
+                                             VerticalOptions="End" HeightRequest="{Binding TankFillHeight}"/>
+                                    <Border Stroke="#94a3b8" StrokeThickness="2" BackgroundColor="Transparent">
+                                        <Border.StrokeShape><RoundRectangle CornerRadius="6"/></Border.StrokeShape>
+                                    </Border>
+                                </Grid>
+                                <Label HorizontalOptions="Center">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="~" FontSize="14"/>
+                                            <Span Text="{Binding EstimatedGallons, StringFormat='{0:F0}'}"
+                                                  FontSize="28" FontAttributes="Bold" TextColor="#1e293b"/>
+                                            <Span Text=" gallons" FontSize="14" TextColor="#64748b"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <Label Text="{Binding PercentFull, StringFormat='{0:F0}% full'}"
+                                       HorizontalOptions="Center" TextColor="#64748b"/>
+                                <Label Text="{Binding DaysRemainingDisplay, StringFormat='~{0} remaining'}"
+                                       HorizontalOptions="Center" TextColor="#16a34a" FontAttributes="Bold"/>
+                            </VerticalStackLayout>
+                        </Border>
+                        <Border Grid.Column="1" BackgroundColor="#f8fafc" Stroke="#e2e8f0" StrokeThickness="1" Padding="20">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                            <VerticalStackLayout Spacing="12">
+                                <Label Text="QUICK STATS" FontSize="11" FontAttributes="Bold" TextColor="#64748b"/>
+                                <Grid ColumnDefinitions="*,*">
+                                    <Label Text="Burn Rate:" TextColor="#64748b"/>
+                                    <Label Grid.Column="1" Text="{Binding BurnRateDisplay}" FontAttributes="Bold" HorizontalOptions="End"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="*,*">
+                                    <Label Text="K-Factor:" TextColor="#64748b"/>
+                                    <Label Grid.Column="1" Text="{Binding KFactorDisplay}" FontAttributes="Bold" HorizontalOptions="End"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="*,*">
+                                    <Label Text="Last Delivery:" TextColor="#64748b"/>
+                                    <Label Grid.Column="1" Text="{Binding LastDeliveryDateDisplay}" FontAttributes="Bold" HorizontalOptions="End"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="*,*">
+                                    <Label Text="Days Since Fill:" TextColor="#64748b"/>
+                                    <Label Grid.Column="1" Text="{Binding DaysSinceLastDelivery, StringFormat='{0} days'}" FontAttributes="Bold" HorizontalOptions="End"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="*,*">
+                                    <Label Text="Tank Capacity:" TextColor="#64748b"/>
+                                    <Label Grid.Column="1" Text="{Binding TankCapacity, StringFormat='{0:F0} gallons'}" FontAttributes="Bold" HorizontalOptions="End"/>
+                                </Grid>
+                                <BoxView HeightRequest="1" BackgroundColor="#e2e8f0"/>
+                                <Grid ColumnDefinitions="*,*">
+                                    <Label Text="Predicted Refill:" TextColor="#64748b"/>
+                                    <Label Grid.Column="1" Text="{Binding PredictedRefillDateText}" FontAttributes="Bold" TextColor="#2563eb" HorizontalOptions="End"/>
+                                </Grid>
+                                <Label Text="Always verify by checking your tank gauge."
+                                       FontSize="11" FontAttributes="Italic" TextColor="#94a3b8"/>
+                            </VerticalStackLayout>
+                        </Border>
+                    </Grid>
 
-                            <!-- Tank Gauge -->
-                            <Grid HeightRequest="120" WidthRequest="60" HorizontalOptions="Center">
-                                <!-- Background -->
-                                <BoxView BackgroundColor="#e2e8f0" CornerRadius="6"/>
-                                <!-- Fill level -->
-                                <BoxView BackgroundColor="#2563eb"
-                                         CornerRadius="6"
-                                         VerticalOptions="End"
-                                         HeightRequest="{Binding TankFillHeight}"/>
-                                <!-- Outline -->
-                                <Border Stroke="#94a3b8" StrokeThickness="2" BackgroundColor="Transparent">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="6"/>
-                                    </Border.StrokeShape>
-                                </Border>
-                            </Grid>
-
-                            <Label HorizontalOptions="Center">
-                                <Label.FormattedText>
-                                    <FormattedString>
-                                        <Span Text="~" FontSize="14"/>
-                                        <Span Text="{Binding EstimatedGallons, StringFormat='{0:F0}'}"
-                                              FontSize="28" FontAttributes="Bold" TextColor="#1e293b"/>
-                                        <Span Text=" gallons" FontSize="14" TextColor="#64748b"/>
-                                    </FormattedString>
-                                </Label.FormattedText>
-                            </Label>
-
-                            <Label Text="{Binding PercentFull, StringFormat='{0:F0}% full'}"
-                                   HorizontalOptions="Center" TextColor="#64748b"/>
-                            <Label Text="{Binding DaysRemainingDisplay, StringFormat='~{0} remaining'}"
-                                   HorizontalOptions="Center" TextColor="#16a34a" FontAttributes="Bold"/>
-                        </VerticalStackLayout>
-                    </Border>
-
-                    <!-- Quick Stats Card -->
-                    <Border BackgroundColor="#f8fafc" Stroke="#e2e8f0" StrokeThickness="1" Padding="20">
-                        <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="8"/>
-                        </Border.StrokeShape>
-                        <VerticalStackLayout Spacing="12">
-                            <Label Text="QUICK STATS" FontSize="11" FontAttributes="Bold" TextColor="#64748b"/>
-
-                            <Grid ColumnDefinitions="*,*">
-                                <Label Text="Burn Rate:" TextColor="#64748b"/>
-                                <Label Grid.Column="1" Text="{Binding BurnRateDisplay}"
-                                       FontAttributes="Bold" HorizontalOptions="End"/>
-                            </Grid>
-                            <Grid ColumnDefinitions="*,*">
-                                <Label Text="K-Factor:" TextColor="#64748b"/>
-                                <Label Grid.Column="1" Text="{Binding KFactorDisplay}"
-                                       FontAttributes="Bold" HorizontalOptions="End"/>
-                            </Grid>
-                            <Grid ColumnDefinitions="*,*">
-                                <Label Text="Last Delivery:" TextColor="#64748b"/>
-                                <Label Grid.Column="1" Text="{Binding LastDeliveryDateDisplay}"
-                                       FontAttributes="Bold" HorizontalOptions="End"/>
-                            </Grid>
-                            <Grid ColumnDefinitions="*,*">
-                                <Label Text="Days Since Fill:" TextColor="#64748b"/>
-                                <Label Grid.Column="1" Text="{Binding DaysSinceLastDelivery, StringFormat='{0} days'}"
-                                       FontAttributes="Bold" HorizontalOptions="End"/>
-                            </Grid>
-                            <Grid ColumnDefinitions="*,*">
-                                <Label Text="Tank Capacity:" TextColor="#64748b"/>
-                                <Label Grid.Column="1" Text="{Binding TankCapacity, StringFormat='{0:F0} gallons'}"
-                                       FontAttributes="Bold" HorizontalOptions="End"/>
-                            </Grid>
-
-                            <BoxView HeightRequest="1" BackgroundColor="#e2e8f0"/>
-
-                            <Grid ColumnDefinitions="*,*">
-                                <Label Text="Predicted Refill:" TextColor="#64748b"/>
-                                <Label Grid.Column="1" Text="{Binding PredictedRefillDateText}"
-                                       FontAttributes="Bold" TextColor="#2563eb" HorizontalOptions="End"/>
-                            </Grid>
-
-                            <Label Text="Always verify by checking your tank gauge."
-                                   FontSize="11" FontAttributes="Italic" TextColor="#94a3b8"/>
-                        </VerticalStackLayout>
-                    </Border>
+                    <!-- Phone: Tank Level + Quick Stats stacked -->
+                    <VerticalStackLayout Spacing="16"
+                                         IsVisible="{OnIdiom Desktop=False, Default=True}">
+                        <Border BackgroundColor="#f8fafc" Stroke="#e2e8f0" StrokeThickness="1" Padding="20">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="TANK LEVEL" FontSize="11" FontAttributes="Bold" TextColor="#64748b"/>
+                                <Grid HeightRequest="120" WidthRequest="60" HorizontalOptions="Center">
+                                    <BoxView BackgroundColor="#e2e8f0" CornerRadius="6"/>
+                                    <BoxView BackgroundColor="#2563eb" CornerRadius="6"
+                                             VerticalOptions="End" HeightRequest="{Binding TankFillHeight}"/>
+                                    <Border Stroke="#94a3b8" StrokeThickness="2" BackgroundColor="Transparent">
+                                        <Border.StrokeShape><RoundRectangle CornerRadius="6"/></Border.StrokeShape>
+                                    </Border>
+                                </Grid>
+                                <Label HorizontalOptions="Center">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="~" FontSize="14"/>
+                                            <Span Text="{Binding EstimatedGallons, StringFormat='{0:F0}'}"
+                                                  FontSize="28" FontAttributes="Bold" TextColor="#1e293b"/>
+                                            <Span Text=" gallons" FontSize="14" TextColor="#64748b"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <Label Text="{Binding PercentFull, StringFormat='{0:F0}% full'}"
+                                       HorizontalOptions="Center" TextColor="#64748b"/>
+                                <Label Text="{Binding DaysRemainingDisplay, StringFormat='~{0} remaining'}"
+                                       HorizontalOptions="Center" TextColor="#16a34a" FontAttributes="Bold"/>
+                            </VerticalStackLayout>
+                        </Border>
+                        <Border BackgroundColor="#f8fafc" Stroke="#e2e8f0" StrokeThickness="1" Padding="20">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                            <VerticalStackLayout Spacing="12">
+                                <Label Text="QUICK STATS" FontSize="11" FontAttributes="Bold" TextColor="#64748b"/>
+                                <Grid ColumnDefinitions="*,*">
+                                    <Label Text="Burn Rate:" TextColor="#64748b"/>
+                                    <Label Grid.Column="1" Text="{Binding BurnRateDisplay}" FontAttributes="Bold" HorizontalOptions="End"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="*,*">
+                                    <Label Text="K-Factor:" TextColor="#64748b"/>
+                                    <Label Grid.Column="1" Text="{Binding KFactorDisplay}" FontAttributes="Bold" HorizontalOptions="End"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="*,*">
+                                    <Label Text="Last Delivery:" TextColor="#64748b"/>
+                                    <Label Grid.Column="1" Text="{Binding LastDeliveryDateDisplay}" FontAttributes="Bold" HorizontalOptions="End"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="*,*">
+                                    <Label Text="Days Since Fill:" TextColor="#64748b"/>
+                                    <Label Grid.Column="1" Text="{Binding DaysSinceLastDelivery, StringFormat='{0} days'}" FontAttributes="Bold" HorizontalOptions="End"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="*,*">
+                                    <Label Text="Tank Capacity:" TextColor="#64748b"/>
+                                    <Label Grid.Column="1" Text="{Binding TankCapacity, StringFormat='{0:F0} gallons'}" FontAttributes="Bold" HorizontalOptions="End"/>
+                                </Grid>
+                                <BoxView HeightRequest="1" BackgroundColor="#e2e8f0"/>
+                                <Grid ColumnDefinitions="*,*">
+                                    <Label Text="Predicted Refill:" TextColor="#64748b"/>
+                                    <Label Grid.Column="1" Text="{Binding PredictedRefillDateText}" FontAttributes="Bold" TextColor="#2563eb" HorizontalOptions="End"/>
+                                </Grid>
+                                <Label Text="Always verify by checking your tank gauge."
+                                       FontSize="11" FontAttributes="Italic" TextColor="#94a3b8"/>
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
 
                     <!-- Recent Deliveries Card -->
                     <Border BackgroundColor="#f8fafc" Stroke="#e2e8f0" StrokeThickness="1" Padding="20">

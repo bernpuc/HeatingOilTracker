@@ -9,11 +9,13 @@ public class DataService : IDataService
 {
     private readonly string DataDirectory;
     private readonly string DataFilePath;
+    private readonly ISyncService? _syncService;
 
-    public DataService(string dataDirectory)
+    public DataService(string dataDirectory, ISyncService? syncService = null)
     {
         DataDirectory = dataDirectory;
         DataFilePath = Path.Combine(DataDirectory, "data.json");
+        _syncService = syncService;
     }
 
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -25,6 +27,8 @@ public class DataService : IDataService
     private TrackerData? _cachedData;
 
     public string GetDataFilePath() => DataFilePath;
+
+    public void InvalidateCache() => _cachedData = null;
 
     public async Task<TrackerData> LoadAsync()
     {
@@ -61,6 +65,9 @@ public class DataService : IDataService
 
         // Auto-backup to configured folder if set
         await BackupToCloudFolderAsync(data);
+
+        // Fire-and-forget push to sync service
+        _ = _syncService?.PushAsync(data);
     }
 
     private async Task BackupToCloudFolderAsync(TrackerData data)
@@ -96,7 +103,10 @@ public class DataService : IDataService
     public async Task<List<OilDelivery>> GetDeliveriesAsync()
     {
         var data = await LoadAsync();
-        return data.Deliveries.OrderByDescending(d => d.Date).ToList();
+        return data.Deliveries
+            .Where(d => !d.IsDeleted)
+            .OrderByDescending(d => d.Date)
+            .ToList();
     }
 
     public async Task AddDeliveryAsync(OilDelivery delivery)
@@ -112,6 +122,7 @@ public class DataService : IDataService
         var index = data.Deliveries.FindIndex(d => d.Id == delivery.Id);
         if (index >= 0)
         {
+            delivery.ModifiedAt = DateTime.UtcNow;
             data.Deliveries[index] = delivery;
             await SaveAsync(data);
         }
@@ -120,8 +131,13 @@ public class DataService : IDataService
     public async Task DeleteDeliveryAsync(Guid id)
     {
         var data = await LoadAsync();
-        data.Deliveries.RemoveAll(d => d.Id == id);
-        await SaveAsync(data);
+        var delivery = data.Deliveries.Find(d => d.Id == id);
+        if (delivery != null)
+        {
+            delivery.IsDeleted = true;
+            delivery.ModifiedAt = DateTime.UtcNow;
+            await SaveAsync(data);
+        }
     }
 
     public async Task<decimal> GetTankCapacityAsync()
@@ -134,6 +150,7 @@ public class DataService : IDataService
     {
         var data = await LoadAsync();
         data.TankCapacityGallons = capacity;
+        data.SettingsModifiedAt = DateTime.UtcNow;
         await SaveAsync(data);
     }
 
@@ -147,6 +164,7 @@ public class DataService : IDataService
     {
         var data = await LoadAsync();
         data.Location = location;
+        data.SettingsModifiedAt = DateTime.UtcNow;
         await SaveAsync(data);
     }
 
@@ -181,6 +199,7 @@ public class DataService : IDataService
     {
         var data = await LoadAsync();
         data.ReminderSettings = settings;
+        data.SettingsModifiedAt = DateTime.UtcNow;
         await SaveAsync(data);
     }
 
@@ -207,6 +226,7 @@ public class DataService : IDataService
     {
         var data = await LoadAsync();
         data.RegionalSettings = settings;
+        data.SettingsModifiedAt = DateTime.UtcNow;
         await SaveAsync(data);
     }
 }

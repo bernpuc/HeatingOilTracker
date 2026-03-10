@@ -20,6 +20,7 @@ namespace HeatingOilTracker.Maui.WinUI
         }
 
         protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
+
     }
 
 }

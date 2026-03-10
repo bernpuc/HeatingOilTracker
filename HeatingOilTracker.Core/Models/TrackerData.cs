@@ -14,4 +14,5 @@ public class TrackerData
     /// Set to a cloud-synced folder (OneDrive, Dropbox, etc.) for automatic cloud backup.
     /// </summary>
     public string? BackupFolderPath { get; set; }
+    public DateTime SettingsModifiedAt { get; set; } = DateTime.UtcNow;
 }

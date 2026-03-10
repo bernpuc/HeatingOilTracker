@@ -15,4 +15,6 @@ public class OilDelivery
     /// Defaults to true for backwards compatibility.
     /// </summary>
     public bool FilledToCapacity { get; set; } = true;
+    public DateTime ModifiedAt { get; set; } = DateTime.UtcNow;
+    public bool IsDeleted { get; set; } = false;
 }

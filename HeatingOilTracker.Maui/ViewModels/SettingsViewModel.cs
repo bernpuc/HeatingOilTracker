@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using HeatingOilTracker.Maui.Services;
 
 namespace HeatingOilTracker.Maui.ViewModels;
 
@@ -11,6 +12,7 @@ public class SettingsViewModel : INotifyPropertyChanged
 {
     private readonly IDataService _dataService;
     private readonly IWeatherService _weatherService;
+    private readonly ISyncService? _syncService;
 
     private decimal _tankCapacity;
     private string _tankCapacityText = string.Empty;
@@ -30,6 +32,13 @@ public class SettingsViewModel : INotifyPropertyChanged
     private TemperatureUnitOption _selectedTemperatureUnit = TemperatureUnits.All[0];
     private FuelTypeOption _selectedFuelType = FuelTypes.All[0];
 
+    // Sync state
+    private string _syncStatusText = "Not connected";
+    private bool _isSyncing;
+    private bool _isSignedIn;
+    private string _syncAccountText = string.Empty;
+    private string _lastSyncedText = string.Empty;
+
     public ObservableCollection<Core.Models.Location> LocationSearchResults { get; } = new();
     public ObservableCollection<CultureOption> Currencies { get; } = new(SupportedCultures.All);
     public ObservableCollection<TemperatureUnitOption> TemperatureUnitsCollection { get; } = new(TemperatureUnits.All);
@@ -46,6 +55,15 @@ public class SettingsViewModel : INotifyPropertyChanged
     public string ThresholdDaysText { get => _thresholdDaysText; set => SetProperty(ref _thresholdDaysText, value); }
     public string DataFilePath { get => _dataFilePath; set => SetProperty(ref _dataFilePath, value); }
     public bool HasSearchResults => LocationSearchResults.Count > 0;
+
+    // Sync properties
+    public string SyncStatusText { get => _syncStatusText; set => SetProperty(ref _syncStatusText, value); }
+    public bool IsSyncing { get => _isSyncing; set => SetProperty(ref _isSyncing, value); }
+    public bool IsSignedIn { get => _isSignedIn; set { SetProperty(ref _isSignedIn, value); OnPropertyChanged(nameof(IsNotSignedIn)); } }
+    public bool IsNotSignedIn => !_isSignedIn;
+    public string SyncAccountText { get => _syncAccountText; set => SetProperty(ref _syncAccountText, value); }
+    public string LastSyncedText { get => _lastSyncedText; set => SetProperty(ref _lastSyncedText, value); }
+    public bool SyncConfigured => _syncService?.IsConfigured ?? false;
 
     public CultureOption SelectedCulture { get => _selectedCulture; set => SetProperty(ref _selectedCulture, value); }
     public TemperatureUnitOption SelectedTemperatureUnit { get => _selectedTemperatureUnit; set => SetProperty(ref _selectedTemperatureUnit, value); }
@@ -68,15 +86,22 @@ public class SettingsViewModel : INotifyPropertyChanged
     public ICommand SaveCommand { get; }
     public ICommand SearchLocationCommand { get; }
     public ICommand FetchWeatherCommand { get; }
+    public ICommand ConnectDriveCommand { get; }
+    public ICommand DisconnectDriveCommand { get; }
+    public ICommand SyncNowCommand { get; }
 
-    public SettingsViewModel(IDataService dataService, IWeatherService weatherService)
+    public SettingsViewModel(IDataService dataService, IWeatherService weatherService, ISyncService? syncService = null)
     {
         _dataService = dataService;
         _weatherService = weatherService;
+        _syncService = syncService;
 
         SaveCommand = new Command(async () => await SaveAsync());
         SearchLocationCommand = new Command(async () => await SearchLocationAsync());
         FetchWeatherCommand = new Command(async () => await FetchWeatherAsync());
+        ConnectDriveCommand = new Command(async () => await ConnectDriveAsync());
+        DisconnectDriveCommand = new Command(async () => await DisconnectDriveAsync());
+        SyncNowCommand = new Command(async () => await SyncNowAsync());
 
         _ = LoadAsync();
     }
@@ -110,6 +135,113 @@ public class SettingsViewModel : INotifyPropertyChanged
         ReminderEnabled = reminderSettings.IsEnabled;
         ThresholdGallonsText = reminderSettings.ThresholdGallons.ToString("F0");
         ThresholdDaysText = reminderSettings.ThresholdDays?.ToString() ?? string.Empty;
+
+        RefreshSyncStatus();
+    }
+
+    private void RefreshSyncStatus()
+    {
+        if (_syncService is null || !_syncService.IsConfigured)
+        {
+            IsSignedIn = false;
+            SyncStatusText = "Not configured";
+            SyncAccountText = string.Empty;
+            LastSyncedText = string.Empty;
+            return;
+        }
+
+        IsSignedIn = _syncService.IsSignedIn;
+        if (_syncService.IsSignedIn)
+        {
+            SyncAccountText = _syncService.AccountEmail ?? "Connected";
+            SyncStatusText = $"Connected as {SyncAccountText}";
+            LastSyncedText = _syncService.LastSyncAt.HasValue
+                ? $"Last synced: {FormatRelativeTime(_syncService.LastSyncAt.Value)}"
+                : "Never synced";
+        }
+        else
+        {
+            SyncStatusText = "Not connected";
+            SyncAccountText = string.Empty;
+            LastSyncedText = string.Empty;
+        }
+    }
+
+    private static string FormatRelativeTime(DateTime utcTime)
+    {
+        var elapsed = DateTime.UtcNow - utcTime;
+        if (elapsed.TotalMinutes < 1) return "just now";
+        if (elapsed.TotalMinutes < 60) return $"{(int)elapsed.TotalMinutes} minutes ago";
+        if (elapsed.TotalHours < 24) return $"{(int)elapsed.TotalHours} hours ago";
+        return utcTime.ToLocalTime().ToString("MMM d, yyyy h:mm tt");
+    }
+
+    private async Task ConnectDriveAsync()
+    {
+        if (_syncService is null) return;
+        IsSyncing = true;
+        try
+        {
+            var success = await _syncService.SignInAsync();
+            if (success)
+            {
+                RefreshSyncStatus();
+                await Shell.Current.DisplayAlert("Google Drive", "Connected successfully.", "OK");
+            }
+            else
+            {
+                await Shell.Current.DisplayAlert("Google Drive", "Sign-in was cancelled or failed.", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert("Error", $"Sign-in failed: {ex.Message}", "OK");
+        }
+        finally
+        {
+            IsSyncing = false;
+        }
+    }
+
+    private async Task DisconnectDriveAsync()
+    {
+        if (_syncService is null) return;
+        var confirmed = await Shell.Current.DisplayAlert(
+            "Disconnect", "Disconnect from Google Drive? Local data will not be affected.", "Disconnect", "Cancel");
+        if (!confirmed) return;
+
+        await _syncService.SignOutAsync();
+        RefreshSyncStatus();
+    }
+
+    private async Task SyncNowAsync()
+    {
+        if (_syncService is null || !_syncService.IsSignedIn) return;
+        IsSyncing = true;
+        try
+        {
+            var localData = await _dataService.LoadAsync();
+            var result = await _syncService.SyncOnStartupAsync(localData);
+            if (result.Status == SyncStatus.Success)
+            {
+                await _dataService.SaveAsync(result.MergedData);
+                _dataService.InvalidateCache();
+                RefreshSyncStatus();
+                await Shell.Current.DisplayAlert("Sync", "Sync completed successfully.", "OK");
+            }
+            else
+            {
+                await Shell.Current.DisplayAlert("Sync", $"Sync failed: {result.Status}", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert("Error", $"Sync failed: {ex.Message}", "OK");
+        }
+        finally
+        {
+            IsSyncing = false;
+        }
     }
 
     private async Task SaveAsync()

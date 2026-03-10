@@ -1,6 +1,7 @@
 ﻿using HeatingOilTracker.Core.Interfaces;
 using HeatingOilTracker.Core.Services;
 using HeatingOilTracker.Maui.Services;
+using Microsoft.Extensions.DependencyInjection;
 using HeatingOilTracker.Maui.ViewModels;
 using HeatingOilTracker.Maui.Views;
 using LiveChartsCore.SkiaSharpView.Maui;
@@ -32,8 +33,9 @@ public static class MauiProgram
 #endif
 
         // Register services
-        builder.Services.AddSingleton<IDataService>(
-            new DataService(FileSystem.AppDataDirectory));
+        builder.Services.AddSingleton<ISyncService, GoogleDriveSyncService>();
+        builder.Services.AddSingleton<IDataService>(sp =>
+            new DataService(FileSystem.AppDataDirectory, sp.GetService<ISyncService>()));
         builder.Services.AddSingleton<IWeatherService, WeatherService>();
         builder.Services.AddSingleton<ITankEstimatorService, TankEstimatorService>();
         builder.Services.AddSingleton<IReportService, ReportService>();

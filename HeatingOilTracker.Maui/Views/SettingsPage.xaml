@@ -125,6 +125,39 @@
                            TextColor="#64748b" LineBreakMode="CharacterWrap"/>
                 </VerticalStackLayout>
 
+                <BoxView HeightRequest="1" BackgroundColor="#e2e8f0" Margin="0,0,0,24"/>
+
+                <!-- Google Drive Sync -->
+                <VerticalStackLayout Spacing="10" Margin="0,0,0,24">
+                    <Label Text="Google Drive Sync" FontSize="16" FontAttributes="Bold" TextColor="#334155"/>
+
+                    <Label Text="{Binding SyncStatusText}" TextColor="#64748b"/>
+
+                    <!-- Not signed in: show Connect button -->
+                    <Button Text="Connect Google Drive"
+                            Command="{Binding ConnectDriveCommand}"
+                            IsVisible="{Binding IsNotSignedIn}"
+                            BackgroundColor="#2563eb" TextColor="White"
+                            CornerRadius="6" HorizontalOptions="Start"/>
+
+                    <!-- Signed in: show Sync Now + Disconnect -->
+                    <HorizontalStackLayout Spacing="10" IsVisible="{Binding IsSignedIn}">
+                        <Button Text="Sync Now"
+                                Command="{Binding SyncNowCommand}"
+                                BackgroundColor="#64748b" TextColor="White" CornerRadius="6"/>
+                        <Button Text="Disconnect"
+                                Command="{Binding DisconnectDriveCommand}"
+                                BackgroundColor="#ef4444" TextColor="White" CornerRadius="6"/>
+                    </HorizontalStackLayout>
+
+                    <Label Text="{Binding LastSyncedText}"
+                           IsVisible="{Binding IsSignedIn}"
+                           FontSize="11" TextColor="#94a3b8"/>
+
+                    <Label Text="Keeps your deliveries and settings in sync across Windows and Android devices."
+                           FontSize="11" TextColor="#94a3b8"/>
+                </VerticalStackLayout>
+
                 <!-- Save Button -->
                 <Button Text="Save Settings"
                         Command="{Binding SaveCommand}"

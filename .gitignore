@@ -1,9 +1,14 @@
+# Secrets (never commit)
+HeatingOilTracker.Maui/Secrets.cs
+
 # Build results
 [Dd]ebug/
 [Rr]elease/
 x64/
 x86/
 [Bb]in/
+[Bb]inPublish/
+[Bb]inRelease*/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
@@ -41,3 +46,7 @@ Desktop.ini
 *.db
 *.db-shm
 *.db-wal
+
+# Secrets / local config (never commit)
+appsettings.json
+appsettings.*.json

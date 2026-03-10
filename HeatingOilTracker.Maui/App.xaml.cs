@@ -6,19 +6,42 @@ public partial class App : Application
 {
     private readonly IDataService _dataService;
     private readonly IWeatherService _weatherService;
+    private readonly ISyncService? _syncService;
     private DateTime _lastRefreshDate = DateTime.MinValue;
     private IDispatcherTimer? _refreshTimer;
 
-    public App(IDataService dataService, IWeatherService weatherService)
+    public App(IDataService dataService, IWeatherService weatherService, ISyncService? syncService = null)
     {
         InitializeComponent();
         _dataService = dataService;
         _weatherService = weatherService;
+        _syncService = syncService;
 
+        _ = SyncOnStartupAsync();
         _ = FetchLatestWeatherAsync();
 
         _lastRefreshDate = DateTime.Today;
         StartRefreshTimer();
+    }
+
+    private async Task SyncOnStartupAsync()
+    {
+        if (_syncService is null || !_syncService.IsSignedIn) return;
+
+        try
+        {
+            var localData = await _dataService.LoadAsync();
+            var result = await _syncService.SyncOnStartupAsync(localData);
+            if (result.Status == SyncStatus.Success)
+            {
+                await _dataService.SaveAsync(result.MergedData);
+                _dataService.InvalidateCache();
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Sync] Startup sync failed: {ex.Message}");
+        }
     }
 
     protected override Window CreateWindow(IActivationState? activationState)
