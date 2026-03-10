@@ -1,6 +1,6 @@
 # Heating Oil Tracker
 
-A Windows desktop application for tracking heating oil deliveries, monitoring tank levels, analyzing usage patterns, and understanding your carbon footprint.
+A heating oil delivery tracker available as both a **Windows desktop app (WPF)** and a **cross-platform mobile/desktop app (MAUI)** for Android and Windows. Track deliveries, monitor tank levels, analyze usage patterns, and understand your carbon footprint.
 
 ![Dashboard Screenshot](docs/Screenshot%20Dashboard.png)
 
@@ -22,7 +22,7 @@ A Windows desktop application for tracking heating oil deliveries, monitoring ta
 - **Automatic Updates**: Weather data fetched automatically on startup when location is configured
 - **Heating Degree Days (HDD)**: Historical temperature data from Open-Meteo API
 - **Weather-Normalized Metrics**: Compare efficiency across years with different temperatures
-- **ZIP Code Lookup**: Automatic location detection from ZIP code
+- **Location Search**: Search by city name to configure your location for weather data
 
 ### Charts
 - **Price History**: Track oil price trends over time
@@ -44,9 +44,10 @@ A Windows desktop application for tracking heating oil deliveries, monitoring ta
 
 ### Settings
 - **Tank Configuration**: Set tank capacity for accurate level estimates
-- **Location Settings**: Configure ZIP code for weather data
+- **Location Settings**: Search and set your location for weather data
 - **Reminder Thresholds**: Set gallon and days-remaining alert thresholds
 - **Cloud Backup**: Automatic backup to OneDrive, Dropbox, or other cloud folders
+- **Google Drive Sync**: Connect your Google account to sync data across devices (MAUI)
 
 ### Reference Guide
 - **In-App Documentation**: Explains all calculations (HDD, K-Factor, burn rate, carbon footprint)
@@ -54,41 +55,48 @@ A Windows desktop application for tracking heating oil deliveries, monitoring ta
 
 ## Tech Stack
 
+### Shared (Core Library)
 - .NET 9
-- WPF (Windows Presentation Foundation)
-- Prism MVVM Framework
 - LiveCharts2 for charting
 - CsvHelper for CSV operations
-- Open-Meteo API for weather data
-- Zippopotam.us for ZIP code geocoding
+- Open-Meteo API for weather data and geocoding
+
+### WPF Desktop App
+- WPF (Windows Presentation Foundation)
+- Prism 9 MVVM Framework with DryIoc DI
+
+### MAUI App (Android + Windows)
+- .NET MAUI 9
+- Microsoft.Extensions dependency injection
+- Google Drive API with OAuth2 PKCE for cross-device sync
 
 ## Installation
 
-### Using the Installer (Recommended)
+### WPF Desktop App (Windows)
 
 Download the latest `HeatingOilTracker x.x.x Installer.exe` from the [Releases](https://github.com/bernpuc/HeatingOilTracker/releases) page and run it. The installer will:
 - Install to `C:\Program Files\HeatingOilTracker`
 - Create Start Menu and Desktop shortcuts
 - Register in Programs & Features for easy uninstall
 
-### Build from Source
+### MAUI App
 
-#### Prerequisites
+Build from source (see below). Android APK and Windows MSIX packages are not yet published to stores.
+
+## Build from Source
+
+### Prerequisites
 
 - [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
 - Windows 10/11
 
-#### Build and Run
+### WPF Desktop App
 
 ```bash
-# Clone the repository
 git clone https://github.com/bernpuc/HeatingOilTracker.git
 cd HeatingOilTracker
 
-# Build
 dotnet build
-
-# Run
 dotnet run --project HeatingOilTracker
 ```
 
@@ -97,13 +105,28 @@ dotnet run --project HeatingOilTracker
 Requires [NSIS](https://nsis.sourceforge.io/Download) (Nullsoft Scriptable Install System).
 
 ```bash
-# Build Release version
 dotnet publish HeatingOilTracker -c Release
 
-# Create installer
 cd HeatingOilTracker/Package
 makensis -DVERSION=1.0.0 Installer.nsi
 ```
+
+### MAUI App
+
+The MAUI app requires Google OAuth credentials for the Google Drive sync feature.
+
+1. Copy `HeatingOilTracker.Maui/Secrets.template.cs` to `HeatingOilTracker.Maui/Secrets.cs`
+2. Fill in your Google Cloud OAuth client IDs and secret (see `Secrets.template.cs` for instructions)
+
+```bash
+# Run on Windows
+dotnet run --project HeatingOilTracker.Maui -f net9.0-windows10.0.19041.0
+
+# Build for Android (requires Android SDK / Visual Studio with MAUI workload)
+dotnet build HeatingOilTracker.Maui -f net9.0-android
+```
+
+Google Drive sync is optional — the app works without credentials, just without cross-device sync.
 
 ## Data Storage
 
@@ -112,7 +135,7 @@ Data is stored locally in JSON format at:
 %APPDATA%\HeatingOilTracker\data.json
 ```
 
-Optional cloud backup can be configured to sync this data to a cloud-synced folder.
+Optional cloud backup can be configured to sync this data to a cloud-synced folder. The MAUI app additionally supports Google Drive sync to share data between Android and Windows.
 
 ## Sample Data
 
