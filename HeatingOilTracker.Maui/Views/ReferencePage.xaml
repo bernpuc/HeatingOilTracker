@@ -142,6 +142,26 @@
             <Label Style="{StaticResource RefBody}"
                    Text="When a location is configured, the app automatically fetches the latest weather data on startup. This ensures tank estimates using K-Factor stay accurate without manual intervention. You can also manually fetch weather data from Settings if needed."/>
 
+            <!-- Charts -->
+            <Label Text="Charts" Style="{StaticResource RefSectionTitle}"/>
+            <Label Style="{StaticResource RefBody}" Text="All charts support interactive zoom on the time axis:"/>
+            <Label Style="{StaticResource RefBody}" Margin="16,0,0,4">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="Ctrl + scroll wheel: " FontAttributes="Bold" TextColor="#334155"/>
+                        <Span Text="zoom in or out, centered on the cursor position" TextColor="#475569"/>
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+            <Label Style="{StaticResource RefBody}" Margin="16,0,0,8">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="Double-click: " FontAttributes="Bold" TextColor="#334155"/>
+                        <Span Text="reset to full view" TextColor="#475569"/>
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+
             <!-- Further Reading -->
             <Label Text="Further Reading" Style="{StaticResource RefSectionTitle}"/>
             <Label Style="{StaticResource RefBody}" Text="Learn more about the concepts used in this app:"/>

@@ -12,42 +12,142 @@ namespace HeatingOilTracker.Views;
 
 public partial class ChartsView : UserControl
 {
+    private readonly Dictionary<CartesianChart, (double Min, double Max)> _naturalRanges = new();
+
     public ChartsView()
     {
         InitializeComponent();
 
-        BurnRateChart.MouseMove += (s, e) =>
+        // Tooltips: attached to overlays (charts are behind overlays and won't receive mouse events)
+        BurnRateOverlay.MouseMove += (s, e) =>
             UpdateTooltip(BurnRateChart, BurnRateTooltip, BurnRateTooltipText, BurnRateTooltipTransform, e,
                 p => $"{p.DateTime:MMM d, yyyy}   {p.Value:F1} gal/day");
 
-        BurnRateChart.MouseLeave += (_, _) =>
+        BurnRateOverlay.MouseLeave += (_, _) =>
             BurnRateTooltip.Visibility = Visibility.Collapsed;
 
-        PriceChart.MouseMove += (s, e) =>
+        PriceOverlay.MouseMove += (s, e) =>
             UpdateTooltip(PriceChart, PriceTooltip, PriceTooltipText, PriceTooltipTransform, e,
                 p => $"{p.DateTime:MMM d, yyyy}   {p.Value:C3}/gal");
 
-        PriceChart.MouseLeave += (_, _) =>
+        PriceOverlay.MouseLeave += (_, _) =>
             PriceTooltip.Visibility = Visibility.Collapsed;
 
-        KFactorChart.MouseMove += (s, e) =>
+        KFactorOverlay.MouseMove += (s, e) =>
             UpdateTooltip(KFactorChart, KFactorTooltip, KFactorTooltipText, KFactorTooltipTransform, e,
                 p => $"{p.DateTime:MMM d, yyyy}   {p.Value:F3} gal/HDD");
 
-        KFactorChart.MouseLeave += (_, _) =>
+        KFactorOverlay.MouseLeave += (_, _) =>
             KFactorTooltip.Visibility = Visibility.Collapsed;
 
-        DeliveryComparisonChart.MouseMove += (s, e) =>
+        DeliveryComparisonOverlay.MouseMove += (s, e) =>
             UpdateBarChartTooltip(DeliveryComparisonChart, DeliveryComparisonTooltip, DeliveryComparisonTooltipText, DeliveryComparisonTooltipTransform, e);
 
-        DeliveryComparisonChart.MouseLeave += (_, _) =>
+        DeliveryComparisonOverlay.MouseLeave += (_, _) =>
             DeliveryComparisonTooltip.Visibility = Visibility.Collapsed;
 
-        // Prevent mouse wheel from bubbling to ScrollViewer (let charts handle zoom)
-        BurnRateChart.MouseWheel += (_, e) => e.Handled = true;
-        PriceChart.MouseWheel += (_, e) => e.Handled = true;
-        KFactorChart.MouseWheel += (_, e) => e.Handled = true;
-        DeliveryComparisonChart.MouseWheel += (_, e) => e.Handled = true;
+        // Wheel: intercepted at ScrollViewer level (above all charts in the tunnel).
+        // Because overlays are the hit-test targets the charts never receive mouse events
+        // at all, so LiveCharts' internal handlers never fire.
+        ChartsScrollViewer.PreviewMouseWheel += (_, e) =>
+        {
+            var chart = GetHoveredChart(e);
+            if (chart == null) return;
+
+            e.Handled = true;
+
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+            {
+                var pos = e.GetPosition(chart);
+                ZoomChartX(chart, pos.X, zoomIn: e.Delta > 0);
+            }
+            else
+            {
+                ChartsScrollViewer.ScrollToVerticalOffset(
+                    ChartsScrollViewer.VerticalOffset - e.Delta / 3.0);
+            }
+        };
+
+        // Double-click to reset zoom
+        foreach (var (overlay, chart) in new[]
+        {
+            (BurnRateOverlay,           (CartesianChart)BurnRateChart),
+            (PriceOverlay,              PriceChart),
+            (KFactorOverlay,            KFactorChart),
+            (DeliveryComparisonOverlay, DeliveryComparisonChart),
+        })
+        {
+            var c = chart;
+            overlay.MouseLeftButtonDown += (_, e) =>
+            {
+                if (e.ClickCount == 2)
+                {
+                    foreach (var axis in c.XAxes.OfType<Axis>())
+                        axis.MinLimit = axis.MaxLimit = null;
+                }
+            };
+        }
+    }
+
+    private CartesianChart? GetHoveredChart(MouseEventArgs e)
+    {
+        foreach (var chart in new[] { BurnRateChart, PriceChart, KFactorChart, DeliveryComparisonChart })
+        {
+            if (!chart.IsVisible) continue;
+            var pos = e.GetPosition(chart);
+            if (pos.X >= 0 && pos.X <= chart.ActualWidth && pos.Y >= 0 && pos.Y <= chart.ActualHeight)
+                return chart;
+        }
+        return null;
+    }
+
+    private void ZoomChartX(CartesianChart chart, double pivotPixelX, bool zoomIn)
+    {
+        var axis = chart.XAxes?.OfType<Axis>().FirstOrDefault();
+        if (axis == null) return;
+
+        var w = chart.ActualWidth;
+        if (w <= 0) return;
+
+        // Capture the natural full-data range the first time we zoom while at auto-fit.
+        if (!_naturalRanges.ContainsKey(chart) && axis.MinLimit == null && axis.MaxLimit == null)
+        {
+            var nl = chart.ScalePixelsToData(new LvcPointD(0, 0)).X;
+            var nr = chart.ScalePixelsToData(new LvcPointD(w, 0)).X;
+            if (nr > nl) _naturalRanges[chart] = (nl, nr);
+        }
+
+        if (!zoomIn)
+        {
+            if (_naturalRanges.TryGetValue(chart, out var nat))
+            {
+                var currentRange = chart.ScalePixelsToData(new LvcPointD(w, 0)).X
+                                 - chart.ScalePixelsToData(new LvcPointD(0, 0)).X;
+                if (currentRange * 1.333 >= nat.Max - nat.Min)
+                {
+                    axis.MinLimit = null;
+                    axis.MaxLimit = null;
+                    return;
+                }
+            }
+            else if (axis.MinLimit == null)
+            {
+                return;
+            }
+        }
+
+        var leftData  = chart.ScalePixelsToData(new LvcPointD(0, 0)).X;
+        var rightData = chart.ScalePixelsToData(new LvcPointD(w, 0)).X;
+        var pivotData = chart.ScalePixelsToData(new LvcPointD(pivotPixelX, 0)).X;
+
+        var range = rightData - leftData;
+        if (range <= 0) return;
+
+        var factor     = zoomIn ? 0.75 : 1.333;
+        var newRange   = range * factor;
+        var pivotRatio = (pivotData - leftData) / range;
+        axis.MinLimit  = pivotData - newRange * pivotRatio;
+        axis.MaxLimit  = pivotData + newRange * (1 - pivotRatio);
     }
 
     private static void UpdateTooltip(
@@ -86,14 +186,12 @@ public partial class ChartsView : UserControl
                 return;
             }
 
-            // Get pixel X of the nearest data point so tooltip snaps with the crosshair
             var nearestPixel = chart.ScaleDataToPixels(
                 new LvcPointD(nearest.DateTime.Ticks, nearest.Value ?? 0));
 
             tooltipText.Text = formatter(nearest);
             tooltip.Visibility = Visibility.Visible;
 
-            // Measure to get width for centering
             tooltip.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
             var tooltipWidth = tooltip.DesiredSize.Width;
 
@@ -124,9 +222,9 @@ public partial class ChartsView : UserControl
             return;
         }
 
-        var actualSeries = seriesList[0];
-        var hddSeries = seriesList[1];
-        var burnRateSeries = seriesList[2];
+        var actualSeries    = seriesList[0];
+        var hddSeries       = seriesList[1];
+        var burnRateSeries  = seriesList[2];
 
         if (actualSeries.Values is not IEnumerable<DateTimePoint> actualValues)
         {
@@ -153,35 +251,29 @@ public partial class ChartsView : UserControl
                 return;
             }
 
-            // Find matching HDD estimate point
             double? hddValue = null;
             if (hddSeries.Values is IEnumerable<DateTimePoint> hddValues)
             {
-                var hddPoints = hddValues.ToList();
-                var nearestHdd = hddPoints.FirstOrDefault(p => p.DateTime == nearestActual.DateTime);
+                var nearestHdd = hddValues.FirstOrDefault(p => p.DateTime == nearestActual.DateTime);
                 hddValue = nearestHdd?.Value;
             }
 
-            // Find matching burn rate estimate point
             double? burnRateValue = null;
             if (burnRateSeries.Values is IEnumerable<DateTimePoint> burnRateValues)
             {
-                var burnRatePoints = burnRateValues.ToList();
-                var nearestBurnRate = burnRatePoints.FirstOrDefault(p => p.DateTime == nearestActual.DateTime);
+                var nearestBurnRate = burnRateValues.FirstOrDefault(p => p.DateTime == nearestActual.DateTime);
                 burnRateValue = nearestBurnRate?.Value;
             }
 
-            // Get pixel X of the nearest data point so tooltip snaps with the crosshair
             var nearestPixel = chart.ScaleDataToPixels(
                 new LvcPointD(nearestActual.DateTime.Ticks, nearestActual.Value ?? 0));
 
-            var actualStr = nearestActual.Value.HasValue ? $"{nearestActual.Value:F1}" : "N/A";
-            var hddStr = hddValue.HasValue ? $"{hddValue:F1}" : "N/A";
-            var burnRateStr = burnRateValue.HasValue ? $"{burnRateValue:F1}" : "N/A";
+            var actualStr    = nearestActual.Value.HasValue ? $"{nearestActual.Value:F1}" : "N/A";
+            var hddStr       = hddValue.HasValue ? $"{hddValue:F1}" : "N/A";
+            var burnRateStr  = burnRateValue.HasValue ? $"{burnRateValue:F1}" : "N/A";
             tooltipText.Text = $"{nearestActual.DateTime:MMM d, yyyy}\nActual: {actualStr} gal\nEst (HDD): {hddStr} gal\nEst (Burn): {burnRateStr} gal";
             tooltip.Visibility = Visibility.Visible;
 
-            // Measure to get width for centering
             tooltip.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
             var tooltipWidth = tooltip.DesiredSize.Width;
 

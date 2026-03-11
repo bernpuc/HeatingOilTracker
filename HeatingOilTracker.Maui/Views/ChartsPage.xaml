@@ -5,8 +5,12 @@
              x:Class="HeatingOilTracker.Maui.Views.ChartsPage"
              Title="Charts">
 
-    <ScrollView>
+    <ScrollView x:Name="ChartsScrollView">
         <VerticalStackLayout Padding="16" Spacing="16">
+
+            <Label Text="Ctrl + scroll to zoom  ·  Double-click a chart to reset zoom"
+                   FontSize="11" TextColor="#94a3b8"
+                   IsVisible="{Binding HasData}"/>
 
             <!-- Empty State -->
             <Label Text="No delivery data available. Add deliveries to see charts."
@@ -39,11 +43,15 @@
                                 <Label Text="Est. (Burn Rate)" FontSize="11" TextColor="#64748b"/>
                             </HorizontalStackLayout>
                         </HorizontalStackLayout>
-                        <lvc:CartesianChart Series="{Binding DeliveryComparisonSeries}"
-                                            XAxes="{Binding DeliveryComparisonXAxes}"
-                                            YAxes="{Binding DeliveryComparisonYAxes}"
-                                            HeightRequest="250"
-                                            ZoomMode="X"/>
+                        <!-- Chart wrapped in Grid so a transparent overlay can sit on top -->
+                        <Grid HeightRequest="250">
+                            <lvc:CartesianChart x:Name="DeliveryComparisonChart"
+                                                Series="{Binding DeliveryComparisonSeries}"
+                                                XAxes="{Binding DeliveryComparisonXAxes}"
+                                                YAxes="{Binding DeliveryComparisonYAxes}"
+                                                ZoomMode="None"/>
+                            <Grid x:Name="DeliveryComparisonOverlay" BackgroundColor="Transparent"/>
+                        </Grid>
                     </VerticalStackLayout>
                 </Border>
 
@@ -55,11 +63,14 @@
                     <VerticalStackLayout Spacing="10">
                         <Label Text="Burn Rate (Gallons/Day)"
                                FontSize="15" FontAttributes="Bold" TextColor="#334155"/>
-                        <lvc:CartesianChart Series="{Binding BurnRateSeries}"
-                                            XAxes="{Binding BurnRateXAxes}"
-                                            YAxes="{Binding BurnRateYAxes}"
-                                            HeightRequest="250"
-                                            ZoomMode="X"/>
+                        <Grid HeightRequest="250">
+                            <lvc:CartesianChart x:Name="BurnRateChart"
+                                                Series="{Binding BurnRateSeries}"
+                                                XAxes="{Binding BurnRateXAxes}"
+                                                YAxes="{Binding BurnRateYAxes}"
+                                                ZoomMode="None"/>
+                            <Grid x:Name="BurnRateOverlay" BackgroundColor="Transparent"/>
+                        </Grid>
                     </VerticalStackLayout>
                 </Border>
 
@@ -71,11 +82,14 @@
                     <VerticalStackLayout Spacing="10">
                         <Label Text="Price per Gallon"
                                FontSize="15" FontAttributes="Bold" TextColor="#334155"/>
-                        <lvc:CartesianChart Series="{Binding PriceSeries}"
-                                            XAxes="{Binding PriceXAxes}"
-                                            YAxes="{Binding PriceYAxes}"
-                                            HeightRequest="250"
-                                            ZoomMode="X"/>
+                        <Grid HeightRequest="250">
+                            <lvc:CartesianChart x:Name="PriceChart"
+                                                Series="{Binding PriceSeries}"
+                                                XAxes="{Binding PriceXAxes}"
+                                                YAxes="{Binding PriceYAxes}"
+                                                ZoomMode="None"/>
+                            <Grid x:Name="PriceOverlay" BackgroundColor="Transparent"/>
+                        </Grid>
                     </VerticalStackLayout>
                 </Border>
 
@@ -88,11 +102,14 @@
                     <VerticalStackLayout Spacing="10">
                         <Label Text="K-Factor (Gallons per Heating Degree Day)"
                                FontSize="15" FontAttributes="Bold" TextColor="#334155"/>
-                        <lvc:CartesianChart Series="{Binding KFactorSeries}"
-                                            XAxes="{Binding KFactorXAxes}"
-                                            YAxes="{Binding KFactorYAxes}"
-                                            HeightRequest="250"
-                                            ZoomMode="X"/>
+                        <Grid HeightRequest="250">
+                            <lvc:CartesianChart x:Name="KFactorChart"
+                                                Series="{Binding KFactorSeries}"
+                                                XAxes="{Binding KFactorXAxes}"
+                                                YAxes="{Binding KFactorYAxes}"
+                                                ZoomMode="None"/>
+                            <Grid x:Name="KFactorOverlay" BackgroundColor="Transparent"/>
+                        </Grid>
                     </VerticalStackLayout>
                 </Border>
 

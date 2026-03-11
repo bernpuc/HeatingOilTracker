@@ -29,6 +29,7 @@ A heating oil delivery tracker available as both a **Windows desktop app (WPF)**
 - **Burn Rate Trends**: Visualize consumption patterns
 - **K-Factor Chart**: Monitor heating efficiency changes
 - **Interactive Tooltips**: Crosshair tooltips for detailed data inspection
+- **Interactive Zoom**: Ctrl + scroll to zoom in/out on any chart; double-click to reset to full view
 
 ### Cost Reports
 - **Annual Summaries**: Total cost, gallons, and average price per year

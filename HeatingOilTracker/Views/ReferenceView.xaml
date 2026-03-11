@@ -234,6 +234,18 @@
                     You can also manually fetch weather data from Settings if needed.
                 </TextBlock>
 
+                <!-- Charts -->
+                <TextBlock Text="Charts" Style="{StaticResource SectionTitle}"/>
+                <TextBlock Style="{StaticResource BodyText}">
+                    All charts support interactive zoom on the time axis:
+                </TextBlock>
+                <TextBlock Style="{StaticResource BodyText}" Margin="15,0,0,4">
+                    <Run FontWeight="SemiBold">Ctrl + scroll wheel</Run> — zoom in or out, centered on the cursor position
+                </TextBlock>
+                <TextBlock Style="{StaticResource BodyText}" Margin="15,0,0,8">
+                    <Run FontWeight="SemiBold">Double-click</Run> — reset to full view
+                </TextBlock>
+
                 <!-- Further Reading -->
                 <TextBlock Text="Further Reading" Style="{StaticResource SectionTitle}"/>
                 <TextBlock Style="{StaticResource BodyText}">
