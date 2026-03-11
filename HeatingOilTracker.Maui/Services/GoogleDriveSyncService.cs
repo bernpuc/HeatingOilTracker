@@ -47,6 +47,7 @@ public class GoogleDriveSyncService : ISyncService
     private const string KeyRefreshToken = "gdrive_refresh_token";
     private const string KeyAccountEmail = "gdrive_account_email";
     private const string KeyLastSyncAt = "gdrive_last_sync_at";
+    private const string KeyTokenExpiry = "gdrive_token_expiry";
 
     private readonly HttpClient _http;
     private readonly SyncMergeService _mergeService;
@@ -218,6 +219,7 @@ public class GoogleDriveSyncService : ISyncService
             SecureStorage.Default.Remove(KeyRefreshToken);
             SecureStorage.Default.Remove(KeyAccountEmail);
             SecureStorage.Default.Remove(KeyLastSyncAt);
+            SecureStorage.Default.Remove(KeyTokenExpiry);
         }
         catch (Exception ex)
         {
@@ -403,12 +405,15 @@ public class GoogleDriveSyncService : ISyncService
     private async Task<string?> GetValidAccessTokenAsync()
     {
         var accessToken = await SecureStorage.Default.GetAsync(KeyAccessToken);
-        // If we have a token, try to use it. Drive API will return 401 if expired.
-        // For a more robust impl, store expiry time and proactively refresh.
-        // Here, we attempt a refresh if no token is stored.
         if (!string.IsNullOrEmpty(accessToken))
-            return accessToken;
+        {
+            // Only use the stored token if it hasn't expired (with a 5-minute buffer).
+            var expiryStr = await SecureStorage.Default.GetAsync(KeyTokenExpiry);
+            if (DateTime.TryParse(expiryStr, out var expiry) && DateTime.UtcNow < expiry)
+                return accessToken;
+        }
 
+        // Token absent, expired, or no expiry stored — refresh.
         return await RefreshAccessTokenAsync();
     }
 
@@ -443,6 +448,8 @@ public class GoogleDriveSyncService : ISyncService
             if (tokenResponse?.AccessToken is null) return null;
 
             await SecureStorage.Default.SetAsync(KeyAccessToken, tokenResponse.AccessToken);
+            var expiry = DateTime.UtcNow.AddSeconds(Math.Max(0, tokenResponse.ExpiresIn - 300));
+            await SecureStorage.Default.SetAsync(KeyTokenExpiry, expiry.ToString("O"));
             return tokenResponse.AccessToken;
         }
         catch (Exception ex)
@@ -457,6 +464,9 @@ public class GoogleDriveSyncService : ISyncService
         await SecureStorage.Default.SetAsync(KeyAccessToken, tokens.AccessToken ?? string.Empty);
         if (!string.IsNullOrEmpty(tokens.RefreshToken))
             await SecureStorage.Default.SetAsync(KeyRefreshToken, tokens.RefreshToken);
+        // Store expiry with a 5-minute buffer so we refresh before the token actually expires.
+        var expiry = DateTime.UtcNow.AddSeconds(Math.Max(0, tokens.ExpiresIn - 300));
+        await SecureStorage.Default.SetAsync(KeyTokenExpiry, expiry.ToString("O"));
     }
 
     private async Task<TokenResponse?> ExchangeCodeForTokensAsync(string code, string codeVerifier, string clientId, string redirectUri, string? clientSecret = null)
