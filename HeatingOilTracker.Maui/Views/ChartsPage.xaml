@@ -49,7 +49,7 @@
                                                 Series="{Binding DeliveryComparisonSeries}"
                                                 XAxes="{Binding DeliveryComparisonXAxes}"
                                                 YAxes="{Binding DeliveryComparisonYAxes}"
-                                                ZoomMode="None"/>
+                                                ZoomMode="{OnPlatform WinUI=None, Default=X}"/>
                             <Grid x:Name="DeliveryComparisonOverlay" BackgroundColor="Transparent"/>
                         </Grid>
                     </VerticalStackLayout>
@@ -68,7 +68,7 @@
                                                 Series="{Binding BurnRateSeries}"
                                                 XAxes="{Binding BurnRateXAxes}"
                                                 YAxes="{Binding BurnRateYAxes}"
-                                                ZoomMode="None"/>
+                                                ZoomMode="{OnPlatform WinUI=None, Default=X}"/>
                             <Grid x:Name="BurnRateOverlay" BackgroundColor="Transparent"/>
                         </Grid>
                     </VerticalStackLayout>
@@ -87,7 +87,7 @@
                                                 Series="{Binding PriceSeries}"
                                                 XAxes="{Binding PriceXAxes}"
                                                 YAxes="{Binding PriceYAxes}"
-                                                ZoomMode="None"/>
+                                                ZoomMode="{OnPlatform WinUI=None, Default=X}"/>
                             <Grid x:Name="PriceOverlay" BackgroundColor="Transparent"/>
                         </Grid>
                     </VerticalStackLayout>
@@ -107,7 +107,7 @@
                                                 Series="{Binding KFactorSeries}"
                                                 XAxes="{Binding KFactorXAxes}"
                                                 YAxes="{Binding KFactorYAxes}"
-                                                ZoomMode="None"/>
+                                                ZoomMode="{OnPlatform WinUI=None, Default=X}"/>
                             <Grid x:Name="KFactorOverlay" BackgroundColor="Transparent"/>
                         </Grid>
                     </VerticalStackLayout>
