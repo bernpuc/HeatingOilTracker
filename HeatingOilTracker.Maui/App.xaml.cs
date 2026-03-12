@@ -96,6 +96,15 @@ public partial class App : Application
             if (weatherHistory.Count > 0)
             {
                 startDate = weatherHistory.Max(w => w.Date).AddDays(1);
+
+                // Also backfill if deliveries predate the oldest stored weather record
+                if (deliveries.Count > 0)
+                {
+                    var earliestDelivery = deliveries.Min(d => d.Date).AddDays(-1);
+                    var oldestWeather = weatherHistory.Min(w => w.Date);
+                    if (earliestDelivery < oldestWeather)
+                        startDate = earliestDelivery;
+                }
             }
             else if (deliveries.Count > 0)
             {

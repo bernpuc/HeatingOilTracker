@@ -7,7 +7,7 @@ A heating oil delivery tracker available as both a **Windows desktop app (WPF)**
 ## Features
 
 ### Dashboard
-- **Tank Level Estimation**: Real-time estimate of remaining gallons using K-Factor with weather data (falls back to burn rate)
+- **Tank Level Estimation**: Real-time estimate of remaining gallons using K-Factor with weather data (falls back to burn rate); gauge displays gallons, percentage, and eighths (e.g. 6/8ths)
 - **Days Remaining**: Predicted days until tank reaches threshold
 - **Low Tank Alerts**: Configurable alerts when tank level or days remaining drops below threshold
 - **Refill Prediction**: Estimated date when you'll need to reorder
@@ -33,7 +33,7 @@ A heating oil delivery tracker available as both a **Windows desktop app (WPF)**
 
 ### Cost Reports
 - **Annual Summaries**: Total cost, gallons, and average price per year
-- **Seasonal Breakdown**: Compare heating season (Oct-Mar) vs off-season usage
+- **Seasonal Breakdown**: Compare heating season vs off-season usage; season months are configurable (default Oct–Mar for Northern Hemisphere, Apr–Sep for Southern)
 - **Year-over-Year Comparison**: Table with cost, gallons, HDD, $/HDD, and K-Factor
 - **Weather-Normalized Costs**: $/HDD metric for fair year-to-year comparison
 
@@ -47,6 +47,7 @@ A heating oil delivery tracker available as both a **Windows desktop app (WPF)**
 - **Tank Configuration**: Set tank capacity for accurate level estimates
 - **Location Settings**: Search and set your location for weather data
 - **Reminder Thresholds**: Set gallon and days-remaining alert thresholds
+- **Heating Season**: Configure start and end months to match your climate (Northern or Southern Hemisphere)
 - **Cloud Backup**: Automatic backup to OneDrive, Dropbox, or other cloud folders
 - **Google Drive Sync**: Connect your Google account to sync data across devices (MAUI)
 

@@ -48,6 +48,15 @@ public class DashboardViewModel : INotifyPropertyChanged
     public string DaysRemainingDisplay => DaysRemaining.HasValue ? $"~{DaysRemaining.Value} days" : "--";
     public string LastDeliveryDateDisplay => LastDeliveryDate.HasValue ? LastDeliveryDate.Value.ToString("MMM d, yyyy") : "--";
     public double TankFillHeight => (double)PercentFull / 100.0 * 120.0;
+    public string TankEighthsDisplay
+    {
+        get
+        {
+            var eighths = (int)Math.Round((double)PercentFull / 100.0 * 8.0, MidpointRounding.AwayFromZero);
+            eighths = Math.Clamp(eighths, 0, 8);
+            return $"{eighths}/8";
+        }
+    }
     public bool IsRefreshing { get => _isRefreshing; set => SetProperty(ref _isRefreshing, value); }
 
     public ICommand RefreshCommand => new Command(async () =>
@@ -84,6 +93,7 @@ public class DashboardViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(DaysRemainingDisplay));
             OnPropertyChanged(nameof(LastDeliveryDateDisplay));
             OnPropertyChanged(nameof(TankFillHeight));
+            OnPropertyChanged(nameof(TankEighthsDisplay));
 
             var reminderSettings = await _dataService.GetReminderSettingsAsync();
 

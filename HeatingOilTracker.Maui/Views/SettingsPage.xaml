@@ -76,6 +76,22 @@
 
                     <Label Text="Fuel type affects CO2 emission calculations in reports."
                            FontSize="11" TextColor="#94a3b8"/>
+
+                    <Label Text="Heating Season" FontAttributes="Bold" Margin="0,8,0,0"/>
+                    <Grid ColumnDefinitions="*,Auto,*">
+                        <Picker Grid.Column="0"
+                                ItemsSource="{Binding MonthsCollection}"
+                                SelectedItem="{Binding SelectedHeatingSeasonStartMonth}"
+                                ItemDisplayBinding="{Binding DisplayName}"/>
+                        <Label Grid.Column="1" Text="through"
+                               VerticalOptions="Center" TextColor="#64748b" Margin="8,0"/>
+                        <Picker Grid.Column="2"
+                                ItemsSource="{Binding MonthsCollection}"
+                                SelectedItem="{Binding SelectedHeatingSeasonEndMonth}"
+                                ItemDisplayBinding="{Binding DisplayName}"/>
+                    </Grid>
+                    <Label Text="Used for seasonal breakdowns in reports. Northern Hemisphere: Oct–Mar. Southern Hemisphere: Apr–Sep."
+                           FontSize="11" TextColor="#94a3b8"/>
                 </VerticalStackLayout>
 
                 <BoxView HeightRequest="1" BackgroundColor="#e2e8f0" Margin="0,0,0,24"/>

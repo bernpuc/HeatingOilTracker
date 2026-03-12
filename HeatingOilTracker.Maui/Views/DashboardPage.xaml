@@ -62,8 +62,16 @@
                                         </FormattedString>
                                     </Label.FormattedText>
                                 </Label>
-                                <Label Text="{Binding PercentFull, StringFormat='{0:F0}% full'}"
-                                       HorizontalOptions="Center" TextColor="#64748b"/>
+                                <Label HorizontalOptions="Center" TextColor="#64748b">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{Binding PercentFull, StringFormat='{0:F0}%'}"/>
+                                            <Span Text=" · "/>
+                                            <Span Text="{Binding TankEighthsDisplay}"/>
+                                            <Span Text="ths"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
                                 <Label Text="{Binding DaysRemainingDisplay, StringFormat='~{0} remaining'}"
                                        HorizontalOptions="Center" TextColor="#16a34a" FontAttributes="Bold"/>
                             </VerticalStackLayout>
@@ -128,8 +136,16 @@
                                         </FormattedString>
                                     </Label.FormattedText>
                                 </Label>
-                                <Label Text="{Binding PercentFull, StringFormat='{0:F0}% full'}"
-                                       HorizontalOptions="Center" TextColor="#64748b"/>
+                                <Label HorizontalOptions="Center" TextColor="#64748b">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{Binding PercentFull, StringFormat='{0:F0}%'}"/>
+                                            <Span Text=" · "/>
+                                            <Span Text="{Binding TankEighthsDisplay}"/>
+                                            <Span Text="ths"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
                                 <Label Text="{Binding DaysRemainingDisplay, StringFormat='~{0} remaining'}"
                                        HorizontalOptions="Center" TextColor="#16a34a" FontAttributes="Bold"/>
                             </VerticalStackLayout>

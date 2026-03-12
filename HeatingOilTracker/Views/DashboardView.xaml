@@ -109,11 +109,15 @@
                                 <Run Text=" gallons" FontSize="14" Foreground="#64748b"/>
                             </TextBlock>
 
-                            <TextBlock Text="{Binding PercentFull, StringFormat='{}{0:F0}% full'}"
-                                       HorizontalAlignment="Center"
+                            <TextBlock HorizontalAlignment="Center"
                                        FontSize="14"
                                        Foreground="#64748b"
-                                       Margin="0,0,0,5"/>
+                                       Margin="0,0,0,5">
+                                <Run Text="{Binding PercentFull, StringFormat='{}{0:F0}%'}"/>
+                                <Run Text=" · "/>
+                                <Run Text="{Binding TankEighthsDisplay}"/>
+                                <Run Text="ths" FontSize="9" BaselineAlignment="Superscript"/>
+                            </TextBlock>
 
                             <TextBlock Text="{Binding DaysRemainingDisplay, StringFormat='~{0} remaining'}"
                                        HorizontalAlignment="Center"

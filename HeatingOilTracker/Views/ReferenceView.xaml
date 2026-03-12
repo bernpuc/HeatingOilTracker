@@ -143,7 +143,9 @@
                 <!-- Seasonal Breakdown -->
                 <TextBlock Text="Seasonal Breakdown" Style="{StaticResource SectionTitle}"/>
                 <TextBlock Style="{StaticResource BodyText}">
-                    The app divides the year into two seasons for analysis:
+                    The app divides the year into two seasons for analysis. The months are configurable in Settings
+                    to match your climate (e.g. Southern Hemisphere users typically reverse the seasons).
+                    Defaults are shown below for the Northern Hemisphere:
                 </TextBlock>
                 <TextBlock Style="{StaticResource BodyText}" Margin="15,5,0,5">
                     <Run FontWeight="SemiBold">Heating Season:</Run> October through March — when most heating occurs

@@ -68,7 +68,7 @@
             <!-- Seasonal Breakdown -->
             <Label Text="Seasonal Breakdown" Style="{StaticResource RefSectionTitle}"/>
             <Label Style="{StaticResource RefBody}"
-                   Text="The app divides the year into two seasons for analysis:"/>
+                   Text="The app divides the year into two seasons for analysis. The months are configurable in Settings to match your climate — Southern Hemisphere users typically reverse the seasons. Defaults shown are for the Northern Hemisphere:"/>
             <Label Style="{StaticResource RefBody}" Margin="16,0,0,4">
                 <Label.FormattedText>
                     <FormattedString>

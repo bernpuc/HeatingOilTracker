@@ -23,6 +23,8 @@ public class SettingsViewModel : BindableBase, INavigationAware
     private CultureOption _selectedCulture = SupportedCultures.All[0];
     private TemperatureUnitOption _selectedTemperatureUnit = TemperatureUnits.All[0];
     private FuelTypeOption _selectedFuelType = FuelTypes.All[0];
+    private MonthOption _selectedHeatingSeasonStartMonth = MonthOptions.GetByNumber(10);
+    private MonthOption _selectedHeatingSeasonEndMonth = MonthOptions.GetByNumber(3);
 
     // Reminder settings
     private bool _reminderEnabled = true;
@@ -45,6 +47,9 @@ public class SettingsViewModel : BindableBase, INavigationAware
     // Fuel types
     public ObservableCollection<FuelTypeOption> FuelTypesCollection { get; } = new(FuelTypes.All);
 
+    // Heating season months
+    public ObservableCollection<MonthOption> MonthsCollection { get; } = new(MonthOptions.All);
+
     public CultureOption SelectedCulture
     {
         get => _selectedCulture;
@@ -61,6 +66,18 @@ public class SettingsViewModel : BindableBase, INavigationAware
     {
         get => _selectedFuelType;
         set => SetProperty(ref _selectedFuelType, value);
+    }
+
+    public MonthOption SelectedHeatingSeasonStartMonth
+    {
+        get => _selectedHeatingSeasonStartMonth;
+        set => SetProperty(ref _selectedHeatingSeasonStartMonth, value);
+    }
+
+    public MonthOption SelectedHeatingSeasonEndMonth
+    {
+        get => _selectedHeatingSeasonEndMonth;
+        set => SetProperty(ref _selectedHeatingSeasonEndMonth, value);
     }
 
     public decimal TankCapacity
@@ -195,6 +212,8 @@ public class SettingsViewModel : BindableBase, INavigationAware
         SelectedCulture = SupportedCultures.GetByCode(regionalSettings.CultureCode);
         SelectedTemperatureUnit = TemperatureUnits.GetByCode(regionalSettings.TemperatureUnit);
         SelectedFuelType = FuelTypes.GetByCode(regionalSettings.FuelTypeCode);
+        SelectedHeatingSeasonStartMonth = MonthOptions.GetByNumber(regionalSettings.HeatingSeasonStartMonth);
+        SelectedHeatingSeasonEndMonth = MonthOptions.GetByNumber(regionalSettings.HeatingSeasonEndMonth);
 
         var location = await _dataService.GetLocationAsync();
         if (location.IsSet)
@@ -248,7 +267,9 @@ public class SettingsViewModel : BindableBase, INavigationAware
         {
             CultureCode = SelectedCulture.Code,
             TemperatureUnit = SelectedTemperatureUnit.Code,
-            FuelTypeCode = SelectedFuelType.Code
+            FuelTypeCode = SelectedFuelType.Code,
+            HeatingSeasonStartMonth = SelectedHeatingSeasonStartMonth.Number,
+            HeatingSeasonEndMonth = SelectedHeatingSeasonEndMonth.Number,
         };
         await _dataService.SetRegionalSettingsAsync(regionalSettings);
 

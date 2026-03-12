@@ -31,6 +31,8 @@ public class SettingsViewModel : INotifyPropertyChanged
     private CultureOption _selectedCulture = SupportedCultures.All[0];
     private TemperatureUnitOption _selectedTemperatureUnit = TemperatureUnits.All[0];
     private FuelTypeOption _selectedFuelType = FuelTypes.All[0];
+    private MonthOption _selectedHeatingSeasonStartMonth = MonthOptions.GetByNumber(10);
+    private MonthOption _selectedHeatingSeasonEndMonth = MonthOptions.GetByNumber(3);
 
     // Sync state
     private string _syncStatusText = "Not connected";
@@ -43,6 +45,7 @@ public class SettingsViewModel : INotifyPropertyChanged
     public ObservableCollection<CultureOption> Currencies { get; } = new(SupportedCultures.All);
     public ObservableCollection<TemperatureUnitOption> TemperatureUnitsCollection { get; } = new(TemperatureUnits.All);
     public ObservableCollection<FuelTypeOption> FuelTypesCollection { get; } = new(FuelTypes.All);
+    public ObservableCollection<MonthOption> MonthsCollection { get; } = new(MonthOptions.All);
 
     public string TankCapacityText { get => _tankCapacityText; set => SetProperty(ref _tankCapacityText, value); }
     public string LocationSearch { get => _locationSearch; set => SetProperty(ref _locationSearch, value); }
@@ -68,6 +71,8 @@ public class SettingsViewModel : INotifyPropertyChanged
     public CultureOption SelectedCulture { get => _selectedCulture; set => SetProperty(ref _selectedCulture, value); }
     public TemperatureUnitOption SelectedTemperatureUnit { get => _selectedTemperatureUnit; set => SetProperty(ref _selectedTemperatureUnit, value); }
     public FuelTypeOption SelectedFuelType { get => _selectedFuelType; set => SetProperty(ref _selectedFuelType, value); }
+    public MonthOption SelectedHeatingSeasonStartMonth { get => _selectedHeatingSeasonStartMonth; set => SetProperty(ref _selectedHeatingSeasonStartMonth, value); }
+    public MonthOption SelectedHeatingSeasonEndMonth { get => _selectedHeatingSeasonEndMonth; set => SetProperty(ref _selectedHeatingSeasonEndMonth, value); }
 
     public Core.Models.Location? SelectedSearchResult
     {
@@ -115,6 +120,8 @@ public class SettingsViewModel : INotifyPropertyChanged
         SelectedCulture = SupportedCultures.GetByCode(regionalSettings.CultureCode);
         SelectedTemperatureUnit = TemperatureUnits.GetByCode(regionalSettings.TemperatureUnit);
         SelectedFuelType = FuelTypes.GetByCode(regionalSettings.FuelTypeCode);
+        SelectedHeatingSeasonStartMonth = MonthOptions.GetByNumber(regionalSettings.HeatingSeasonStartMonth);
+        SelectedHeatingSeasonEndMonth = MonthOptions.GetByNumber(regionalSettings.HeatingSeasonEndMonth);
 
         var location = await _dataService.GetLocationAsync();
         LocationDisplay = location.IsSet ? location.DisplayName : "Not set";
@@ -268,7 +275,9 @@ public class SettingsViewModel : INotifyPropertyChanged
         {
             CultureCode = SelectedCulture.Code,
             TemperatureUnit = SelectedTemperatureUnit.Code,
-            FuelTypeCode = SelectedFuelType.Code
+            FuelTypeCode = SelectedFuelType.Code,
+            HeatingSeasonStartMonth = SelectedHeatingSeasonStartMonth.Number,
+            HeatingSeasonEndMonth = SelectedHeatingSeasonEndMonth.Number,
         });
 
         await _dataService.SetReminderSettingsAsync(new ReminderSettings

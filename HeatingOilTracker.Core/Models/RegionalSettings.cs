@@ -19,6 +19,25 @@ public class RegionalSettings
     /// Fuel type code for CO2 calculations.
     /// </summary>
     public string FuelTypeCode { get; set; } = "OIL";
+
+    /// <summary>
+    /// First month of the heating season (1–12). Default 10 (October) for Northern Hemisphere.
+    /// </summary>
+    public int HeatingSeasonStartMonth { get; set; } = 10;
+
+    /// <summary>
+    /// Last month of the heating season (1–12). Default 3 (March) for Northern Hemisphere.
+    /// </summary>
+    public int HeatingSeasonEndMonth { get; set; } = 3;
+
+    /// <summary>
+    /// Returns true if the given month falls within the configured heating season.
+    /// Handles both year-wrapping (e.g. Oct–Mar) and non-wrapping (e.g. Apr–Sep) ranges.
+    /// </summary>
+    public bool IsHeatingSeason(int month) =>
+        HeatingSeasonStartMonth > HeatingSeasonEndMonth
+            ? month >= HeatingSeasonStartMonth || month <= HeatingSeasonEndMonth
+            : month >= HeatingSeasonStartMonth && month <= HeatingSeasonEndMonth;
 }
 
 /// <summary>
@@ -93,3 +112,22 @@ public static class FuelTypes
 /// <param name="CO2LbsPerGallon">CO2 emissions in lbs per gallon</param>
 /// <param name="Source">Source of emission factor</param>
 public record FuelTypeOption(string Code, string DisplayName, decimal CO2LbsPerGallon, string Source);
+
+/// <summary>
+/// Month option for heating season picker.
+/// </summary>
+public static class MonthOptions
+{
+    public static readonly List<MonthOption> All = new()
+    {
+        new(1, "January"), new(2, "February"), new(3, "March"),
+        new(4, "April"),   new(5, "May"),       new(6, "June"),
+        new(7, "July"),    new(8, "August"),    new(9, "September"),
+        new(10, "October"), new(11, "November"), new(12, "December"),
+    };
+
+    public static MonthOption GetByNumber(int month) =>
+        All.FirstOrDefault(m => m.Number == month) ?? All[9]; // October fallback
+}
+
+public record MonthOption(int Number, string DisplayName);

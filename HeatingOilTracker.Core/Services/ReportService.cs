@@ -72,12 +72,8 @@ public class ReportService : IReportService
         var fuelType = FuelTypes.GetByCode(regionalSettings.FuelTypeCode);
         var hddBaseF = DailyWeather.GetHddBase(regionalSettings.TemperatureUnit);
 
-        // Heating season: October - March (months 10, 11, 12, 1, 2, 3)
-        // Off-season: April - September (months 4, 5, 6, 7, 8, 9)
-        var heatingSeasonMonths = new[] { 10, 11, 12, 1, 2, 3 };
-
-        var heatingDeliveries = yearDeliveries.Where(d => heatingSeasonMonths.Contains(d.Date.Month)).ToList();
-        var offSeasonDeliveries = yearDeliveries.Where(d => !heatingSeasonMonths.Contains(d.Date.Month)).ToList();
+        var heatingDeliveries = yearDeliveries.Where(d => regionalSettings.IsHeatingSeason(d.Date.Month)).ToList();
+        var offSeasonDeliveries = yearDeliveries.Where(d => !regionalSettings.IsHeatingSeason(d.Date.Month)).ToList();
 
         var breakdown = new SeasonalBreakdown
         {
@@ -94,16 +90,47 @@ public class ReportService : IReportService
         // Calculate HDD for each season if weather data available
         if (weatherData.Count > 0)
         {
-            // Heating season HDD (Oct-Dec of year + Jan-Mar of year)
-            var hddOctDec = _weatherService.CalculateHDD(weatherData,
-                new DateTime(year, 10, 1), new DateTime(year, 12, 31), hddBaseF);
-            var hddJanMar = _weatherService.CalculateHDD(weatherData,
-                new DateTime(year, 1, 1), new DateTime(year, 3, 31), hddBaseF);
-            breakdown.HeatingSeasonHDD = hddOctDec + hddJanMar;
+            int s = regionalSettings.HeatingSeasonStartMonth;
+            int e = regionalSettings.HeatingSeasonEndMonth;
 
-            // Off-season HDD (Apr-Sep)
-            breakdown.OffSeasonHDD = _weatherService.CalculateHDD(weatherData,
-                new DateTime(year, 4, 1), new DateTime(year, 9, 30), hddBaseF);
+            if (s > e)
+            {
+                // Wraps year boundary (e.g. Oct–Mar, Northern Hemisphere):
+                // heating = Jan..endMonth + startMonth..Dec of the same calendar year
+                breakdown.HeatingSeasonHDD =
+                    _weatherService.CalculateHDD(weatherData,
+                        new DateTime(year, 1, 1),
+                        new DateTime(year, e, DateTime.DaysInMonth(year, e)), hddBaseF) +
+                    _weatherService.CalculateHDD(weatherData,
+                        new DateTime(year, s, 1),
+                        new DateTime(year, 12, 31), hddBaseF);
+                // Off-season = endMonth+1 .. startMonth-1 (single contiguous range)
+                breakdown.OffSeasonHDD =
+                    _weatherService.CalculateHDD(weatherData,
+                        new DateTime(year, e + 1, 1),
+                        new DateTime(year, s - 1, DateTime.DaysInMonth(year, s - 1)), hddBaseF);
+            }
+            else
+            {
+                // No wrap (e.g. Apr–Sep, Southern Hemisphere):
+                // heating = startMonth..endMonth (single range)
+                breakdown.HeatingSeasonHDD =
+                    _weatherService.CalculateHDD(weatherData,
+                        new DateTime(year, s, 1),
+                        new DateTime(year, e, DateTime.DaysInMonth(year, e)), hddBaseF);
+                // Off-season = Jan..startMonth-1 + endMonth+1..Dec
+                var hddBefore = s > 1
+                    ? _weatherService.CalculateHDD(weatherData,
+                        new DateTime(year, 1, 1),
+                        new DateTime(year, s - 1, DateTime.DaysInMonth(year, s - 1)), hddBaseF)
+                    : 0m;
+                var hddAfter = e < 12
+                    ? _weatherService.CalculateHDD(weatherData,
+                        new DateTime(year, e + 1, 1),
+                        new DateTime(year, 12, 31), hddBaseF)
+                    : 0m;
+                breakdown.OffSeasonHDD = hddBefore + hddAfter;
+            }
         }
 
         return breakdown;

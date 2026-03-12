@@ -126,6 +126,15 @@ public class DashboardViewModel : BindableBase, INavigationAware
     public string KFactorDisplay => AverageKFactor.HasValue ? $"{AverageKFactor.Value:F1} HDD/gal" : "--";
     public string DaysRemainingDisplay => DaysRemaining.HasValue ? $"~{DaysRemaining.Value} days" : "--";
     public string LastDeliveryDateDisplay => LastDeliveryDate.HasValue ? LastDeliveryDate.Value.ToString("MMM d, yyyy") : "--";
+    public string TankEighthsDisplay
+    {
+        get
+        {
+            var eighths = (int)Math.Round((double)PercentFull / 100.0 * 8.0, MidpointRounding.AwayFromZero);
+            eighths = Math.Clamp(eighths, 0, 8);
+            return $"{eighths}/8";
+        }
+    }
 
     public DelegateCommand NavigateToDeliveriesCommand { get; }
     public DelegateCommand NavigateToSettingsCommand { get; }
@@ -183,6 +192,7 @@ public class DashboardViewModel : BindableBase, INavigationAware
             RaisePropertyChanged(nameof(KFactorDisplay));
             RaisePropertyChanged(nameof(DaysRemainingDisplay));
             RaisePropertyChanged(nameof(LastDeliveryDateDisplay));
+            RaisePropertyChanged(nameof(TankEighthsDisplay));
 
             // Load reminder settings and check alert
             var reminderSettings = await _dataService.GetReminderSettingsAsync();
