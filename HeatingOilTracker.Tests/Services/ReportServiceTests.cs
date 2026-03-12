@@ -121,7 +121,7 @@ public class ReportServiceTests
 
     #endregion
 
-    #region GetSeasonalBreakdownAsync Tests
+    #region GetSeasonalBreakdownAsync Tests — Northern Hemisphere (default, wrapping Oct–Mar)
 
     [Fact]
     public async Task GetSeasonalBreakdownAsync_SeparatesHeatingAndOffSeason()
@@ -251,6 +251,174 @@ public class ReportServiceTests
         // Assert
         result.HeatingSeasonHDD.Should().BeNull();
         result.OffSeasonHDD.Should().BeNull();
+    }
+
+    #endregion
+
+    #region GetSeasonalBreakdownAsync Tests — Southern Hemisphere (non-wrapping Apr–Sep)
+
+    private void SetupSouthernHemisphereSettings()
+    {
+        _mockDataService.Setup(x => x.GetRegionalSettingsAsync())
+            .ReturnsAsync(new RegionalSettings { HeatingSeasonStartMonth = 4, HeatingSeasonEndMonth = 9 });
+    }
+
+    [Fact]
+    public async Task GetSeasonalBreakdownAsync_SouthernHemisphere_SeparatesHeatingAndOffSeason()
+    {
+        // Arrange
+        SetupSouthernHemisphereSettings();
+        var deliveries = new List<OilDelivery>
+        {
+            // Heating season (Apr-Sep)
+            new() { Id = Guid.NewGuid(), Date = new DateTime(2024, 4, 10), Gallons = 120m, PricePerGallon = 3.50m },
+            new() { Id = Guid.NewGuid(), Date = new DateTime(2024, 6, 15), Gallons = 180m, PricePerGallon = 3.50m },
+            new() { Id = Guid.NewGuid(), Date = new DateTime(2024, 9, 5),  Gallons = 150m, PricePerGallon = 3.50m },
+            // Off-season (Oct-Mar)
+            new() { Id = Guid.NewGuid(), Date = new DateTime(2024, 1, 20), Gallons = 40m,  PricePerGallon = 3.50m },
+            new() { Id = Guid.NewGuid(), Date = new DateTime(2024, 11, 8), Gallons = 30m,  PricePerGallon = 3.50m },
+        };
+
+        _mockDataService.Setup(x => x.GetDeliveriesAsync()).ReturnsAsync(deliveries);
+        _mockDataService.Setup(x => x.GetWeatherHistoryAsync()).ReturnsAsync(new List<DailyWeather>());
+
+        // Act
+        var result = await _sut.GetSeasonalBreakdownAsync(2024);
+
+        // Assert
+        result.HeatingSeasonGallons.Should().Be(450m); // 120+180+150
+        result.HeatingSeasonDeliveries.Should().Be(3);
+        result.OffSeasonGallons.Should().Be(70m); // 40+30
+        result.OffSeasonDeliveries.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task GetSeasonalBreakdownAsync_SouthernHemisphere_AllMonthsAreCategorizedCorrectly()
+    {
+        // Arrange
+        SetupSouthernHemisphereSettings();
+        var deliveries = new List<OilDelivery>();
+        for (int month = 1; month <= 12; month++)
+        {
+            deliveries.Add(new OilDelivery
+            {
+                Id = Guid.NewGuid(),
+                Date = new DateTime(2024, month, 15),
+                Gallons = 100m,
+                PricePerGallon = 3.50m
+            });
+        }
+
+        _mockDataService.Setup(x => x.GetDeliveriesAsync()).ReturnsAsync(deliveries);
+        _mockDataService.Setup(x => x.GetWeatherHistoryAsync()).ReturnsAsync(new List<DailyWeather>());
+
+        // Act
+        var result = await _sut.GetSeasonalBreakdownAsync(2024);
+
+        // Assert — heating = Apr,May,Jun,Jul,Aug,Sep (6 months); off = Jan,Feb,Mar,Oct,Nov,Dec (6 months)
+        result.HeatingSeasonDeliveries.Should().Be(6);
+        result.HeatingSeasonGallons.Should().Be(600m);
+        result.OffSeasonDeliveries.Should().Be(6);
+        result.OffSeasonGallons.Should().Be(600m);
+    }
+
+    [Fact]
+    public async Task GetSeasonalBreakdownAsync_SouthernHemisphere_CalculatesHDDForSeasons()
+    {
+        // Arrange
+        SetupSouthernHemisphereSettings();
+        var deliveries = new List<OilDelivery>
+        {
+            new() { Id = Guid.NewGuid(), Date = new DateTime(2024, 6, 1), Gallons = 100m, PricePerGallon = 3.50m }
+        };
+        var weatherData = TestData.CreateWeatherData(new DateTime(2024, 1, 1), 366, 15m);
+
+        _mockDataService.Setup(x => x.GetDeliveriesAsync()).ReturnsAsync(deliveries);
+        _mockDataService.Setup(x => x.GetWeatherHistoryAsync()).ReturnsAsync(weatherData);
+
+        // Heating season: single contiguous range Apr–Sep
+        _mockWeatherService.Setup(x => x.CalculateHDD(
+            weatherData,
+            new DateTime(2024, 4, 1),
+            new DateTime(2024, 9, 30),
+            It.IsAny<decimal>()))
+            .Returns(1800m);
+
+        // Off-season: Jan–Mar (before heating season)
+        _mockWeatherService.Setup(x => x.CalculateHDD(
+            weatherData,
+            new DateTime(2024, 1, 1),
+            new DateTime(2024, 3, 31),
+            It.IsAny<decimal>()))
+            .Returns(400m);
+
+        // Off-season: Oct–Dec (after heating season)
+        _mockWeatherService.Setup(x => x.CalculateHDD(
+            weatherData,
+            new DateTime(2024, 10, 1),
+            new DateTime(2024, 12, 31),
+            It.IsAny<decimal>()))
+            .Returns(200m);
+
+        // Act
+        var result = await _sut.GetSeasonalBreakdownAsync(2024);
+
+        // Assert
+        result.HeatingSeasonHDD.Should().Be(1800m);
+        result.OffSeasonHDD.Should().Be(600m); // 400 + 200
+    }
+
+    [Fact]
+    public async Task GetSeasonalBreakdownAsync_SouthernHemisphere_NoWeatherData_HDDIsNull()
+    {
+        // Arrange
+        SetupSouthernHemisphereSettings();
+        var deliveries = new List<OilDelivery>
+        {
+            new() { Id = Guid.NewGuid(), Date = new DateTime(2024, 6, 1), Gallons = 100m, PricePerGallon = 3.50m }
+        };
+
+        _mockDataService.Setup(x => x.GetDeliveriesAsync()).ReturnsAsync(deliveries);
+        _mockDataService.Setup(x => x.GetWeatherHistoryAsync()).ReturnsAsync(new List<DailyWeather>());
+
+        // Act
+        var result = await _sut.GetSeasonalBreakdownAsync(2024);
+
+        // Assert
+        result.HeatingSeasonHDD.Should().BeNull();
+        result.OffSeasonHDD.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetSeasonalBreakdownAsync_CustomWrappingSeasonNovToFeb_CorrectlyCategorizes()
+    {
+        // Arrange — e.g. mild climate where heating is only Nov–Feb (still wraps)
+        _mockDataService.Setup(x => x.GetRegionalSettingsAsync())
+            .ReturnsAsync(new RegionalSettings { HeatingSeasonStartMonth = 11, HeatingSeasonEndMonth = 2 });
+
+        var deliveries = new List<OilDelivery>();
+        for (int month = 1; month <= 12; month++)
+        {
+            deliveries.Add(new OilDelivery
+            {
+                Id = Guid.NewGuid(),
+                Date = new DateTime(2024, month, 15),
+                Gallons = 100m,
+                PricePerGallon = 3.50m
+            });
+        }
+
+        _mockDataService.Setup(x => x.GetDeliveriesAsync()).ReturnsAsync(deliveries);
+        _mockDataService.Setup(x => x.GetWeatherHistoryAsync()).ReturnsAsync(new List<DailyWeather>());
+
+        // Act
+        var result = await _sut.GetSeasonalBreakdownAsync(2024);
+
+        // Assert — heating = Nov, Dec, Jan, Feb (4 months); off = Mar–Oct (8 months)
+        result.HeatingSeasonDeliveries.Should().Be(4);
+        result.HeatingSeasonGallons.Should().Be(400m);
+        result.OffSeasonDeliveries.Should().Be(8);
+        result.OffSeasonGallons.Should().Be(800m);
     }
 
     #endregion
