@@ -50,3 +50,6 @@ Desktop.ini
 # Secrets / local config (never commit)
 appsettings.json
 appsettings.*.json
+
+# MSIX signing certificate (machine-specific private key)
+*.pfx
