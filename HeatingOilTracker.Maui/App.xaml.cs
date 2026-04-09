@@ -8,6 +8,8 @@ public partial class App : Application
     private readonly IWeatherService _weatherService;
     private readonly ISyncService? _syncService;
     private DateTime _lastRefreshDate = DateTime.MinValue;
+    private DateTime _lastSyncAt = DateTime.MinValue;
+    private static readonly TimeSpan SyncOnResumeCooldown = TimeSpan.FromMinutes(30);
     private IDispatcherTimer? _refreshTimer;
 
     public App(IDataService dataService, IWeatherService weatherService, ISyncService? syncService = null)
@@ -18,6 +20,7 @@ public partial class App : Application
         _syncService = syncService;
 
         _ = SyncOnStartupAsync();
+        _lastSyncAt = DateTime.UtcNow;
         _ = FetchLatestWeatherAsync();
 
         _lastRefreshDate = DateTime.Today;
@@ -26,7 +29,10 @@ public partial class App : Application
 
     private async Task SyncOnStartupAsync()
     {
-        if (_syncService is null || !_syncService.IsSignedIn) return;
+        // Do NOT check IsSignedIn here — it is populated by a fire-and-forget
+        // call in GoogleDriveSyncService's constructor and may not be set yet.
+        // SyncOnStartupAsync will return SyncStatus.NotSignedIn if no token exists.
+        if (_syncService is null) return;
 
         try
         {
@@ -46,7 +52,17 @@ public partial class App : Application
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        return new Window(new AppShell());
+        var window = new Window(new AppShell());
+#if WINDOWS
+        window.HandlerChanged += (s, e) =>
+        {
+            if (window.Handler?.PlatformView is Microsoft.UI.Xaml.Window winUiWindow)
+                winUiWindow.DispatcherQueue.TryEnqueue(
+                    Microsoft.UI.Dispatching.DispatcherQueuePriority.Low,
+                    () => winUiWindow.ExtendsContentIntoTitleBar = false);
+        };
+#endif
+        return window;
     }
 
     private void StartRefreshTimer()
@@ -75,6 +91,14 @@ public partial class App : Application
             System.Diagnostics.Debug.WriteLine("[Weather] App resumed on new day - refreshing");
             _ = FetchLatestWeatherAsync();
             _lastRefreshDate = DateTime.Today;
+        }
+        // Sync on resume if enough time has passed — catches deliveries whose auto-push
+        // failed silently while the app was in the background.
+        if (DateTime.UtcNow - _lastSyncAt >= SyncOnResumeCooldown)
+        {
+            System.Diagnostics.Debug.WriteLine("[Sync] App resumed after cooldown - syncing");
+            _ = SyncOnStartupAsync();
+            _lastSyncAt = DateTime.UtcNow;
         }
     }
 

@@ -258,7 +258,7 @@ public class SettingsViewModel : INotifyPropertyChanged
 
     private async Task SyncNowAsync()
     {
-        if (_syncService is null || !_syncService.IsSignedIn) return;
+        if (_syncService is null) return;
         IsSyncing = true;
         try
         {

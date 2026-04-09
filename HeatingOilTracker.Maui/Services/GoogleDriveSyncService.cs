@@ -241,8 +241,10 @@ public class GoogleDriveSyncService : ISyncService
         if (!IsConfigured)
             return new SyncResult(localData, SyncStatus.NotConfigured, LastSyncAt);
 
-        if (!IsSignedIn)
-            return new SyncResult(localData, SyncStatus.NotSignedIn, LastSyncAt);
+        // Do NOT short-circuit on the IsSignedIn field here — it is populated by a
+        // fire-and-forget LoadStoredStateAsync() call and may not be set yet when
+        // SyncOnStartupAsync is called on startup.  GetValidAccessTokenAsync() reads
+        // SecureStorage directly and is the authoritative check.
 
         _startupSyncInProgress = true;
         try
