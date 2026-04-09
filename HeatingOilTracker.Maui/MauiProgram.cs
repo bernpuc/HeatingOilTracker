@@ -40,6 +40,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<ITankEstimatorService, TankEstimatorService>();
         builder.Services.AddSingleton<IReportService, ReportService>();
         builder.Services.AddSingleton<ICsvImportService, CsvImportService>();
+        builder.Services.AddSingleton<IEiaService>(_ =>
+            new EiaService(Preferences.Get("eia_api_key", string.Empty)));
 
         // ViewModels
         builder.Services.AddTransient<DashboardViewModel>();
@@ -50,6 +52,7 @@ public static class MauiProgram
         builder.Services.AddTransient<ChartsViewModel>();
         builder.Services.AddTransient<WeatherViewModel>();
         builder.Services.AddTransient<ReferenceViewModel>();
+        builder.Services.AddTransient<PricesViewModel>();
 
         // Pages
         builder.Services.AddTransient<DashboardPage>();
@@ -60,6 +63,7 @@ public static class MauiProgram
         builder.Services.AddTransient<ChartsPage>();
         builder.Services.AddTransient<WeatherPage>();
         builder.Services.AddTransient<ReferencePage>();
+        builder.Services.AddTransient<PricesPage>();
 
 #if DEBUG
         builder.Logging.AddDebug();

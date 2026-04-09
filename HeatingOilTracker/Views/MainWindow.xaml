@@ -46,6 +46,11 @@
                             Margin="0,2"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="WeatherView"/>
+                    <Button Content="Oil Prices"
+                            Style="{StaticResource SidebarButtonStyle}"
+                            Margin="0,2"
+                            Command="{Binding NavigateCommand}"
+                            CommandParameter="PricesView"/>
                     <Button Content="Reports"
                             Style="{StaticResource SidebarButtonStyle}"
                             Margin="0,2"

@@ -1,0 +1,135 @@
+<UserControl x:Class="HeatingOilTracker.Views.PricesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             Background="White">
+    <DockPanel Margin="30">
+
+        <!-- Header (always visible) -->
+        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,20">
+            <TextBlock Text="Oil Prices"
+                       FontSize="24" FontWeight="Bold" Foreground="#1e293b"/>
+            <TextBlock Text="Weekly retail heating oil prices from the U.S. Energy Information Administration (EIA)."
+                       FontSize="12" Foreground="#64748b" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <!-- Loading -->
+        <TextBlock DockPanel.Dock="Top"
+                   Text="Loading price data…"
+                   FontSize="14" Foreground="#64748b"
+                   Margin="0,20"
+                   Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
+
+        <!-- Error / No Key -->
+        <Border DockPanel.Dock="Top"
+                Background="#fef3c7" BorderBrush="#f59e0b" BorderThickness="1"
+                CornerRadius="6" Padding="16" Margin="0,0,0,0"
+                Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel>
+                <TextBlock Text="Could not load price data"
+                           FontWeight="SemiBold" Foreground="#92400e" Margin="0,0,0,4"/>
+                <TextBlock Text="{Binding ErrorMessage}"
+                           Foreground="#92400e" FontSize="12" TextWrapping="Wrap"/>
+                <TextBlock Text="Go to Settings → API Keys to add your free EIA API key."
+                           Foreground="#92400e" FontSize="12" Margin="0,6,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Main content -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      Visibility="{Binding HasData, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel>
+
+                <!-- KPI Cards -->
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="2*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Region price -->
+                    <Border Grid.Column="0"
+                            Background="#f0f9ff" BorderBrush="#bae6fd" BorderThickness="1"
+                            CornerRadius="8" Padding="16">
+                        <StackPanel>
+                            <TextBlock Text="{Binding RegionName}"
+                                       FontSize="11" FontWeight="SemiBold" Foreground="#0369a1"/>
+                            <TextBlock Text="{Binding LatestRegionPrice}"
+                                       FontSize="30" FontWeight="Bold" Foreground="#0c4a6e"
+                                       Margin="0,4,0,2"/>
+                            <TextBlock Text="per gallon (latest week)"
+                                       FontSize="11" Foreground="#64748b"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- National average -->
+                    <Border Grid.Column="2"
+                            Background="#f8fafc" BorderBrush="#e2e8f0" BorderThickness="1"
+                            CornerRadius="8" Padding="16">
+                        <StackPanel>
+                            <TextBlock Text="U.S. Average"
+                                       FontSize="11" FontWeight="SemiBold" Foreground="#475569"/>
+                            <TextBlock Text="{Binding LatestNationalPrice}"
+                                       FontSize="30" FontWeight="Bold" Foreground="#1e293b"
+                                       Margin="0,4,0,2"/>
+                            <TextBlock Text="per gallon (latest week)"
+                                       FontSize="11" Foreground="#64748b"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Trend + suggestion -->
+                    <Border Grid.Column="4"
+                            Background="#f0fdf4" BorderBrush="#bbf7d0" BorderThickness="1"
+                            CornerRadius="8" Padding="16">
+                        <StackPanel>
+                            <TextBlock Text="Trend Analysis"
+                                       FontSize="11" FontWeight="SemiBold" Foreground="#15803d"
+                                       Margin="0,0,0,6"/>
+                            <TextBlock Text="{Binding TrendSummary}"
+                                       FontSize="12" FontWeight="SemiBold" Foreground="#166534"
+                                       TextWrapping="Wrap" Margin="0,0,0,8"/>
+                            <TextBlock Text="{Binding Suggestion}"
+                                       FontSize="12" Foreground="#374151"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- vs national caption -->
+                <TextBlock Text="{Binding PriceDiff}"
+                           FontSize="12" Foreground="#64748b"
+                           Margin="0,0,0,20"/>
+
+                <!-- Chart -->
+                <TextBlock Text="Price History — Last 52 Weeks"
+                           FontSize="14" FontWeight="SemiBold" Foreground="#334155"
+                           Margin="0,0,0,8"/>
+                <lvc:CartesianChart Series="{Binding PriceSeries}"
+                                    XAxes="{Binding XAxes}"
+                                    YAxes="{Binding YAxes}"
+                                    Height="280"
+                                    TooltipFindingStrategy="CompareOnlyXTakeClosest"/>
+
+                <!-- Legend -->
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <Border Background="#2563eb" Width="20" Height="3" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                    <TextBlock Text="{Binding RegionName}" FontSize="11" Foreground="#64748b" Margin="0,0,16,0"/>
+                    <Border Background="#94a3b8" Width="20" Height="3" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                    <TextBlock Text="U.S. Average" FontSize="11" Foreground="#64748b"/>
+                </StackPanel>
+
+                <TextBlock Text="Gaps between April and October are normal — the EIA only surveys retail heating oil prices during the heating season (Oct–Mar)."
+                           FontSize="11" Foreground="#64748b" TextWrapping="Wrap" Margin="0,12,0,4"/>
+                <TextBlock Text="Source: U.S. Energy Information Administration (EIA). No. 2 heating oil retail prices, weekly."
+                           FontSize="10" Foreground="#94a3b8"/>
+
+            </StackPanel>
+        </ScrollViewer>
+
+    </DockPanel>
+</UserControl>

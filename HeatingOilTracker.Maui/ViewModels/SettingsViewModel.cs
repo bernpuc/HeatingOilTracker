@@ -34,12 +34,38 @@ public class SettingsViewModel : INotifyPropertyChanged
     private MonthOption _selectedHeatingSeasonStartMonth = MonthOptions.GetByNumber(10);
     private MonthOption _selectedHeatingSeasonEndMonth = MonthOptions.GetByNumber(3);
 
+    // EIA region
+    private string _eiaRegionCode = string.Empty;
+
+    // API keys
+    private string _eiaApiKey = string.Empty;
+    private string _eiaKeyStatus = string.Empty;
+
     // Sync state
     private string _syncStatusText = "Not connected";
     private bool _isSyncing;
     private bool _isSignedIn;
     private string _syncAccountText = string.Empty;
     private string _lastSyncedText = string.Empty;
+
+    // EIA region picker options — empty code = auto-detect
+    public List<Core.Models.EiaRegionOption> EiaRegions { get; } =
+        new[] { new Core.Models.EiaRegionOption("", "Auto-detect from location") }
+        .Concat(Core.Models.EiaRegion.All.Select(r => new Core.Models.EiaRegionOption(r.Code, r.Name)))
+        .ToList();
+
+    private Core.Models.EiaRegionOption? _selectedEiaRegion;
+    public Core.Models.EiaRegionOption? SelectedEiaRegion
+    {
+        get => _selectedEiaRegion;
+        set
+        {
+            SetProperty(ref _selectedEiaRegion, value);
+            EiaRegionCode = value?.Code ?? string.Empty;
+        }
+    }
+
+    public string EiaRegionCode { get => _eiaRegionCode; set => SetProperty(ref _eiaRegionCode, value); }
 
     public ObservableCollection<Core.Models.Location> LocationSearchResults { get; } = new();
     public ObservableCollection<CultureOption> Currencies { get; } = new(SupportedCultures.All);
@@ -58,6 +84,8 @@ public class SettingsViewModel : INotifyPropertyChanged
     public string ThresholdDaysText { get => _thresholdDaysText; set => SetProperty(ref _thresholdDaysText, value); }
     public string DataFilePath { get => _dataFilePath; set => SetProperty(ref _dataFilePath, value); }
     public bool HasSearchResults => LocationSearchResults.Count > 0;
+    public string EiaApiKey { get => _eiaApiKey; set => SetProperty(ref _eiaApiKey, value); }
+    public string EiaKeyStatus { get => _eiaKeyStatus; set => SetProperty(ref _eiaKeyStatus, value); }
 
     // Sync properties
     public string SyncStatusText { get => _syncStatusText; set => SetProperty(ref _syncStatusText, value); }
@@ -142,6 +170,13 @@ public class SettingsViewModel : INotifyPropertyChanged
         ReminderEnabled = reminderSettings.IsEnabled;
         ThresholdGallonsText = reminderSettings.ThresholdGallons.ToString("F0");
         ThresholdDaysText = reminderSettings.ThresholdDays?.ToString() ?? string.Empty;
+
+        // Load EIA API key + region
+        EiaApiKey = Preferences.Get("eia_api_key", string.Empty);
+        EiaKeyStatus = string.IsNullOrWhiteSpace(EiaApiKey) ? "Not configured" : "Key saved";
+        EiaRegionCode = regionalSettings.EiaRegionCode;
+        _selectedEiaRegion = EiaRegions.FirstOrDefault(r => r.Code == EiaRegionCode) ?? EiaRegions[0];
+        OnPropertyChanged(nameof(SelectedEiaRegion));
 
         RefreshSyncStatus();
     }
@@ -278,6 +313,7 @@ public class SettingsViewModel : INotifyPropertyChanged
             FuelTypeCode = SelectedFuelType.Code,
             HeatingSeasonStartMonth = SelectedHeatingSeasonStartMonth.Number,
             HeatingSeasonEndMonth = SelectedHeatingSeasonEndMonth.Number,
+            EiaRegionCode = EiaRegionCode,
         });
 
         await _dataService.SetReminderSettingsAsync(new ReminderSettings
@@ -286,6 +322,13 @@ public class SettingsViewModel : INotifyPropertyChanged
             ThresholdGallons = thresholdGallons,
             ThresholdDays = thresholdDays
         });
+
+        // Save EIA API key
+        if (string.IsNullOrWhiteSpace(EiaApiKey))
+            Preferences.Remove("eia_api_key");
+        else
+            Preferences.Set("eia_api_key", EiaApiKey.Trim());
+        EiaKeyStatus = string.IsNullOrWhiteSpace(EiaApiKey) ? "Not configured" : "Key saved";
 
         await Shell.Current.DisplayAlert("Settings", "Settings saved.", "OK");
     }
@@ -329,6 +372,13 @@ public class SettingsViewModel : INotifyPropertyChanged
         LocationDisplay = location.DisplayName;
         LocationSearchResults.Clear();
         OnPropertyChanged(nameof(HasSearchResults));
+
+        // Auto-detect EIA region from coordinates if user hasn't manually chosen one
+        if (string.IsNullOrEmpty(EiaRegionCode))
+        {
+            EiaRegionCode = Core.Models.EiaRegionMapper.FromCoordinates(location.Latitude, location.Longitude);
+        }
+
         await Shell.Current.DisplayAlert("Location Set", $"Location set to {location.DisplayName}", "OK");
     }
 

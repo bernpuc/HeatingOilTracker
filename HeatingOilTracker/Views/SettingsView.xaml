@@ -265,6 +265,41 @@
                          Foreground="#64748b"/>
             </StackPanel>
 
+            <!-- API Keys Section -->
+            <Border BorderBrush="{StaticResource BorderColor}"
+                    BorderThickness="0,1,0,0"
+                    Padding="0,20,0,0"
+                    Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="API Keys"
+                               FontSize="16" FontWeight="SemiBold"
+                               Foreground="#334155"
+                               Margin="0,0,0,15"/>
+
+                    <TextBlock Text="EIA (U.S. Energy Information Administration)"
+                               FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBlock Text="Used to display regional heating oil market prices. Free key at eia.gov/opendata/register.php"
+                               Foreground="#64748b" FontSize="11"
+                               TextWrapping="Wrap" Margin="0,0,0,8"/>
+                    <TextBox Text="{Binding EiaApiKey, UpdateSourceTrigger=PropertyChanged}"
+                             Width="300" HorizontalAlignment="Left"
+                             Margin="0,0,0,5"/>
+                    <TextBlock Text="{Binding EiaKeyStatus}"
+                               Foreground="#64748b" FontSize="11"
+                               Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Price Region" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBlock Text="Auto-detected from your location, or choose a region manually."
+                               Foreground="#64748b" FontSize="11"
+                               TextWrapping="Wrap" Margin="0,0,0,8"/>
+                    <ComboBox ItemsSource="{Binding EiaRegions}"
+                              SelectedValuePath="Code"
+                              SelectedValue="{Binding EiaRegionCode}"
+                              DisplayMemberPath="Name"
+                              Width="260" HorizontalAlignment="Left"/>
+                </StackPanel>
+            </Border>
+
             <!-- Save Button -->
             <Button Content="Save Settings"
                     Style="{StaticResource PrimaryButtonStyle}"

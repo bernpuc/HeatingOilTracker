@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
+             x:Class="HeatingOilTracker.Maui.Views.PricesPage"
+             Title="Oil Prices">
+
+    <RefreshView Command="{Binding RefreshCommand}" IsRefreshing="{Binding IsLoading}">
+        <ScrollView VerticalScrollBarVisibility="Never">
+            <VerticalStackLayout Padding="16" Spacing="16">
+
+                <!-- Loading -->
+                <Label Text="Loading price data…"
+                       FontSize="15" TextColor="#64748b"
+                       HorizontalOptions="Center" Margin="0,40"
+                       IsVisible="{Binding IsLoading}"/>
+
+                <!-- Error -->
+                <Border BackgroundColor="#fef3c7" Stroke="#f59e0b" StrokeThickness="1"
+                        Padding="16" IsVisible="{Binding HasError}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8"/>
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Could not load price data"
+                               FontAttributes="Bold" TextColor="#92400e"/>
+                        <Label Text="{Binding ErrorMessage}"
+                               FontSize="13" TextColor="#92400e"/>
+                        <Label Text="Go to Settings → API Keys to add your free EIA API key."
+                               FontSize="12" TextColor="#92400e"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Content -->
+                <VerticalStackLayout Spacing="16" IsVisible="{Binding HasData}">
+
+                    <!-- Region price card -->
+                    <Border BackgroundColor="#f0f9ff" Stroke="#bae6fd" StrokeThickness="1" Padding="16">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="8"/>
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{Binding RegionName}"
+                                   FontSize="12" FontAttributes="Bold" TextColor="#0369a1"/>
+                            <Label Text="{Binding LatestRegionPrice}"
+                                   FontSize="32" FontAttributes="Bold" TextColor="#0c4a6e"/>
+                            <Label Text="per gallon (latest week)"
+                                   FontSize="12" TextColor="#64748b"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- National average card -->
+                    <Border BackgroundColor="#f8fafc" Stroke="#e2e8f0" StrokeThickness="1" Padding="16">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="8"/>
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="U.S. Average"
+                                   FontSize="12" FontAttributes="Bold" TextColor="#475569"/>
+                            <Label Text="{Binding LatestNationalPrice}"
+                                   FontSize="32" FontAttributes="Bold" TextColor="#1e293b"/>
+                            <Label Text="per gallon (latest week)"
+                                   FontSize="12" TextColor="#64748b"/>
+                            <Label Text="{Binding PriceDiff}"
+                                   FontSize="12" TextColor="#64748b" Margin="0,4,0,0"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Trend analysis card -->
+                    <Border BackgroundColor="#f0fdf4" Stroke="#bbf7d0" StrokeThickness="1" Padding="16">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="8"/>
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Trend Analysis"
+                                   FontSize="12" FontAttributes="Bold" TextColor="#15803d"/>
+                            <Label Text="{Binding TrendSummary}"
+                                   FontSize="13" FontAttributes="Bold" TextColor="#166534"/>
+                            <Label Text="{Binding Suggestion}"
+                                   FontSize="13" TextColor="#374151"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Chart -->
+                    <Label Text="Price History — Last 52 Weeks"
+                           FontSize="14" FontAttributes="Bold" TextColor="#334155"/>
+
+                    <lvc:CartesianChart Series="{Binding PriceSeries}"
+                                        XAxes="{Binding XAxes}"
+                                        YAxes="{Binding YAxes}"
+                                        HeightRequest="240"
+                                        TooltipFindingStrategy="CompareOnlyXTakeClosest"/>
+
+                    <!-- Legend -->
+                    <HorizontalStackLayout Spacing="12">
+                        <BoxView Color="#2563eb" HeightRequest="3" WidthRequest="20" VerticalOptions="Center"/>
+                        <Label Text="{Binding RegionName}" FontSize="12" TextColor="#64748b" VerticalOptions="Center"/>
+                        <BoxView Color="#94a3b8" HeightRequest="3" WidthRequest="20" VerticalOptions="Center"/>
+                        <Label Text="U.S. Average" FontSize="12" TextColor="#64748b" VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+
+                    <Label Text="Gaps between April and October are normal — the EIA only surveys retail heating oil prices during the heating season (Oct–Mar)."
+                           FontSize="12" TextColor="#64748b" Margin="0,4,0,2"/>
+                    <Label Text="Source: U.S. EIA — No. 2 heating oil retail prices, weekly."
+                           FontSize="10" TextColor="#94a3b8"/>
+
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+
+</ContentPage>

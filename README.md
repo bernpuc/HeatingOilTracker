@@ -31,6 +31,14 @@ A heating oil delivery tracker available as both a **Windows desktop app (WPF)**
 - **Interactive Tooltips**: Crosshair tooltips for detailed data inspection
 - **Interactive Zoom**: Ctrl + scroll to zoom in/out on any chart; double-click to reset to full view
 
+### Oil Prices
+- **Regional Market Prices**: Weekly retail heating oil prices from the U.S. Energy Information Administration (EIA) — requires a free API key from eia.gov/opendata/register.php
+- **Auto-Detected Region**: EIA price region is automatically determined from your configured location (New England, Central Atlantic, Lower Atlantic, Midwest, Gulf Coast, Rocky Mountain, West Coast, or U.S. Average); can be overridden in Settings
+- **vs. National Average**: Latest regional price shown alongside the U.S. average with the dollar and percentage difference
+- **Trend Analysis**: Compares the 4-week average to the 13-week average to classify prices as trending up, down, or stable — with week-over-week and year-over-year changes
+- **Buy/Wait Suggestion**: Actionable recommendation based on the trend direction and whether your region is above or below the national average
+- **52-Week Price Chart**: Line chart of your region and the U.S. average; summer gaps (Apr–Oct) are expected as the EIA only surveys heating oil prices during the heating season
+
 ### Cost Reports
 - **Annual Summaries**: Total cost, gallons, and average price per year
 - **Seasonal Breakdown**: Compare heating season vs off-season usage; season months are configurable (default Oct–Mar for Northern Hemisphere, Apr–Sep for Southern)
@@ -50,6 +58,7 @@ A heating oil delivery tracker available as both a **Windows desktop app (WPF)**
 - **Heating Season**: Configure start and end months to match your climate (Northern or Southern Hemisphere)
 - **Cloud Backup**: Automatic backup to OneDrive, Dropbox, or other cloud folders
 - **Google Drive Sync**: Connect your Google account to sync data across devices (MAUI)
+- **EIA Price Region**: Override the auto-detected region for oil price lookups
 
 ### Reference Guide
 - **In-App Documentation**: Explains all calculations (HDD, K-Factor, burn rate, carbon footprint)

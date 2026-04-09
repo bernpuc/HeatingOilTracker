@@ -4,6 +4,7 @@
        xmlns:views="clr-namespace:HeatingOilTracker.Maui.Views"
        x:Class="HeatingOilTracker.Maui.AppShell"
        FlyoutBehavior="{OnIdiom Desktop=Locked, Default=Flyout}"
+       FlyoutHeaderBehavior="Fixed"
        FlyoutBackgroundColor="#1e293b">
 
     <Shell.FlyoutHeader>
@@ -54,6 +55,10 @@
         <ShellContent ContentTemplate="{DataTemplate views:WeatherPage}"/>
     </FlyoutItem>
 
+    <FlyoutItem Title="Oil Prices" FlyoutIcon="💲">
+        <ShellContent ContentTemplate="{DataTemplate views:PricesPage}"/>
+    </FlyoutItem>
+
     <FlyoutItem Title="Reports" FlyoutIcon="📄">
         <ShellContent ContentTemplate="{DataTemplate views:ReportsPage}"/>
     </FlyoutItem>
@@ -65,5 +70,17 @@
     <FlyoutItem Title="Reference" FlyoutIcon="📖">
         <ShellContent ContentTemplate="{DataTemplate views:ReferencePage}"/>
     </FlyoutItem>
+
+    <Shell.FlyoutFooter>
+        <Grid HeightRequest="60" BackgroundColor="#0f172a">
+            <Button Text="⏻  Exit"
+                    TextColor="#94a3b8"
+                    BackgroundColor="Transparent"
+                    FontSize="14"
+                    HorizontalOptions="Fill"
+                    VerticalOptions="Center"
+                    Clicked="OnExitClicked"/>
+        </Grid>
+    </Shell.FlyoutFooter>
 
 </Shell>

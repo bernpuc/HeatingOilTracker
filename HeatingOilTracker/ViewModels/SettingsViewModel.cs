@@ -1,6 +1,7 @@
 using HeatingOilTracker.Converters;
 using HeatingOilTracker.Core.Interfaces;
 using HeatingOilTracker.Core.Models;
+using HeatingOilTracker.Services;
 using System.Collections.ObjectModel;
 
 namespace HeatingOilTracker.ViewModels;
@@ -34,6 +35,24 @@ public class SettingsViewModel : BindableBase, INavigationAware
     // Backup settings
     private string _backupFolderPath = string.Empty;
     private string _backupStatus = string.Empty;
+
+    // EIA region
+    private string _eiaRegionCode = string.Empty;
+
+    // API keys
+    private string _eiaApiKey = string.Empty;
+    private string _eiaKeyStatus = string.Empty;
+
+    // EIA region options — empty code = auto-detect from location coordinates
+    public ObservableCollection<EiaRegionOption> EiaRegions { get; } = new(
+        new[] { new EiaRegionOption("", "Auto-detect from location") }
+        .Concat(EiaRegion.All.Select(r => new EiaRegionOption(r.Code, r.Name))));
+
+    public string EiaRegionCode
+    {
+        get => _eiaRegionCode;
+        set => SetProperty(ref _eiaRegionCode, value);
+    }
 
     // Location search results
     public ObservableCollection<Location> LocationSearchResults { get; } = new();
@@ -177,6 +196,18 @@ public class SettingsViewModel : BindableBase, INavigationAware
 
     public bool HasBackupFolder => !string.IsNullOrWhiteSpace(BackupFolderPath);
 
+    public string EiaApiKey
+    {
+        get => _eiaApiKey;
+        set => SetProperty(ref _eiaApiKey, value);
+    }
+
+    public string EiaKeyStatus
+    {
+        get => _eiaKeyStatus;
+        set => SetProperty(ref _eiaKeyStatus, value);
+    }
+
     public DelegateCommand SaveCommand { get; }
     public DelegateCommand SearchLocationCommand { get; }
     public DelegateCommand FetchWeatherCommand { get; }
@@ -242,6 +273,11 @@ public class SettingsViewModel : BindableBase, INavigationAware
         // Load backup settings
         BackupFolderPath = await _dataService.GetBackupFolderPathAsync() ?? string.Empty;
         UpdateBackupStatus();
+
+        // Load EIA API key + region
+        EiaApiKey = EiaKeyStore.Load();
+        EiaKeyStatus = string.IsNullOrWhiteSpace(EiaApiKey) ? "Not configured" : "Key saved";
+        EiaRegionCode = regionalSettings.EiaRegionCode;
     }
 
     private async Task SaveAsync()
@@ -270,6 +306,7 @@ public class SettingsViewModel : BindableBase, INavigationAware
             FuelTypeCode = SelectedFuelType.Code,
             HeatingSeasonStartMonth = SelectedHeatingSeasonStartMonth.Number,
             HeatingSeasonEndMonth = SelectedHeatingSeasonEndMonth.Number,
+            EiaRegionCode = EiaRegionCode,
         };
         await _dataService.SetRegionalSettingsAsync(regionalSettings);
 
@@ -289,6 +326,13 @@ public class SettingsViewModel : BindableBase, INavigationAware
         var backupPath = string.IsNullOrWhiteSpace(BackupFolderPath) ? null : BackupFolderPath;
         await _dataService.SetBackupFolderPathAsync(backupPath);
         UpdateBackupStatus();
+
+        // Save EIA API key
+        if (string.IsNullOrWhiteSpace(EiaApiKey))
+            EiaKeyStore.Delete();
+        else
+            EiaKeyStore.Save(EiaApiKey.Trim());
+        EiaKeyStatus = string.IsNullOrWhiteSpace(EiaApiKey) ? "Not configured" : "Key saved";
 
         MessageBox.Show("Settings saved.", "Settings", MessageBoxButton.OK, MessageBoxImage.Information);
     }
@@ -388,6 +432,13 @@ public class SettingsViewModel : BindableBase, INavigationAware
         LocationDisplay = location.DisplayName;
         LocationSearchResults.Clear();
         RaisePropertyChanged(nameof(HasSearchResults));
+
+        // Auto-detect EIA region from coordinates if user hasn't manually chosen one
+        if (string.IsNullOrEmpty(EiaRegionCode))
+        {
+            var detected = HeatingOilTracker.Core.Models.EiaRegionMapper.FromCoordinates(location.Latitude, location.Longitude);
+            EiaRegionCode = detected;
+        }
     }
 
     private async Task FetchWeatherAsync()

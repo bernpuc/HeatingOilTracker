@@ -2,6 +2,7 @@ using HeatingOilTracker.Converters;
 using HeatingOilTracker.Core.Interfaces;
 using HeatingOilTracker.Core.Services;
 using HeatingOilTracker.Events;
+using HeatingOilTracker.Services;
 using HeatingOilTracker.ViewModels;
 using HeatingOilTracker.Views;
 using System.Windows;
@@ -34,6 +35,7 @@ public partial class App : PrismApplication
         containerRegistry.Register<IWeatherService, WeatherService>();
         containerRegistry.Register<ITankEstimatorService, TankEstimatorService>();
         containerRegistry.Register<IReportService, ReportService>();
+        containerRegistry.RegisterSingleton<IEiaService>(() => new EiaService(EiaKeyStore.Load()));
 
         // Views for navigation
         containerRegistry.RegisterForNavigation<DashboardView, DashboardViewModel>();
@@ -43,6 +45,7 @@ public partial class App : PrismApplication
         containerRegistry.RegisterForNavigation<SettingsView, SettingsViewModel>();
         containerRegistry.RegisterForNavigation<WeatherView, WeatherViewModel>();
         containerRegistry.RegisterForNavigation<ReferenceView, ReferenceViewModel>();
+        containerRegistry.RegisterForNavigation<PricesView, PricesViewModel>();
     }
 
     protected override void OnInitialized()

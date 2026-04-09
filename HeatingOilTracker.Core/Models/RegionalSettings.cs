@@ -21,6 +21,12 @@ public class RegionalSettings
     public string FuelTypeCode { get; set; } = "OIL";
 
     /// <summary>
+    /// EIA duoarea code for heating oil price region (e.g. "R1X" for New England).
+    /// Empty string means auto-detect from the configured location coordinates.
+    /// </summary>
+    public string EiaRegionCode { get; set; } = string.Empty;
+
+    /// <summary>
     /// First month of the heating season (1–12). Default 10 (October) for Northern Hemisphere.
     /// </summary>
     public int HeatingSeasonStartMonth { get; set; } = 10;
