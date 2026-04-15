@@ -17,13 +17,14 @@ public class EiaService : IEiaService
     private const string HeatingOilProduct = "EPD2F";
 
     private readonly HttpClient _httpClient;
-    private readonly string _apiKey;
+    private readonly Func<string> _getApiKey;
 
-    public EiaService(string apiKey) : this(apiKey, new HttpClient()) { }
+    public EiaService(string apiKey) : this(() => apiKey, new HttpClient()) { }
+    public EiaService(Func<string> getApiKey) : this(getApiKey, new HttpClient()) { }
 
-    public EiaService(string apiKey, HttpClient httpClient)
+    public EiaService(Func<string> getApiKey, HttpClient httpClient)
     {
-        _apiKey = apiKey;
+        _getApiKey = getApiKey;
         _httpClient = httpClient;
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "HeatingOilTracker/1.0");
     }
@@ -52,7 +53,7 @@ public class EiaService : IEiaService
     // ── Private helpers ──────────────────────────────────────────────────────
 
     private string BuildUrl(string regionCode, int length = 52) =>
-        $"{BaseUrl}?api_key={_apiKey}" +
+        $"{BaseUrl}?api_key={_getApiKey()}" +
         $"&frequency=weekly" +
         $"&data[0]=value" +
         $"&facets[product][]={HeatingOilProduct}" +

@@ -41,7 +41,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<IReportService, ReportService>();
         builder.Services.AddSingleton<ICsvImportService, CsvImportService>();
         builder.Services.AddSingleton<IEiaService>(_ =>
-            new EiaService(Preferences.Get("eia_api_key", string.Empty)));
+            new EiaService(() => Preferences.Get("eia_api_key", string.Empty)));
 
         // ViewModels
         builder.Services.AddTransient<DashboardViewModel>();

@@ -35,7 +35,7 @@ public partial class App : PrismApplication
         containerRegistry.Register<IWeatherService, WeatherService>();
         containerRegistry.Register<ITankEstimatorService, TankEstimatorService>();
         containerRegistry.Register<IReportService, ReportService>();
-        containerRegistry.RegisterSingleton<IEiaService>(() => new EiaService(EiaKeyStore.Load()));
+        containerRegistry.RegisterSingleton<IEiaService>(() => new EiaService(EiaKeyStore.Load));
 
         // Views for navigation
         containerRegistry.RegisterForNavigation<DashboardView, DashboardViewModel>();
