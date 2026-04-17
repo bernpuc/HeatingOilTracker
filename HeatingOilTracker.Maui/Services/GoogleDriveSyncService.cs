@@ -256,10 +256,16 @@ public class GoogleDriveSyncService : ISyncService
             var remoteJson = await DownloadSyncFileAsync(token);
             if (remoteJson is null)
             {
-                // No remote file yet — push local data up
-                await UploadSyncFileAsync(token, localData);
-                LastSyncAt = DateTime.UtcNow;
-                await PersistLastSyncAtAsync();
+                // No remote file yet — only push if we have something worth saving.
+                // If local is also empty, skip the upload so we don't clobber a file
+                // that another device may be about to create.
+                var hasLocalData = localData.Deliveries.Any(d => !d.IsDeleted);
+                if (hasLocalData)
+                {
+                    await UploadSyncFileAsync(token, localData);
+                    LastSyncAt = DateTime.UtcNow;
+                    await PersistLastSyncAtAsync();
+                }
                 return new SyncResult(localData, SyncStatus.Success, LastSyncAt);
             }
 

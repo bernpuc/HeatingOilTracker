@@ -245,14 +245,8 @@
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="6"/>
                 </Border.StrokeShape>
-                <Label FontSize="13" TextColor="#64748b">
-                    <Label.FormattedText>
-                        <FormattedString>
-                            <Span Text="Heating Oil Tracker v2.0" FontAttributes="Bold"/>
-                            <Span Text="&#10;Calculations use standard industry formulas and U.S. EIA emission factors. Actual consumption may vary based on equipment efficiency, home characteristics, and usage patterns."/>
-                        </FormattedString>
-                    </Label.FormattedText>
-                </Label>
+                <Label FontSize="13" TextColor="#64748b"
+                       Text="Calculations use standard industry formulas and U.S. EIA emission factors. Actual consumption may vary based on equipment efficiency, home characteristics, and usage patterns."/>
             </Border>
 
         </VerticalStackLayout>

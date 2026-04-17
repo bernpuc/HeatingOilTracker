@@ -9,4 +9,9 @@ public partial class AppShell : Shell
         InitializeComponent();
         Routing.RegisterRoute("DeliveryEditorPage", typeof(DeliveryEditorPage));
     }
+
+    private void OnExitClicked(object sender, EventArgs e)
+    {
+        Application.Current?.Quit();
+    }
 }

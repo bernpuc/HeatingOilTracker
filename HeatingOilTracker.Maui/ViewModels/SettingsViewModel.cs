@@ -83,6 +83,7 @@ public class SettingsViewModel : INotifyPropertyChanged
     public string ThresholdGallonsText { get => _thresholdGallonsText; set => SetProperty(ref _thresholdGallonsText, value); }
     public string ThresholdDaysText { get => _thresholdDaysText; set => SetProperty(ref _thresholdDaysText, value); }
     public string DataFilePath { get => _dataFilePath; set => SetProperty(ref _dataFilePath, value); }
+    public string AppVersion => $"v{AppInfo.Current.VersionString}";
     public bool HasSearchResults => LocationSearchResults.Count > 0;
     public string EiaApiKey { get => _eiaApiKey; set => SetProperty(ref _eiaApiKey, value); }
     public string EiaKeyStatus { get => _eiaKeyStatus; set => SetProperty(ref _eiaKeyStatus, value); }
@@ -266,9 +267,12 @@ public class SettingsViewModel : INotifyPropertyChanged
             var result = await _syncService.SyncOnStartupAsync(localData);
             if (result.Status == SyncStatus.Success)
             {
+                var driveCount = result.MergedData.Deliveries.Count(d => !d.IsDeleted);
                 await _dataService.MergeFromSyncAsync(result.MergedData);
+                var localCount = (await _dataService.LoadAsync()).Deliveries.Count(d => !d.IsDeleted);
                 RefreshSyncStatus();
-                await Shell.Current.DisplayAlert("Sync", "Sync completed successfully.", "OK");
+                await Shell.Current.DisplayAlert("Sync",
+                    $"Sync completed.\nDrive: {driveCount} deliveries\nLocal after merge: {localCount}", "OK");
             }
             else
             {

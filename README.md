@@ -59,6 +59,7 @@ A heating oil delivery tracker available as both a **Windows desktop app (WPF)**
 - **Cloud Backup**: Automatic backup to OneDrive, Dropbox, or other cloud folders
 - **Google Drive Sync**: Connect your Google account to sync data across devices (MAUI)
 - **EIA Price Region**: Override the auto-detected region for oil price lookups
+- **App Version**: Displayed at the bottom of the Settings page
 
 ### Reference Guide
 - **In-App Documentation**: Explains all calculations (HDD, K-Factor, burn rate, carbon footprint)
@@ -92,7 +93,7 @@ Download the latest `HeatingOilTracker x.x.x Installer.exe` from the [Releases](
 
 ### MAUI App
 
-Build from source (see below). Android APK and Windows MSIX packages are not yet published to stores.
+Android APK and Windows MSIX packages are not published to stores. Install via sideload — see [BUILDING.md](HeatingOilTracker.Maui/BUILDING.md) for step-by-step instructions.
 
 ## Build from Source
 

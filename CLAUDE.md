@@ -70,3 +70,13 @@ Both apps use LiveCharts2 (`LiveChartsCore.SkiaSharpView`). Charts are configure
 ## Testing Patterns
 
 Tests use Arrange-Act-Assert with Moq for dependency mocking and FluentAssertions for readable assertions. `Fixtures/TestData.cs` contains shared test data builders. The test project targets `net9.0-windows` because some Core dependencies require Windows.
+
+## Target Frameworks
+- WPF: `net9.0-windows`
+- MAUI: `net9.0-android`, `net9.0-windows10.0.19041.0`
+
+## MAUI-Specific
+- Interaction model: tap-to-start / tap-to-stop (no press-and-hold)
+- Use `SecureStorage` for any persisted credentials
+- Pull-to-refresh implemented on list views — preserve this pattern when adding new data views
+- Weather chart uses LiveCharts2 (same as WPF) — keep consistent

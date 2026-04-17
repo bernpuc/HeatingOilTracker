@@ -19,7 +19,22 @@ namespace HeatingOilTracker.Maui.WinUI
             this.InitializeComponent();
         }
 
-        protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
+        protected override MauiApp CreateMauiApp()
+        {
+            try
+            {
+                return MauiProgram.CreateMauiApp();
+            }
+            catch (Exception ex)
+            {
+                var logPath = System.IO.Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "HeatingOilTracker", "startup-crash.log");
+                System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(logPath)!);
+                System.IO.File.WriteAllText(logPath, $"{DateTime.Now}\n{ex}");
+                throw;
+            }
+        }
 
     }
 

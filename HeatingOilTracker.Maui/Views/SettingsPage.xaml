@@ -4,7 +4,7 @@
              x:Class="HeatingOilTracker.Maui.Views.SettingsPage"
              Title="Settings">
 
-        <ScrollView VerticalScrollBarVisibility="Never">
+        <ScrollView VerticalScrollBarVisibility="Default">
             <VerticalStackLayout Padding="20" Spacing="0">
 
                 <!-- Tank Capacity -->
@@ -200,7 +200,11 @@
                         Command="{Binding SaveCommand}"
                         BackgroundColor="#2563eb" TextColor="White"
                         CornerRadius="6" HorizontalOptions="Start"
-                        Margin="0,0,0,40"/>
+                        Margin="0,0,0,16"/>
+
+                <Label Text="{Binding AppVersion}"
+                       FontSize="12" TextColor="#94a3b8"
+                       HorizontalOptions="Start" Margin="0,0,0,40"/>
 
             </VerticalStackLayout>
         </ScrollView>
