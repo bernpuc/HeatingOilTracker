@@ -40,8 +40,9 @@ public partial class App : Application
             var result = await _syncService.SyncOnStartupAsync(localData);
             if (result.Status == SyncStatus.Success)
             {
-                await _dataService.SaveAsync(result.MergedData);
-                _dataService.InvalidateCache();
+                // Re-read from disk before saving so any settings saved
+                // concurrently during the Drive download are preserved.
+                await _dataService.MergeFromSyncAsync(result.MergedData);
             }
         }
         catch (Exception ex)

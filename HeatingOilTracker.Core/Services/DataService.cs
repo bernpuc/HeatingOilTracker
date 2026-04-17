@@ -216,6 +216,46 @@ public class DataService : IDataService
         await SaveAsync(data);
     }
 
+    public async Task MergeFromSyncAsync(TrackerData syncResult)
+    {
+        // Always start from the freshest on-disk state so we don't overwrite
+        // settings that were saved concurrently (e.g. during startup sync).
+        InvalidateCache();
+        var local = await LoadAsync();
+
+        // Union deliveries — newer ModifiedAt wins per GUID
+        var merged = local.Deliveries
+            .Concat(syncResult.Deliveries)
+            .GroupBy(d => d.Id)
+            .Select(g => g.OrderByDescending(d => d.ModifiedAt).First())
+            .Where(d => !d.IsDeleted || d.ModifiedAt > DateTime.UtcNow.AddDays(-60))
+            .ToList();
+
+        // Settings: keep whichever side saved them more recently
+        TrackerData toSave;
+        if (syncResult.SettingsModifiedAt > local.SettingsModifiedAt)
+        {
+            toSave = new TrackerData
+            {
+                Deliveries = merged,
+                TankCapacityGallons = syncResult.TankCapacityGallons,
+                Location = syncResult.Location,
+                ReminderSettings = syncResult.ReminderSettings,
+                RegionalSettings = syncResult.RegionalSettings,
+                SettingsModifiedAt = syncResult.SettingsModifiedAt,
+                WeatherHistory = local.WeatherHistory,
+                BackupFolderPath = local.BackupFolderPath
+            };
+        }
+        else
+        {
+            local.Deliveries = merged;
+            toSave = local;
+        }
+
+        await SaveAsync(toSave);
+    }
+
     public async Task<RegionalSettings> GetRegionalSettingsAsync()
     {
         var data = await LoadAsync();

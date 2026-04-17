@@ -266,8 +266,7 @@ public class SettingsViewModel : INotifyPropertyChanged
             var result = await _syncService.SyncOnStartupAsync(localData);
             if (result.Status == SyncStatus.Success)
             {
-                await _dataService.SaveAsync(result.MergedData);
-                _dataService.InvalidateCache();
+                await _dataService.MergeFromSyncAsync(result.MergedData);
                 RefreshSyncStatus();
                 await Shell.Current.DisplayAlert("Sync", "Sync completed successfully.", "OK");
             }

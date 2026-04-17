@@ -22,6 +22,13 @@ public interface IDataService
     Task SetBackupFolderPathAsync(string? path);
     Task<RegionalSettings> GetRegionalSettingsAsync();
     Task SetRegionalSettingsAsync(RegionalSettings settings);
+    /// <summary>
+    /// Re-reads the latest local data from disk, unions the deliveries from
+    /// <paramref name="syncResult"/> into it, applies remote settings if they
+    /// are newer, then saves. Safe to call concurrently with Set*Async calls
+    /// because it always starts from the freshest on-disk state.
+    /// </summary>
+    Task MergeFromSyncAsync(TrackerData syncResult);
     string GetDataFilePath();
     void InvalidateCache();
 }
