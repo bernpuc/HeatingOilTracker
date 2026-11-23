@@ -23,8 +23,7 @@ public class SyncMergeServiceTests
     private static TrackerData EmptyData(List<OilDelivery>? deliveries = null) =>
         new()
         {
-            Deliveries = deliveries ?? [],
-            SettingsModifiedAt = DateTime.UtcNow
+            Deliveries = deliveries ?? []
         };
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -146,37 +145,60 @@ public class SyncMergeServiceTests
     // ──────────────────────────────────────────────────────────────────────────
 
     [Fact]
-    public void Merge_RemoteHasNewerSettingsModifiedAt_RemoteSettingsUsed()
+    public void Merge_RemoteHasNewerTankCapacityModifiedAt_RemoteTankCapacityUsed()
     {
         var local = EmptyData();
-        local.SettingsModifiedAt = DateTime.UtcNow.AddMinutes(-10);
+        local.TankCapacityModifiedAt = DateTime.UtcNow.AddMinutes(-10);
         local.TankCapacityGallons = 275m;
 
         var remote = EmptyData();
-        remote.SettingsModifiedAt = DateTime.UtcNow;
+        remote.TankCapacityModifiedAt = DateTime.UtcNow;
         remote.TankCapacityGallons = 330m;
 
         var result = _sut.Merge(local, remote);
 
         result.TankCapacityGallons.Should().Be(330m);
-        result.SettingsModifiedAt.Should().Be(remote.SettingsModifiedAt);
+        result.TankCapacityModifiedAt.Should().Be(remote.TankCapacityModifiedAt);
     }
 
     [Fact]
-    public void Merge_LocalHasNewerSettingsModifiedAt_LocalSettingsUsed()
+    public void Merge_LocalHasNewerTankCapacityModifiedAt_LocalTankCapacityUsed()
     {
         var local = EmptyData();
-        local.SettingsModifiedAt = DateTime.UtcNow;
+        local.TankCapacityModifiedAt = DateTime.UtcNow;
         local.TankCapacityGallons = 275m;
 
         var remote = EmptyData();
-        remote.SettingsModifiedAt = DateTime.UtcNow.AddMinutes(-10);
+        remote.TankCapacityModifiedAt = DateTime.UtcNow.AddMinutes(-10);
         remote.TankCapacityGallons = 330m;
 
         var result = _sut.Merge(local, remote);
 
         result.TankCapacityGallons.Should().Be(275m);
-        result.SettingsModifiedAt.Should().Be(local.SettingsModifiedAt);
+        result.TankCapacityModifiedAt.Should().Be(local.TankCapacityModifiedAt);
+    }
+
+    [Fact]
+    public void Merge_RemoteHasNewerLocationModifiedAt_RemoteLocationUsedButLocalTankCapacityKept()
+    {
+        // Regression test: a change to Location on one side must not drag along
+        // that side's stale TankCapacity (the bug behind the single
+        // "SettingsModifiedAt" bundle that used to govern all settings at once).
+        var local = EmptyData();
+        local.TankCapacityModifiedAt = DateTime.UtcNow;
+        local.TankCapacityGallons = 225m;
+        local.LocationModifiedAt = DateTime.UtcNow.AddMinutes(-10);
+
+        var remote = EmptyData();
+        remote.TankCapacityModifiedAt = DateTime.UtcNow.AddMinutes(-10);
+        remote.TankCapacityGallons = 275m; // stale on remote, shouldn't win
+        remote.LocationModifiedAt = DateTime.UtcNow;
+        remote.Location = new Location { DisplayName = "Naugatuck, CT", Latitude = 41.48593m, Longitude = -73.05066m };
+
+        var result = _sut.Merge(local, remote);
+
+        result.TankCapacityGallons.Should().Be(225m);
+        result.Location.DisplayName.Should().Be("Naugatuck, CT");
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -193,11 +215,9 @@ public class SyncMergeServiceTests
 
         var local = EmptyData();
         local.WeatherHistory = localWeather;
-        local.SettingsModifiedAt = DateTime.UtcNow.AddMinutes(-10); // remote is newer
 
         var remote = EmptyData();
         remote.WeatherHistory = []; // remote has no weather
-        remote.SettingsModifiedAt = DateTime.UtcNow;
 
         var result = _sut.Merge(local, remote);
 
@@ -209,11 +229,9 @@ public class SyncMergeServiceTests
     {
         var local = EmptyData();
         local.BackupFolderPath = @"C:\MyBackups";
-        local.SettingsModifiedAt = DateTime.UtcNow.AddMinutes(-10); // remote is newer
 
         var remote = EmptyData();
         remote.BackupFolderPath = @"D:\OtherBackups";
-        remote.SettingsModifiedAt = DateTime.UtcNow;
 
         var result = _sut.Merge(local, remote);
 

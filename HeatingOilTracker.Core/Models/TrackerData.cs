@@ -14,5 +14,15 @@ public class TrackerData
     /// Set to a cloud-synced folder (OneDrive, Dropbox, etc.) for automatic cloud backup.
     /// </summary>
     public string? BackupFolderPath { get; set; }
-    public DateTime SettingsModifiedAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// Per-setting modification timestamps. Tracked independently (rather than one
+    /// combined "SettingsModifiedAt") so that syncing a change to one setting on a
+    /// device doesn't drag along stale values for settings that haven't actually
+    /// changed on that device.
+    /// </summary>
+    public DateTime TankCapacityModifiedAt { get; set; } = DateTime.MinValue;
+    public DateTime LocationModifiedAt { get; set; } = DateTime.MinValue;
+    public DateTime ReminderSettingsModifiedAt { get; set; } = DateTime.MinValue;
+    public DateTime RegionalSettingsModifiedAt { get; set; } = DateTime.MinValue;
 }

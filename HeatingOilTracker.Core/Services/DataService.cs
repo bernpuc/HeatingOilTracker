@@ -150,7 +150,7 @@ public class DataService : IDataService
     {
         var data = await LoadAsync();
         data.TankCapacityGallons = capacity;
-        data.SettingsModifiedAt = DateTime.UtcNow;
+        data.TankCapacityModifiedAt = DateTime.UtcNow;
         await SaveAsync(data);
     }
 
@@ -164,7 +164,7 @@ public class DataService : IDataService
     {
         var data = await LoadAsync();
         data.Location = location;
-        data.SettingsModifiedAt = DateTime.UtcNow;
+        data.LocationModifiedAt = DateTime.UtcNow;
         await SaveAsync(data);
     }
 
@@ -199,7 +199,7 @@ public class DataService : IDataService
     {
         var data = await LoadAsync();
         data.ReminderSettings = settings;
-        data.SettingsModifiedAt = DateTime.UtcNow;
+        data.ReminderSettingsModifiedAt = DateTime.UtcNow;
         await SaveAsync(data);
     }
 
@@ -231,29 +231,25 @@ public class DataService : IDataService
             .Where(d => !d.IsDeleted || d.ModifiedAt > DateTime.UtcNow.AddDays(-60))
             .ToList();
 
-        // Settings: keep whichever side saved them more recently
-        TrackerData toSave;
-        if (syncResult.SettingsModifiedAt > local.SettingsModifiedAt)
-        {
-            toSave = new TrackerData
-            {
-                Deliveries = merged,
-                TankCapacityGallons = syncResult.TankCapacityGallons,
-                Location = syncResult.Location,
-                ReminderSettings = syncResult.ReminderSettings,
-                RegionalSettings = syncResult.RegionalSettings,
-                SettingsModifiedAt = syncResult.SettingsModifiedAt,
-                WeatherHistory = local.WeatherHistory,
-                BackupFolderPath = local.BackupFolderPath
-            };
-        }
-        else
-        {
-            local.Deliveries = merged;
-            toSave = local;
-        }
+        // Settings: merge each setting independently by its own modification time,
+        // so a change to one setting on the sync side doesn't drag along stale
+        // values for settings that haven't actually changed there.
+        var useRemoteTankCapacity = syncResult.TankCapacityModifiedAt > local.TankCapacityModifiedAt;
+        var useRemoteLocation = syncResult.LocationModifiedAt > local.LocationModifiedAt;
+        var useRemoteReminderSettings = syncResult.ReminderSettingsModifiedAt > local.ReminderSettingsModifiedAt;
+        var useRemoteRegionalSettings = syncResult.RegionalSettingsModifiedAt > local.RegionalSettingsModifiedAt;
 
-        await SaveAsync(toSave);
+        local.Deliveries = merged;
+        local.TankCapacityGallons = useRemoteTankCapacity ? syncResult.TankCapacityGallons : local.TankCapacityGallons;
+        local.TankCapacityModifiedAt = useRemoteTankCapacity ? syncResult.TankCapacityModifiedAt : local.TankCapacityModifiedAt;
+        local.Location = useRemoteLocation ? syncResult.Location : local.Location;
+        local.LocationModifiedAt = useRemoteLocation ? syncResult.LocationModifiedAt : local.LocationModifiedAt;
+        local.ReminderSettings = useRemoteReminderSettings ? syncResult.ReminderSettings : local.ReminderSettings;
+        local.ReminderSettingsModifiedAt = useRemoteReminderSettings ? syncResult.ReminderSettingsModifiedAt : local.ReminderSettingsModifiedAt;
+        local.RegionalSettings = useRemoteRegionalSettings ? syncResult.RegionalSettings : local.RegionalSettings;
+        local.RegionalSettingsModifiedAt = useRemoteRegionalSettings ? syncResult.RegionalSettingsModifiedAt : local.RegionalSettingsModifiedAt;
+
+        await SaveAsync(local);
     }
 
     public async Task<RegionalSettings> GetRegionalSettingsAsync()
@@ -266,7 +262,7 @@ public class DataService : IDataService
     {
         var data = await LoadAsync();
         data.RegionalSettings = settings;
-        data.SettingsModifiedAt = DateTime.UtcNow;
+        data.RegionalSettingsModifiedAt = DateTime.UtcNow;
         await SaveAsync(data);
     }
 }

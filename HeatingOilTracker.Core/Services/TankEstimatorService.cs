@@ -78,14 +78,34 @@ public class TankEstimatorService : ITankEstimatorService
         }
         status.EstimatedGallons = Math.Max(0, tankLevelAfterDelivery - estimatedUsage);
 
-        // Calculate days remaining using burn rate (we can't predict future HDD)
-        if (burnRate > 0)
+        // Calculate days remaining. Prefer a K-Factor/HDD-based projection: the burn-rate
+        // average mixes delivery gaps from all seasons (a diluted summer-heavy average
+        // badly understates usage once heating season is underway), while the trailing
+        // HDD rate reflects the weather actually happening right now.
+        decimal? dailyUsage = null;
+        if (kFactor.HasValue && kFactor.Value > 0 && weatherData.Count > 0)
         {
-            status.EstimatedDaysRemaining = (int)(status.EstimatedGallons / burnRate);
+            var trailingStart = DateTime.Today.AddDays(-(TrailingHddWindowDays - 1));
+            var trailingHdd = _weatherService.CalculateHDD(weatherData, trailingStart, DateTime.Today, hddBaseF);
+            var trailingDailyUsage = trailingHdd / TrailingHddWindowDays / kFactor.Value;
+            if (trailingDailyUsage > 0)
+            {
+                dailyUsage = trailingDailyUsage;
+            }
+        }
+
+        // Fall back to burn rate when there's no weather-based trend to use
+        dailyUsage ??= burnRate > 0 ? burnRate : null;
+
+        if (dailyUsage.HasValue)
+        {
+            status.EstimatedDaysRemaining = (int)(status.EstimatedGallons / dailyUsage.Value);
         }
 
         return status;
     }
+
+    private const int TrailingHddWindowDays = 14;
 
     /// <summary>
     /// Calculates the estimated tank level at a specific date by walking through delivery history.

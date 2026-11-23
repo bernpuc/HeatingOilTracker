@@ -347,14 +347,14 @@ public class DataServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task SetTankCapacityAsync_SetsSettingsModifiedAt()
+    public async Task SetTankCapacityAsync_SetsTankCapacityModifiedAt()
     {
         var before = DateTime.UtcNow.AddSeconds(-1);
         await _sut.SetTankCapacityAsync(275m);
         _sut.InvalidateCache();
 
         var data = await _sut.LoadAsync();
-        data.SettingsModifiedAt.Should().BeAfter(before);
+        data.TankCapacityModifiedAt.Should().BeAfter(before);
     }
 
     #endregion
@@ -381,14 +381,14 @@ public class DataServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task SetLocationAsync_SetsSettingsModifiedAt()
+    public async Task SetLocationAsync_SetsLocationModifiedAt()
     {
         var before = DateTime.UtcNow.AddSeconds(-1);
         await _sut.SetLocationAsync(new Location());
         _sut.InvalidateCache();
 
         var data = await _sut.LoadAsync();
-        data.SettingsModifiedAt.Should().BeAfter(before);
+        data.LocationModifiedAt.Should().BeAfter(before);
     }
 
     #endregion
@@ -540,14 +540,14 @@ public class DataServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task SetRegionalSettingsAsync_SetsSettingsModifiedAt()
+    public async Task SetRegionalSettingsAsync_SetsRegionalSettingsModifiedAt()
     {
         var before = DateTime.UtcNow.AddSeconds(-1);
         await _sut.SetRegionalSettingsAsync(new RegionalSettings());
         _sut.InvalidateCache();
 
         var data = await _sut.LoadAsync();
-        data.SettingsModifiedAt.Should().BeAfter(before);
+        data.RegionalSettingsModifiedAt.Should().BeAfter(before);
     }
 
     #endregion

@@ -566,7 +566,10 @@ public class GoogleDriveSyncService : ISyncService
             Location = data.Location,
             ReminderSettings = data.ReminderSettings,
             RegionalSettings = data.RegionalSettings,
-            SettingsModifiedAt = data.SettingsModifiedAt
+            TankCapacityModifiedAt = data.TankCapacityModifiedAt,
+            LocationModifiedAt = data.LocationModifiedAt,
+            ReminderSettingsModifiedAt = data.ReminderSettingsModifiedAt,
+            RegionalSettingsModifiedAt = data.RegionalSettingsModifiedAt
         };
         return JsonSerializer.Serialize(payload, SyncJsonOptions);
     }
@@ -585,7 +588,10 @@ public class GoogleDriveSyncService : ISyncService
                 Location = payload.Location ?? new Core.Models.Location(),
                 ReminderSettings = payload.ReminderSettings ?? new ReminderSettings(),
                 RegionalSettings = payload.RegionalSettings ?? new RegionalSettings(),
-                SettingsModifiedAt = payload.SettingsModifiedAt,
+                TankCapacityModifiedAt = payload.TankCapacityModifiedAt,
+                LocationModifiedAt = payload.LocationModifiedAt,
+                ReminderSettingsModifiedAt = payload.ReminderSettingsModifiedAt,
+                RegionalSettingsModifiedAt = payload.RegionalSettingsModifiedAt,
                 // WeatherHistory and BackupFolderPath are intentionally left empty —
                 // they'll be filled in by the caller from local data via SyncMergeService.
                 WeatherHistory = [],
@@ -610,7 +616,10 @@ public class GoogleDriveSyncService : ISyncService
         public Core.Models.Location? Location { get; set; }
         public ReminderSettings? ReminderSettings { get; set; }
         public RegionalSettings? RegionalSettings { get; set; }
-        public DateTime SettingsModifiedAt { get; set; }
+        public DateTime TankCapacityModifiedAt { get; set; }
+        public DateTime LocationModifiedAt { get; set; }
+        public DateTime ReminderSettingsModifiedAt { get; set; }
+        public DateTime RegionalSettingsModifiedAt { get; set; }
     }
 
     private class TokenResponse

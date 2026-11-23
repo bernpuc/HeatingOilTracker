@@ -30,7 +30,10 @@ public partial class App : PrismApplication
         containerRegistry.Register<MainWindowViewModel>();
 
         // Services
-        containerRegistry.RegisterSingleton<IDataService, DataService>();
+        containerRegistry.RegisterSingleton<IDataService>(() => new DataService(
+            System.IO.Path.Combine(
+                System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData),
+                "HeatingOilTracker")));
         containerRegistry.Register<ICsvImportService, CsvImportService>();
         containerRegistry.Register<IWeatherService, WeatherService>();
         containerRegistry.Register<ITankEstimatorService, TankEstimatorService>();

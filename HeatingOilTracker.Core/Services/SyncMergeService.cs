@@ -22,17 +22,25 @@ public class SyncMergeService
             .Where(d => !d.IsDeleted || d.ModifiedAt > pruneDate)
             .ToList();
 
-        // 3. Settings: take whichever side modified them more recently
-        bool useRemoteSettings = remote.SettingsModifiedAt > local.SettingsModifiedAt;
+        // 3. Settings: merge each one independently by its own modification time,
+        //    so a change to one setting doesn't drag along stale values for
+        //    settings that haven't actually changed on that side.
+        bool useRemoteTankCapacity = remote.TankCapacityModifiedAt > local.TankCapacityModifiedAt;
+        bool useRemoteLocation = remote.LocationModifiedAt > local.LocationModifiedAt;
+        bool useRemoteReminderSettings = remote.ReminderSettingsModifiedAt > local.ReminderSettingsModifiedAt;
+        bool useRemoteRegionalSettings = remote.RegionalSettingsModifiedAt > local.RegionalSettingsModifiedAt;
 
         return new TrackerData
         {
             Deliveries = merged,
-            TankCapacityGallons = useRemoteSettings ? remote.TankCapacityGallons : local.TankCapacityGallons,
-            Location = useRemoteSettings ? remote.Location : local.Location,
-            ReminderSettings = useRemoteSettings ? remote.ReminderSettings : local.ReminderSettings,
-            RegionalSettings = useRemoteSettings ? remote.RegionalSettings : local.RegionalSettings,
-            SettingsModifiedAt = useRemoteSettings ? remote.SettingsModifiedAt : local.SettingsModifiedAt,
+            TankCapacityGallons = useRemoteTankCapacity ? remote.TankCapacityGallons : local.TankCapacityGallons,
+            TankCapacityModifiedAt = useRemoteTankCapacity ? remote.TankCapacityModifiedAt : local.TankCapacityModifiedAt,
+            Location = useRemoteLocation ? remote.Location : local.Location,
+            LocationModifiedAt = useRemoteLocation ? remote.LocationModifiedAt : local.LocationModifiedAt,
+            ReminderSettings = useRemoteReminderSettings ? remote.ReminderSettings : local.ReminderSettings,
+            ReminderSettingsModifiedAt = useRemoteReminderSettings ? remote.ReminderSettingsModifiedAt : local.ReminderSettingsModifiedAt,
+            RegionalSettings = useRemoteRegionalSettings ? remote.RegionalSettings : local.RegionalSettings,
+            RegionalSettingsModifiedAt = useRemoteRegionalSettings ? remote.RegionalSettingsModifiedAt : local.RegionalSettingsModifiedAt,
             // Always keep local-only fields:
             WeatherHistory = local.WeatherHistory,
             BackupFolderPath = local.BackupFolderPath,
