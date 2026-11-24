@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!--
+      Android blocks plain HTTP (cleartext) traffic by default for apps targeting API 28+.
+      HeatingOilTracker.Server on kassandra has no TLS (it's a tiny home-lab API trusted only
+      via Tailscale network membership — see KASSANDRA_SYNC_PLAN.md), so cleartext is allowed
+      for just its Tailscale IP rather than globally.
+    -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">100.86.238.34</domain>
+    </domain-config>
+</network-security-config>

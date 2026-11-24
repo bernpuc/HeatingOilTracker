@@ -21,6 +21,14 @@ namespace HeatingOilTracker.Maui.Services;
 /// </summary>
 public class KassandraSyncService : ISyncService
 {
+    // Windows isn't joined to the Tailscale tailnet (it's always on the home LAN), so it uses
+    // the LAN mDNS hostname; Android needs off-LAN access too, so it uses the Tailscale IP.
+#if WINDOWS
+    private static string BaseUrl => Secrets.KassandraSyncBaseUrlWindows;
+#else
+    private static string BaseUrl => Secrets.KassandraSyncBaseUrlAndroid;
+#endif
+
     private readonly HttpClient _http;
 
     public bool IsConfigured => true;
@@ -32,10 +40,10 @@ public class KassandraSyncService : ISyncService
     {
         _http = new HttpClient
         {
-            BaseAddress = new Uri(Secrets.KassandraSyncBaseUrl),
+            BaseAddress = new Uri(BaseUrl),
             Timeout = TimeSpan.FromSeconds(10)
         };
-        AccountEmail = new Uri(Secrets.KassandraSyncBaseUrl).Authority;
+        AccountEmail = new Uri(BaseUrl).Authority;
     }
 
     public async Task<bool> SignInAsync()

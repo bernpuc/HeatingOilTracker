@@ -49,6 +49,10 @@
   <Capabilities>
     <rescap:Capability Name="runFullTrust" />
     <Capability Name="internetClient" />
+    <!-- Needed to reach HeatingOilTracker.Server at kassandra.local (a private LAN address) —
+         without this, MSIX's AppContainer network isolation restricts the app to internetClient
+         only, and plain LAN hosts are silently unreachable. -->
+    <Capability Name="privateNetworkClientServer" />
   </Capabilities>
 
 </Package>

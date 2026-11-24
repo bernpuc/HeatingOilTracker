@@ -53,3 +53,7 @@ appsettings.*.json
 
 # MSIX signing certificate (machine-specific private key)
 *.pfx
+
+# Android signing keystore and its password (machine-specific secrets)
+*.keystore
+keystorepasswordinhere.txt
