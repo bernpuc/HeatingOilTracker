@@ -229,11 +229,11 @@ public class SettingsViewModel : INotifyPropertyChanged
             if (success)
             {
                 RefreshSyncStatus();
-                await Shell.Current.DisplayAlert("Google Drive", "Connected successfully.", "OK");
+                await Shell.Current.DisplayAlert("Kassandra Sync", "Connected successfully.", "OK");
             }
             else
             {
-                await Shell.Current.DisplayAlert("Google Drive", "Sign-in was cancelled or failed.", "OK");
+                await Shell.Current.DisplayAlert("Kassandra Sync", "Could not reach the sync server.", "OK");
             }
         }
         catch (Exception ex)
@@ -250,7 +250,7 @@ public class SettingsViewModel : INotifyPropertyChanged
     {
         if (_syncService is null) return;
         var confirmed = await Shell.Current.DisplayAlert(
-            "Disconnect", "Disconnect from Google Drive? Local data will not be affected.", "Disconnect", "Cancel");
+            "Disconnect", "Disconnect from Kassandra Sync? Local data will not be affected.", "Disconnect", "Cancel");
         if (!confirmed) return;
 
         await _syncService.SignOutAsync();

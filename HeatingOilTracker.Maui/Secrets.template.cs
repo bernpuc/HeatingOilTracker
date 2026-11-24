@@ -1,9 +1,10 @@
 namespace HeatingOilTracker.Maui;
 
-// Copy this file to Secrets.cs and fill in your values from Google Cloud Console.
+// Copy this file to Secrets.cs and fill in your values.
 internal static class Secrets
 {
-    public const string GoogleClientIdAndroid = "YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com";
-    public const string GoogleClientIdWindows = "YOUR_DESKTOP_CLIENT_ID.apps.googleusercontent.com";
-    public const string GoogleClientSecretWindows = "YOUR_DESKTOP_CLIENT_SECRET";
+    // Base URL (including scheme and port) of the HeatingOilTracker.Server instance running on
+    // kassandra, reachable over Tailscale from both the Windows and Android builds. See
+    // HeatingOilTracker.Server/README.md for how to deploy it and KASSANDRA_SYNC_PLAN.md for why.
+    public const string KassandraSyncBaseUrl = "http://100.x.x.x:8086";
 }

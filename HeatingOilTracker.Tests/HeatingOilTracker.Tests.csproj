@@ -25,7 +25,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HeatingOilTracker.Core\HeatingOilTracker.Core.csproj" />
-    <ProjectReference Include="..\HeatingOilTracker\HeatingOilTracker.csproj" />
   </ItemGroup>
 
 </Project>

@@ -33,7 +33,7 @@ public static class MauiProgram
 #endif
 
         // Register services
-        builder.Services.AddSingleton<ISyncService, GoogleDriveSyncService>();
+        builder.Services.AddSingleton<ISyncService, KassandraSyncService>();
         builder.Services.AddSingleton<IDataService>(sp =>
             new DataService(FileSystem.AppDataDirectory, sp.GetService<ISyncService>()));
         builder.Services.AddSingleton<IWeatherService, WeatherService>();

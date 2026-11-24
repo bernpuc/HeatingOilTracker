@@ -29,9 +29,6 @@ public partial class App : Application
 
     private async Task SyncOnStartupAsync()
     {
-        // Do NOT check IsSignedIn here — it is populated by a fire-and-forget
-        // call in GoogleDriveSyncService's constructor and may not be set yet.
-        // SyncOnStartupAsync will return SyncStatus.NotSignedIn if no token exists.
         if (_syncService is null) return;
 
         try
@@ -41,7 +38,7 @@ public partial class App : Application
             if (result.Status == SyncStatus.Success)
             {
                 // Re-read from disk before saving so any settings saved
-                // concurrently during the Drive download are preserved.
+                // concurrently during the sync request are preserved.
                 await _dataService.MergeFromSyncAsync(result.MergedData);
             }
         }

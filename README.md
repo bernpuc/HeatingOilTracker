@@ -57,7 +57,7 @@ A heating oil delivery tracker available as both a **Windows desktop app (WPF)**
 - **Reminder Thresholds**: Set gallon and days-remaining alert thresholds
 - **Heating Season**: Configure start and end months to match your climate (Northern or Southern Hemisphere)
 - **Cloud Backup**: Automatic backup to OneDrive, Dropbox, or other cloud folders
-- **Google Drive Sync**: Connect your Google account to sync data across devices (MAUI)
+- **Kassandra Sync**: Sync data across devices via a self-hosted server reachable over Tailscale (MAUI)
 - **EIA Price Region**: Override the auto-detected region for oil price lookups
 - **App Version**: Displayed at the bottom of the Settings page
 
@@ -80,7 +80,7 @@ A heating oil delivery tracker available as both a **Windows desktop app (WPF)**
 ### MAUI App (Android + Windows)
 - .NET MAUI 9
 - Microsoft.Extensions dependency injection
-- Google Drive API with OAuth2 PKCE for cross-device sync
+- Syncs with `HeatingOilTracker.Server` (self-hosted, Tailscale-only) for cross-device sync
 
 ## Installation
 
@@ -125,10 +125,11 @@ makensis -DVERSION=1.0.0 Installer.nsi
 
 ### MAUI App
 
-The MAUI app requires Google OAuth credentials for the Google Drive sync feature.
+The MAUI app syncs with a `HeatingOilTracker.Server` instance (see that project's README) over
+a URL configured in `Secrets.cs`.
 
 1. Copy `HeatingOilTracker.Maui/Secrets.template.cs` to `HeatingOilTracker.Maui/Secrets.cs`
-2. Fill in your Google Cloud OAuth client IDs and secret (see `Secrets.template.cs` for instructions)
+2. Set `KassandraSyncBaseUrl` to your sync server's URL (see `Secrets.template.cs` for details)
 
 ```bash
 # Run on Windows
@@ -138,7 +139,7 @@ dotnet run --project HeatingOilTracker.Maui -f net9.0-windows10.0.19041.0
 dotnet build HeatingOilTracker.Maui -f net9.0-android
 ```
 
-Google Drive sync is optional — the app works without credentials, just without cross-device sync.
+Kassandra sync is optional — the app works without a reachable server, just without cross-device sync.
 
 ## Data Storage
 
@@ -147,7 +148,7 @@ Data is stored locally in JSON format at:
 %APPDATA%\HeatingOilTracker\data.json
 ```
 
-Optional cloud backup can be configured to sync this data to a cloud-synced folder. The MAUI app additionally supports Google Drive sync to share data between Android and Windows.
+Optional cloud backup can be configured to sync this data to a cloud-synced folder. The MAUI app additionally supports Kassandra sync to share data between Android and Windows.
 
 ## Sample Data
 
