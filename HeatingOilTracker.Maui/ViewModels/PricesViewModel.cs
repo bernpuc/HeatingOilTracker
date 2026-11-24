@@ -161,11 +161,22 @@ public class PricesViewModel : INotifyPropertyChanged
             return;
         }
 
-        var avg4  = region.Take(4).Average(p => p.PricePerGallon);
-        var avg13 = region.Take(Math.Min(13, region.Count)).Average(p => p.PricePerGallon);
+        // Compare the most recent 4 weeks against the 4 weeks immediately before them —
+        // two adjacent, non-overlapping windows of equal size. Previously this compared the
+        // last 4 weeks against the last 13 weeks, but a 13-week window reaches back far enough
+        // to include stale, now-irrelevant price levels (e.g. a climb that happened months ago),
+        // which can anchor the comparison low and flag "up" even while the most recent single
+        // week has actually dropped — exactly the "Trending up · -3.4% week-over-week"
+        // contradiction this was producing.
+        var recentWindow = Math.Min(4, region.Count);
+        var priorWindow  = Math.Min(4, Math.Max(0, region.Count - recentWindow));
+        var avgRecent = region.Take(recentWindow).Average(p => p.PricePerGallon);
+        var avgPrior  = priorWindow > 0
+            ? region.Skip(recentWindow).Take(priorWindow).Average(p => p.PricePerGallon)
+            : avgRecent;
 
-        var trendDir = avg4 > avg13 * 1.02m ? "up"
-                     : avg4 < avg13 * 0.98m ? "down"
+        var trendDir = avgRecent > avgPrior * 1.02m ? "up"
+                     : avgRecent < avgPrior * 0.98m ? "down"
                      : "stable";
 
         var weekChange = region.Count >= 2 ? region[0].PricePerGallon - region[1].PricePerGallon : 0m;
